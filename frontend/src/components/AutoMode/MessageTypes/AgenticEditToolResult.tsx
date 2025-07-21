@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { MessageProps } from '../MessageList';
+import { useAgentFileSelect } from '../utils/agentFileSelect'
 import { getMessage } from '../../../lang';
 import './MessageStyles.css';
 
@@ -8,6 +9,7 @@ interface AgenticEditToolResultProps {
 }
 
 const AgenticEditToolResult: React.FC<AgenticEditToolResultProps> = ({ message }) => {
+  const { publishToAgentFileSelect } = useAgentFileSelect()
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   let toolName = '';
@@ -35,17 +37,17 @@ const AgenticEditToolResult: React.FC<AgenticEditToolResultProps> = ({ message }
       toolName = getMessage('agenticEditToolResultListFilesTool');
     }
     if (toolName === 'SearchFilesTool') {
-      toolName = getMessage('agenticEditToolResultSearchFilesTool');     
+      toolName = getMessage('agenticEditToolResultSearchFilesTool');
     }
 
     // Handle Lists and Maps with JSON serialization, other types with general string conversion
-    if(typeof content !== 'string'){
+    if (typeof content !== 'string') {
       // Check if content is an array (List)
-      if(Array.isArray(content)) {
+      if (Array.isArray(content)) {
         content = JSON.stringify(content, null, 2);
       }
       // Check if content is an object (Map/dictionary) but not null
-      else if(content !== null && typeof content === 'object' && Object.keys(content).length > 0) {
+      else if (content !== null && typeof content === 'object' && Object.keys(content).length > 0) {
         content = JSON.stringify(content, null, 2);
       }
       // For other non-string types, use general string conversion
@@ -119,17 +121,19 @@ const AgenticEditToolResult: React.FC<AgenticEditToolResultProps> = ({ message }
       </div>
 
       <div className="mt-1 text-gray-300 text-xs whitespace-pre-wrap break-words px-2 py-1">
-        <span title={msg} className="hover:underline cursor-help">
+        <span title={msg} onClick={() => msg && publishToAgentFileSelect(msg)} className="hover:underline cursor-help">
           {msg}
         </span>
       </div>
 
-      {!isCollapsed && content && (
-        <div className="mt-2 p-2 bg-gray-900 overflow-auto text-xs font-mono whitespace-pre-wrap text-gray-200 border-t border-gray-700 max-h-[400px] scrollbar-thin scrollbar-thumb-gray-600">
-          {content}
-        </div>
-      )}
-    </div>
+      {
+        !isCollapsed && content && (
+          <div className="mt-2 p-2 bg-gray-900 overflow-auto text-xs font-mono whitespace-pre-wrap text-gray-200 border-t border-gray-700 max-h-[400px] scrollbar-thin scrollbar-thumb-gray-600">
+            {content}
+          </div>
+        )
+      }
+    </div >
   );
 };
 

@@ -12,6 +12,7 @@ import axios from "axios";
 import { queryToString } from "@/utils/formatUtils";
 import "./CodeEditor.css";
 import type { StopGenerationEventData } from "@/services/event_bus_data";
+import { useAgentFileSelect } from "../AutoMode/utils/agentFileSelect";
 
 interface CodeEditorProps {
   selectedFiles?: FileMetadata[];
@@ -37,6 +38,7 @@ interface EditorTabsConfig {
 const CodeEditor: React.FC<CodeEditorProps> = ({
   selectedFiles: initialFiles,
 }) => {
+  const { subscribeToAgentFileSelect } = useAgentFileSelect();
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>(
     initialFiles || []
   );
@@ -162,16 +164,16 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     setCompactFolders(data);
   };
 
-  const isLoadingTree = useRef(false)
+  const isLoadingTree = useRef(false);
   // 订阅CODE完成事件
   const unsubscribeStopGeneration = eventBus.subscribe(
     EVENTS.CODING.TASK_COMPLETE,
-   async ({ success }) => {
-      if (!success) return
-      if(isLoadingTree.current) return
-      isLoadingTree.current = true
-      await fetchFileTree()
-      isLoadingTree.current = false
+    async ({ success }) => {
+      if (!success) return;
+      if (isLoadingTree.current) return;
+      isLoadingTree.current = true;
+      await fetchFileTree();
+      isLoadingTree.current = false;
     }
   );
 
@@ -297,7 +299,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     const key = selectedKeys[0] as string;
     if (!key) return;
 
-    const { isLeaf, key: filePath, children } = info.node;
+    const { isLeaf } = info.node;
     if (isLeaf) {
       const newFile: FileMetadata = { path: key, isSelected: true };
       if (!selectedFiles.some((f) => f.path === key)) {
@@ -316,6 +318,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     if (isLeaf) return;
     await fetchFileTree(filePath);
   };
+
+  useEffect(() => {
+    const fn = subscribeToAgentFileSelect((filePath: string) => {
+      handleSelect([filePath], { node: { isLeaf: true } });
+    });
+    return fn();
+  }, []);
 
   const handleTabChange = async (key: string) => {
     setActiveFile(key);

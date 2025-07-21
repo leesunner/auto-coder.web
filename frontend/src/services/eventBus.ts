@@ -42,7 +42,9 @@ export const EVENTS = {
     // 发送消息事件 InputArea.tsx/EditorComponent.tsx 发布, ChatPanel.tsx 订阅
     SEND_MESSAGE: 'chat.send.message',
     // 停止生成事件 InputArea.tsx/EditorComponent.tsx 发布, ChatPanel.tsx 订阅
-    STOP_GENERATION: 'chat.stop.generation'
+    STOP_GENERATION: 'chat.stop.generation',
+    // ai聊天区文件路劲选择
+    FILE_SELECTED:'file.path.selected'
   },
   RAG: {
     // RAG配置更新事件 RagConfig.tsx 发布, RagSelector.tsx 订阅
