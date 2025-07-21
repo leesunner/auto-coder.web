@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import mermaid from "mermaid";
+import { message as messageTool } from "antd";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
@@ -32,7 +33,7 @@ interface MarkdownComponentProps {
 }
 
 const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
-  const [isCollapsed, setIsCollapsed] = useState(message.type === 'ERROR');
+  const [isCollapsed, setIsCollapsed] = useState(message.type === "ERROR");
 
   // 处理thinking标签
   const processThinkingTags = (content: string): string => {
@@ -44,19 +45,22 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
       }
     );
   };
-  // 处理JSON格式的模型信息                                                                                                                     
+  // 处理JSON格式的模型信息
   function processModelInfo(content: string) {
-    // 匹配JSON格式的模型信息（改进正则以处理嵌套结构）                                                                                         
+    // 匹配JSON格式的模型信息（改进正则以处理嵌套结构）
     const jsonPattern = /{[\s\S]*?}/g;
 
     return content.replace(jsonPattern, (match) => {
       try {
-        // 解析JSON数据                                                                                                                         
+        // 解析JSON数据
         const jsonData = JSON.parse(match);
         const lines: string[] = [];
 
-        // 定义属性映射表（包含单位和格式化处理）                                                                                               
-        const propertyMap: Record<string, { label: string; format?: (value: any) => string }> = {
+        // 定义属性映射表（包含单位和格式化处理）
+        const propertyMap: Record<
+          string,
+          { label: string; format?: (value: any) => string }
+        > = {
           model_name: { label: "模型名称" },
           input_tokens: { label: "输入token" },
           output_tokens: { label: "输出token" },
@@ -68,14 +72,20 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
           conversation_id: { label: "会话ID" },
         };
 
-        // 1. 处理已知属性（按定义的顺序）                                                                                                      
+        // 1. 处理已知属性（按定义的顺序）
         const orderedKeys = [
-          "model_name", "input_tokens", "output_tokens",
-          "elapsed_time", "first_token_time", "speed",
-          "input_cost", "output_cost", "conversation_id"
+          "model_name",
+          "input_tokens",
+          "output_tokens",
+          "elapsed_time",
+          "first_token_time",
+          "speed",
+          "input_cost",
+          "output_cost",
+          "conversation_id",
         ];
 
-        orderedKeys.forEach(key => {
+        orderedKeys.forEach((key) => {
           if (jsonData[key] !== undefined && jsonData[key] !== null) {
             const mapping = propertyMap[key];
             const value = mapping.format
@@ -85,26 +95,27 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
           }
         });
 
-        // 2. 处理其他未知属性（按字母顺序）                                                                                                    
+        // 2. 处理其他未知属性（按字母顺序）
         const unknownKeys = Object.keys(jsonData)
-          .filter(key => !propertyMap.hasOwnProperty(key) && key !== "__type")
+          .filter((key) => !propertyMap.hasOwnProperty(key) && key !== "__type")
           .sort();
 
-        unknownKeys.forEach(key => {
-          // 尝试美化键名                                                                                                                       
-          const formattedKey = key.replace(/_/g, " ")
-            .replace(/\b\w/g, char => char.toUpperCase());
+        unknownKeys.forEach((key) => {
+          // 尝试美化键名
+          const formattedKey = key
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase());
           lines.push(`${formattedKey}：${jsonData[key]}`);
         });
-        
+
         // 在 Markdown 中使用双空格加换行符来实现换行效果
         return lines.join("  \n");
       } catch (e) {
-        // 如果解析失败，返回原始内容                                                                                                           
+        // 如果解析失败，返回原始内容
         return match;
       }
     });
-  };
+  }
 
   const processMessageContent = (content: string): string => {
     let processedContent = content;
@@ -194,6 +205,14 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
     return "";
   };
 
+  const copyCode = (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+    code: React.ReactNode
+  ) => {
+    navigator.clipboard.writeText(code as string);
+    messageTool.success(getMessage("copy") + getMessage("success"));
+  };
+
   // 定义Markdown渲染组件
   const markdownComponents = {
     // 代码块渲染
@@ -208,7 +227,10 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
       if (inline) {
         return (
           <code
-            className={`markdown-inline-code ${className || ""}`}
+            onClick={(e) => copyCode(e, children)}
+            className={`markdown-inline-code hover:cursor-pointer hover:bg-green-600 hover:text-white ${
+              className || ""
+            }`}
             {...props}
           >
             {children}

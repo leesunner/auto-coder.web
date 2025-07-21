@@ -116,9 +116,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
 
   const showNewChatModal = () => {
-    // 清空当前对话内容
-    setMessages([]);
-
     // 设置默认的新对话名称
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     setNewChatName(`chat_${timestamp}`);
@@ -140,6 +137,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
     try {
       setChatListName(newChatName);
+      // 清空当前对话内容
       setMessages([]);
       setChatLists(prev => [newChatName, ...prev]);
 
