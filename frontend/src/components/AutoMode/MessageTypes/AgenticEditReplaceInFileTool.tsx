@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { MessageProps } from "../MessageList";
+import { useAgentFileSelect } from '../utils/agentFileSelect'
 import "./MessageStyles.css";
 import { getMessage } from "@/lang";
 
@@ -10,6 +11,7 @@ interface AgenticEditReplaceInFileToolProps {
 const AgenticEditReplaceInFileTool: React.FC<
   AgenticEditReplaceInFileToolProps
 > = ({ message }) => {
+  const { publishToAgentFileSelect } = useAgentFileSelect()
   const [isCollapsed, setIsCollapsed] = useState(true);
   const content = JSON.parse(message.content);
   const toolName = content.tool_name;
@@ -126,7 +128,7 @@ const AgenticEditReplaceInFileTool: React.FC<
       </div>
 
       <div className="mt-1 text-gray-300 text-xs whitespace-pre-wrap break-words px-2 py-1">
-        <span title={path} className="hover:underline cursor-help">
+        <span title={path} onClick={() => path && publishToAgentFileSelect(path)} className="hover:underline cursor-help">
           {path}
         </span>
       </div>

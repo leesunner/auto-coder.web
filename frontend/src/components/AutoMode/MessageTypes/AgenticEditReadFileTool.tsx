@@ -1,5 +1,6 @@
 import React from 'react';
 import type { MessageProps } from '../MessageList';
+import { useAgentFileSelect } from '../utils/agentFileSelect'
 import './MessageStyles.css'; // Ensure styles are imported
 import { getMessage } from '../../../lang';
 interface AgenticEditReadFileToolProps {
@@ -7,6 +8,7 @@ interface AgenticEditReadFileToolProps {
 }
 
 const AgenticEditReadFileTool: React.FC<AgenticEditReadFileToolProps> = ({ message }) => {
+  const { publishToAgentFileSelect } = useAgentFileSelect()
   let path = '';
 
   try {
@@ -34,7 +36,7 @@ const AgenticEditReadFileTool: React.FC<AgenticEditReadFileToolProps> = ({ messa
       </div>
       {/* File Path */}
       <div className="mt-1 text-cyan-300 bg-gray-800 px-2 py-1 rounded text-sm font-mono break-words max-h-[120px] overflow-auto scrollbar-thin scrollbar-thumb-gray-600">
-        <span title={path} className="hover:underline cursor-help">
+        <span title={path} onClick={() => path && publishToAgentFileSelect(path)} className="hover:underline cursor-help">
           {path}
         </span>
       </div>
