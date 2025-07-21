@@ -235,5 +235,38 @@ export const chatPanelLang = {
   exportCompleteImage: {
     en: "Export complete image",
     zh: "导出完整图片"
+  },
+  // 补充缺失的多语言配置
+  cancelButton: {
+    en: "Cancel",
+    zh: "取消"
+  },
+  deleteButton: {
+    en: "Delete",
+    zh: "删除"
+  },
+  chatDeleted: {
+    en: "Chat deleted",
+    zh: "对话已删除"
+  },
+  chatNameEmpty: {
+    en: "Chat name cannot be empty",
+    zh: "对话名称不能为空"
+  },
+  chatNameExists: {
+    en: "Chat with the same name already exists",
+    zh: "已存在同名对话"
+  },
+  confirmDeleteTitle: {
+    en: "Delete Chat",
+    zh: "删除对话"
+  },
+  confirmDeleteContent: {
+    en: "Are you sure you want to delete the chat '{{name}}'? This action cannot be undone.",
+    zh: "确定要删除对话 '{{name}}' 吗？此操作不可撤销。"
+  },
+  showMore: {
+    en: "Show More",
+    zh: "显示更多"
   }
 };

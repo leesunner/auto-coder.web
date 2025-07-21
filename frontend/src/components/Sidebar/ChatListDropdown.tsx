@@ -103,6 +103,7 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
   
   // 是否需要显示"更多"选项
   const hasMoreChats = chatLists.length > MAX_DEFAULT_CHATS;
+  console.log(visibleChatLists)
 
   const chatListMenuItems = [
     {

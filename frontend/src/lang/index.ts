@@ -21,6 +21,7 @@ import { componentsMessages } from "./components";
 import { messagesConfig } from "./messages";
 import { dotNotationMessages } from "./dotNotationMessages";
 import { commitListLang } from "./commitList";
+import { chatListDropdownMessages } from "./chatListDropdown";
 
 interface Message {
   en: string;
@@ -50,6 +51,7 @@ export const messages: { [key: string]: Message } = {
   ...messagesConfig,
   ...dotNotationMessages,
   ...commitListLang,
+  ...chatListDropdownMessages,
 
   // 补充缺失的消息
   noProjectSelected: {

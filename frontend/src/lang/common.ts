@@ -219,4 +219,54 @@ export const commonMessages: { [key: string]: Message } = {
     en: "Unknown error occurred",
     zh: "发生未知错误"
   },
+  
+  // 补充ChatPanel和ChatListDropdown中缺失的配置
+  rename: {
+    en: "Rename",
+    zh: "重命名"
+  },
+  newName: {
+    en: "New Name",
+    zh: "新名称"
+  },
+  enterNewName: {
+    en: "Enter new name",
+    zh: "输入新名称"
+  },
+  confirmButton: {
+    en: "Confirm",
+    zh: "确认"
+  },
+  cancelButton: {
+    en: "Cancel",
+    zh: "取消"
+  },
+  deleteButton: {
+    en: "Delete",
+    zh: "删除"
+  },
+  createButton: {
+    en: "Create",
+    zh: "创建"
+  },
+  clearButton: {
+    en: "Clear",
+    zh: "清空"
+  },
+  saveButton: {
+    en: "Save",
+    zh: "保存"
+  },
+  loadButton: {
+    en: "Load",
+    zh: "加载"
+  },
+  exportButton: {
+    en: "Export",
+    zh: "导出"
+  },
+  importButton: {
+    en: "Import",
+    zh: "导入"
+  },
 };
