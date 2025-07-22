@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { MessageProps } from "../MessageList";
+import { useAgentFileSelect } from '../utils/agentFileSelect'
 import "./MessageStyles.css"; // Ensure styles are imported
 import { getMessage } from "@/lang";
 interface AgenticEditWriteToFileToolProps {
@@ -9,6 +10,7 @@ interface AgenticEditWriteToFileToolProps {
 const AgenticEditWriteToFileTool: React.FC<AgenticEditWriteToFileToolProps> = ({
   message,
 }) => {
+  const { publishToAgentFileSelect } = useAgentFileSelect()
   const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed
   let path = "";
   let contentSnippet = "";
@@ -82,7 +84,7 @@ const AgenticEditWriteToFileTool: React.FC<AgenticEditWriteToFileToolProps> = ({
         </span>
       </div>
       {/* File Path */}
-      <div className="mt-1 text-cyan-300 bg-gray-800 px-2 py-1 rounded text-sm font-mono break-all">
+      <div onClick={() => path && publishToAgentFileSelect(path)} className="mt-1 text-cyan-300 bg-gray-800 px-2 py-1 rounded text-sm font-mono break-all cursor-pointer">
         {path}
       </div>
       {/* Content Snippet (Collapsible) */}

@@ -295,18 +295,21 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   };
 
-  const handleSelect = async (selectedKeys: React.Key[], info: any) => {
-    const key = selectedKeys[0] as string;
-    if (!key) return;
+  const openFile = (key: string) => {
+    const newFile: FileMetadata = { path: key, isSelected: true };
+    if (!selectedFiles.some((f) => f.path === key)) {
+      setSelectedFiles((prev) => [...prev, newFile]);
+    }
+    setActiveFile(key);
+    loadFileContent(key);
+  };
 
-    const { isLeaf } = info.node;
+  const handleSelect = async (selectedKeys: React.Key[], info: any) => {
+    const { isLeaf, key } = info.node;
+    const _key = key || (selectedKeys[0] as string);
+    if (!_key) return;
     if (isLeaf) {
-      const newFile: FileMetadata = { path: key, isSelected: true };
-      if (!selectedFiles.some((f) => f.path === key)) {
-        setSelectedFiles((prev) => [...prev, newFile]);
-      }
-      setActiveFile(key);
-      loadFileContent(key);
+      openFile(key);
     }
   };
 
@@ -320,9 +323,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   useEffect(() => {
-    const fn = subscribeToAgentFileSelect((filePath: string) => {
-      handleSelect([filePath], { node: { isLeaf: true } });
-    });
+    const fn = subscribeToAgentFileSelect(openFile);
     return fn();
   }, []);
 

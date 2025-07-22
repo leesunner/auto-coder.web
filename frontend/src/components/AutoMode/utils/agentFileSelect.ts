@@ -1,34 +1,26 @@
 import eventBus, { EVENTS } from "@/services/eventBus";
 
+const fileReg = /([A-Za-z\d.@_-]+\/)+[A-Za-z\d.@_-]+\.[a-zA-z]+/gm;
+
 export const useAgentFileSelect = () => {
   const subscribeToAgentFileSelect = (callback: (filePath: string) => void) => {
     return eventBus.subscribe(EVENTS.CHAT.FILE_SELECTED, callback);
   };
 
+  const getPath = (filePath: string) => {
+    if (!filePath) return;
+    fileReg.lastIndex = 0;
+    const list = filePath.match(fileReg);
+    if (!list) return;
+    return list[list.length - 1];
+  };
+
   const publishToAgentFileSelect = (filePath: string) => {
-    let needFomart = false
-    if (filePath.includes('：')) {
-      needFomart = true
-      filePath = filePath.split('：')[1]
-    }
-    if (filePath.includes(':')) {
-      needFomart = true
-      filePath = filePath.split(':')[1]
-    }
-    if (!filePath) return
+    filePath = getPath(filePath) as string;
+    if (!filePath) return;
+    filePath = filePath.trim();
 
-    filePath = filePath.trim()
-    
-    if (needFomart) {
-      /**
-       * 处理类似这种文本提取文件路径
-       * 成功应用了 1/1 个更改到文件：frontend/src/components/AutoMode/MessageTypes/AgenticEditReadFileTool.tsx。
-       * 
-       *  */ 
-      filePath = filePath.slice(0, filePath.length - 1)
-    }
-
-    console.log(filePath)
+    console.log("选中路径：", filePath);
     eventBus.publish(EVENTS.CHAT.FILE_SELECTED, filePath);
   };
 
