@@ -5,6 +5,11 @@ import { getMessage } from '../../lang';
 import axios from 'axios';
 import HotkeyManager from '../../utils/HotkeyManager';
 
+export const DEFAULT_TABS: ChatTabConfig[] =  [
+  { id: 'main', name: getMessage('mainChat') || '主线面板' },
+  { id: 'secondary', name: getMessage('secondaryChat') || '支线面板' }
+]
+
 // 定义单个聊天面板的配置接口
 interface ChatTabConfig {
   id: string;
@@ -36,13 +41,8 @@ const ChatPanels: React.FC<ChatPanelsProps> = ({
   setSelectedFiles
 }) => {
   // 默认聊天标签页配置
-  const defaultTabs: ChatTabConfig[] = [
-    { id: 'main', name: getMessage('mainChat') || '主线面板' },
-    { id: 'secondary', name: getMessage('secondaryChat') || '支线面板' }
-  ];
-  
-  const [tabs, setTabs] = useState<ChatTabConfig[]>(defaultTabs);
-  const [activeTabId, setActiveTabId] = useState<string>(defaultTabs[0].id);
+  const [tabs, setTabs] = useState<ChatTabConfig[]>(DEFAULT_TABS);
+  const [activeTabId, setActiveTabId] = useState<string>(DEFAULT_TABS[0].id);
   const [isAddingTab, setIsAddingTab] = useState<boolean>(false);
   const [newTabName, setNewTabName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);

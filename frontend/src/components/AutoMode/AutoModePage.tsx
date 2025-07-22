@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react'; // Import lazy and Suspense
 import { getMessage } from '../../lang';
+import { ServiceFactory } from '../../services/ServiceFactory';
 import { Message as ServiceMessage, HistoryCommand } from './types';
 import { ChatPanel } from './index';
 import InputPanel from './InputPanel';
 import AskUserDialog from './AskUserDialog'; // Import the new component
 import { autoCommandService } from '../../services/autoCommandService';
+import { DEFAULT_TABS } from '@/components/Sidebar/ChatPanels'
 // Lazy load CommitListPanel and CurrentChangePanel
 const CommitListPanel = lazy(() => import('./CommitListPanel'));
 const CurrentChangePanel = lazy(() => import('./CurrentChangePanel'));
@@ -13,7 +15,7 @@ const CurrentChangePanel = lazy(() => import('./CurrentChangePanel'));
 interface AutoModePageProps {
   projectName: string;
   onSwitchToExpertMode: () => void;
-  className?:string
+  className?: string
 }
 
 interface Message extends ServiceMessage {
@@ -34,17 +36,17 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
   const [isMessageAreaAdaptive, setIsMessageAreaAdaptive] = useState(true); // 消息区域自适应状态
   const [activeTab, setActiveTab] = useState<'messages' | 'current-change' | 'commits'>('messages'); // 修改标签状态
   const [currentCommits, setCurrentCommits] = useState<any[]>([]); // 当前变化的提交详情
-  
+
   const messagesRef = useRef(messages);
-  
+
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
-  
+
   const saveTaskHistory = useCallback(async (isError: boolean = false, query: string, eventFileId: string | null) => {
     if (!query || !eventFileId) return;
     console.log(messagesRef.current); // 使用 ref 获取最新值
-    
+
     try {
       await fetch('/api/auto-command/save-history', {
         method: 'POST',
@@ -71,17 +73,17 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
       console.error('Cannot respond to event: No event ID provided');
       return;
     }
-    
+
     if (!currentEventFileId) {
       console.error('Cannot respond to event: No event file ID available');
       return;
     }
-    
+
     // 如果匹配事件ID，关闭活动的ASK_USER对话框
     if (activeAskUserMessage?.eventId === eventId) {
       setActiveAskUserMessage(null);
     }
-    
+
     // 将用户响应添加到消息列表(事件会自动显示，无需在前端添加)
     // setMessages(prev => [...prev, {
     //   id: 'user-response-' + Date.now(),
@@ -90,7 +92,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
     //   isUser: true,
     //   responseTo: eventId
     // }]);
-    
+
     try {
       // 将响应发送回服务器
       const result = await fetch('/api/auto-command/response', {
@@ -104,12 +106,12 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
           response: response
         })
       });
-      
+
       if (!result.ok) {
         const errorData = await result.json();
         throw new Error(`Failed to send response: ${errorData.detail || result.statusText}`);
       }
-      
+
       console.log('Response sent successfully to event:', eventId);
     } catch (error) {
       console.error('Error sending response to server:', error);
@@ -120,7 +122,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
       }]);
     }
   };
-  
+
   // 组件挂载后的初始化效果
   useEffect(() => {
     // 设置消息事件监听器
@@ -134,7 +136,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
         };
         setActiveAskUserMessage(askUserMessage);
       }
-      
+
       // 更新消息列表
       setMessages(prev => {
         // 创建带有ID和时间戳的新消息
@@ -183,10 +185,10 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
         console.log('No event file ID available');
         return; // 直接返回，不发起请求
       }
-      
+
       // 构建请求URL，传递事件文件ID参数
       let url = `/api/current-changes?event_file_id=${encodeURIComponent(current_event_file_id)}`;
-      
+
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
@@ -204,11 +206,11 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
   useEffect(() => {
     // 先移除旧的监听器，避免重复监听
     autoCommandService.removeAllListeners('taskComplete');
-    
+
     // 添加新的监听器，闭包会捕获最新的状态值
     autoCommandService.on('taskComplete', (isError: boolean) => {
       if (lastSubmittedQuery && currentEventFileId) {
-        
+
         // 任务真正停止的时候是这个时候
         setIsProcessing(false);
         console.log('AutoModePage: Set isProcessing to false');
@@ -217,28 +219,46 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
         console.warn('Cannot save task history: missing query or event file ID');
       }
     });
-    
+
     // 清理函数
     return () => {
       autoCommandService.removeAllListeners('taskComplete');
     };
   }, [lastSubmittedQuery, currentEventFileId, saveTaskHistory]);
 
-  
+  const isCreateNew = useRef(false)
+
+  const handleNewChatCreate = async () => {
+    if (isCreateNew.current) return
+    isCreateNew.current = true
+    // 设置默认的新对话名称
+    const panelId = DEFAULT_TABS[0].id
+    const chatListService = ServiceFactory.getChatListService(panelId);
+    try {
+      // 保存新的空聊天列表
+      const newChatName = await chatListService.createNewChat(panelId);
+      if (!newChatName) return
+      // 保存新的空聊天列表
+      await chatListService.saveChatList(newChatName, [], panelId);
+    } catch (error) {
+      isCreateNew.current = false
+      console.error('Error creating new chat:', error);
+    }
+  };
 
   // 处理自动模式搜索提交
   const handleAutoSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // 检查是否有来自扩展编辑器的内容
     // 如果有，优先使用扩展编辑器的内容
     const contentToSubmit = (window as any).lastEditorContent || autoSearchTerm;
-    
+
     // 清除临时存储的编辑器内容
     if ((window as any).lastEditorContent) {
       delete (window as any).lastEditorContent;
     }
-    
+
     if (contentToSubmit.trim()) {
       try {
         setIsProcessing(true);
@@ -258,7 +278,8 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
         // 存储事件文件ID以便后续用户响应使用
         setCurrentEventFileId(result.event_file_id);
         console.log('AutoModePage: Set currentEventFileId to:', result.event_file_id);
-        
+        // 创建并存储新会话
+        handleNewChatCreate()
         // 清空输入框
         setAutoSearchTerm('');
       } catch (error) {
@@ -269,7 +290,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
           content: 'Failed to execute command. Please try again.'
         }]);
       } finally {
-         console.log("query submitted")
+        console.log("query submitted")
       }
     }
   };
@@ -279,19 +300,19 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
     // 设置查询
     setAutoSearchTerm(task.query);
     // 更新最后提交的查询
-    setLastSubmittedQuery(task.query);          
+    setLastSubmittedQuery(task.query);
     // 更新消息列表
     console.log('Restoring history task messages:', task.messages);
-    setMessages(task.messages);    
-    
+    setMessages(task.messages);
+
     // 恢复事件文件ID
     if (task.event_file_id) {
       setCurrentEventFileId(task.event_file_id);
     }
-    
+
     // 确保消息区域可见
     setIsMessageAreaVisible(true);
-    
+
     console.log('Restored history task:', task);
   };
 
@@ -300,20 +321,20 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
     <div className={`flex-1 flex flex-col h-screen bg-gray-900 ${className}`}>
       {/* 用户询问对话框 - 当需要用户输入时显示的模态框 */}
       {activeAskUserMessage && (
-        <AskUserDialog 
-          message={activeAskUserMessage} 
+        <AskUserDialog
+          message={activeAskUserMessage}
           onResponse={handleUserResponse}
           onClose={() => setActiveAskUserMessage(null)}
         />
       )}
-      
+
       {/* 主内容区域 - 居中、最大宽度限制、垂直弹性布局 */}
       <div className={`w-full max-w-4xl mx-auto px-4 py-6 flex flex-col ${messages.length === 0 ? 'justify-center' : ''} h-full`}>
         {/* 标题区域 - 显示应用名称和当前项目 */}
         <div className="flex flex-col items-center justify-center mb-6 space-y-3">
           <div className="flex items-center">
             <svg className="w-8 h-8 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text font-bold text-3xl">auto-coder.web</span>
           </div>
@@ -321,7 +342,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
             {getMessage('projectName')}: {projectName}
           </div>
         </div>
-        
+
         {/* 消息区域 - 带滚动功能的主聊天界面，包含ChatPanel组件和侧边栏 */}
         {messages.length > 0 && isMessageAreaVisible && (
           <div className="flex-1 mb-6 flex flex-col items-center w-full overflow-hidden">
@@ -360,7 +381,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
                     {getMessage('viewChange')}
                   </button>
                 </div>
-                
+
                 {/* 控制按钮容器 - 移到侧边栏底部 */}
                 <div className="mt-auto flex flex-col space-y-2 pt-4 border-t border-gray-700">
                   <button
@@ -389,16 +410,16 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
                   </button>
                 </div>
               </div>
-              
+
               {/* 主内容区域 */}
               <div className={`flex-1 ${isMessageAreaAdaptive ? 'overflow-y-auto' : ''} bg-gray-800 rounded-r-lg p-5 shadow-lg`}>
                 {/* 根据当前标签显示不同内容 */}
                 {activeTab === 'messages' ? (
-                  <ChatPanel 
-                    messages={messages} 
-                    currentTask={lastSubmittedQuery.length > 0 
-                      ? (lastSubmittedQuery.length > 20 
-                        ? `${lastSubmittedQuery.substring(0, 20)}...` 
+                  <ChatPanel
+                    messages={messages}
+                    currentTask={lastSubmittedQuery.length > 0
+                      ? (lastSubmittedQuery.length > 20
+                        ? `${lastSubmittedQuery.substring(0, 20)}...`
                         : lastSubmittedQuery)
                       : (projectName || getMessage('noProjectSelected'))}
                     onUserResponse={handleUserResponse}
@@ -406,9 +427,9 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
                 ) : activeTab === 'current-change' ? (
                   // Wrap CurrentChangePanel with Suspense
                   <Suspense fallback={<div className="p-4 text-gray-400 text-center">Loading Changes...</div>}>
-                    <CurrentChangePanel 
-                      projectName={projectName} 
-                      commits={currentCommits} 
+                    <CurrentChangePanel
+                      projectName={projectName}
+                      commits={currentCommits}
                     />
                   </Suspense>
                 ) : (
@@ -420,7 +441,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
               </div>
             </div>
           </div>
-        )}        
+        )}
 
         {/* 显示消息区域的按钮 - 当消息区域被隐藏时显示 */}
         {messages.length > 0 && !isMessageAreaVisible && (
@@ -451,21 +472,21 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
           <p className="mb-2">{getMessage('autoModeDescription')}</p>
           <p>{getMessage('tryExamples')}:</p>
           <div className="flex flex-wrap justify-center gap-2 mt-3">
-            <button 
+            <button
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-full text-sm text-gray-300 transition-colors"
               onClick={() => setAutoSearchTerm('Add authentication to the app')}
               disabled={isProcessing}
             >
               Add authentication
             </button>
-            <button 
+            <button
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-full text-sm text-gray-300 transition-colors"
               onClick={() => setAutoSearchTerm('Create a new API endpoint')}
               disabled={isProcessing}
             >
               Create API endpoint
             </button>
-            <button 
+            <button
               className="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded-full text-sm text-gray-300 transition-colors"
               onClick={() => setAutoSearchTerm('Fix bugs in the code')}
               disabled={isProcessing}
