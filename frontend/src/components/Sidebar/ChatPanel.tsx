@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import './ChatPanel.css';
 import InputArea from './InputArea';
 import { getMessage } from '../../lang';
+import { useChatContext } from '../../contexts/ChatContext';
 import {
   FileGroup,
   ConfigState,
@@ -185,8 +186,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     extra_conf: {},
     available_keys: []
   });
-  const [chatLists, setChatLists] = useState<string[]>([]);
-  const [chatListName, setChatListName] = useState<string>('');
+  
+  // 使用 Context 替代本地状态
+  const { chatLists, setChatLists, chatListName, setChatListName } = useChatContext();
+  
   const [showChatListInput, setShowChatListInput] = useState(false);
 
   const [sendLoading, setSendLoading] = useState<boolean>(false);

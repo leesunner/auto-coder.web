@@ -8,6 +8,7 @@ import FileSearch from './components/FileSearch';
 import InitializationPage from './components/InitializationPage';
 import './App.css';
 import { TaskSplittingProvider } from './contexts/TaskSplittingContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { FileMetadata } from './types/file_meta';
 import HotkeyManager from './utils/HotkeyManager';
 
@@ -178,32 +179,35 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Auto Mode Interface */}
-        {
-          <AutoModePage
-            className={`${!isExpertMode ? '' : 'hidden'}`}
-            projectName={projectName}
-            onSwitchToExpertMode={() => setIsExpertMode(true)}
-          />
-        }
+        {/* ChatProvider 包裹 AutoModePage 和 ExpertModePage */}
+        <ChatProvider>
+          {/* Auto Mode Interface */}
+          {
+            <AutoModePage
+              className={`${!isExpertMode ? '' : 'hidden'}`}
+              projectName={projectName}
+              onSwitchToExpertMode={() => setIsExpertMode(true)}
+            />
+          }
 
-        {/* Expert Mode Interface */}
-        {isExpertMode && (
-          <ExpertModePage
-            projectName={projectName}
-            activePanel={activePanel}
-            setActivePanel={setActivePanel}
-            clipboardContent={clipboardContent}
-            setClipboardContent={setClipboardContent}
-            previewFiles={previewFiles}
-            setPreviewFiles={setPreviewFiles}
-            requestId={requestId}
-            setRequestId={setRequestId}
-            selectedFiles={selectedFiles}
-            setSelectedFiles={setSelectedFiles}
-            onSwitchToAutoMode={() => setIsExpertMode(false)}
-          />
-        )}
+          {/* Expert Mode Interface */}
+          {isExpertMode && (
+            <ExpertModePage
+              projectName={projectName}
+              activePanel={activePanel}
+              setActivePanel={setActivePanel}
+              clipboardContent={clipboardContent}
+              setClipboardContent={setClipboardContent}
+              previewFiles={previewFiles}
+              setPreviewFiles={setPreviewFiles}
+              requestId={requestId}
+              setRequestId={setRequestId}
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+              onSwitchToAutoMode={() => setIsExpertMode(false)}
+            />
+          )}
+        </ChatProvider>
 
         {/* File Search Component */}
         <FileSearch

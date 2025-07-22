@@ -18,6 +18,7 @@ import { getMessage } from '../../lang';
 import { FileMetadata } from '../../types/file_meta';
 import './SplitStyles.css';
 import eventBus, { EVENTS } from '../../services/eventBus';
+import { useChatContext } from '../../contexts/ChatContext';
 import ModalDialog from '../Common/ModalDialog';
 // 导入声音播放函数
 import { playTaskComplete } from '../AutoMode/utils/SoundEffects';
@@ -54,6 +55,9 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
   onSwitchToAutoMode,
   setSelectedFiles
 }) => {
+  // 使用 ChatContext 获取聊天列表数据
+  const { chatLists, setChatLists, chatListName, setChatListName } = useChatContext();
+
   const [activeToolPanel, setActiveToolPanel] = useState<string>('terminal');
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [isFull, setFull] = useState(false);
@@ -291,6 +295,12 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
       >
         {/* Left Sidebar - Chat */}
         <div className="border-r border-gray-700 flex flex-col">
+          {/* 显示当前聊天列表信息 - 演示 Context 使用 */}
+          {chatListName && (
+            <div className="bg-gray-800 px-3 py-1 text-gray-400 text-xs border-b border-gray-700">
+              当前聊天: {chatListName} ({chatLists.length} 个聊天)
+            </div>
+          )}
           <ChatPanels
             setPreviewFiles={setPreviewFiles}
             setActivePanel={setActivePanel as any}

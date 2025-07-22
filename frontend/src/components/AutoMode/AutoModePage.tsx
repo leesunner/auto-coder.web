@@ -7,6 +7,7 @@ import InputPanel from './InputPanel';
 import AskUserDialog from './AskUserDialog'; // Import the new component
 import { autoCommandService } from '../../services/autoCommandService';
 import { DEFAULT_TABS } from '@/components/Sidebar/ChatPanels'
+import { useChatContext } from '../../contexts/ChatContext';
 // Lazy load CommitListPanel and CurrentChangePanel
 const CommitListPanel = lazy(() => import('./CommitListPanel'));
 const CurrentChangePanel = lazy(() => import('./CurrentChangePanel'));
@@ -24,6 +25,9 @@ interface Message extends ServiceMessage {
 }
 
 const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpertMode, className }) => {
+  // 使用 ChatContext 获取聊天列表数据
+  const { chatLists, setChatLists, chatListName, setChatListName } = useChatContext();
+
   // 状态管理
   const [autoSearchTerm, setAutoSearchTerm] = useState(''); // 搜索/命令输入框的状态
   const [lastSubmittedQuery, setLastSubmittedQuery] = useState(''); // 最后提交的查询
@@ -341,6 +345,12 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
           <div className="text-gray-400 text-sm font-mono font-medium">
             {getMessage('projectName')}: {projectName}
           </div>
+          {/* 显示当前聊天列表信息 - 演示 Context 使用 */}
+          {chatListName && (
+            <div className="text-gray-500 text-xs font-mono">
+              当前聊天: {chatListName} | 总聊天数: {chatLists.length}
+            </div>
+          )}
         </div>
 
         {/* 消息区域 - 带滚动功能的主聊天界面，包含ChatPanel组件和侧边栏 */}
