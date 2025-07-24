@@ -373,3 +373,11 @@
   margin-inline-end: 0;
   width: 18px;
 }
+
+:where(.css-dev-only-do-not-override-ut69n1).ant-select .ant-select-selection-placeholder {
+  color: #ffffff80!important;
+}
+
+.ant-input::placeholder{
+  color: #ffffff80!important;
+}

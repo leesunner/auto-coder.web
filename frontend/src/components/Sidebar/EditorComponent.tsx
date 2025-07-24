@@ -700,7 +700,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
           theme="vs-dark"
           onMount={handleEditorDidMount}
           // 禁用自动检测和加载远程资源
-          loading={<div className="flex items-center justify-center h-full">{getMessage('loadingEditor')}</div>}
+          loading={<div className="flex items-center justify-center h-full text-[#ffffff80] text-sm">{getMessage('loadingEditor')}</div>}
           // 确保使用本地资源
           beforeMount={(monaco) => {
             // 设置 Monaco 环境，使用本地 worker
