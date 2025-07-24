@@ -16,7 +16,8 @@ const CurrentChangePanel = lazy(() => import('./CurrentChangePanel'));
 interface AutoModePageProps {
   projectName: string;
   onSwitchToExpertMode: () => void;
-  className?: string
+  className?: string;
+  isAutoMode: boolean
 }
 
 interface Message extends ServiceMessage {
@@ -24,7 +25,7 @@ interface Message extends ServiceMessage {
   timestamp?: number;
 }
 
-const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpertMode, className }) => {
+const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpertMode, isAutoMode, className }) => {
   // 使用 ChatContext 获取聊天列表数据
   const { chatLists, setChatLists, chatListName, setChatListName } = useChatContext();
 
@@ -214,7 +215,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
     // 添加新的监听器，闭包会捕获最新的状态值
     autoCommandService.on('taskComplete', (isError: boolean) => {
       if (lastSubmittedQuery && currentEventFileId) {
-
+       
         // 任务真正停止的时候是这个时候
         setIsProcessing(false);
         console.log('AutoModePage: Set isProcessing to false');
@@ -230,25 +231,6 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
     };
   }, [lastSubmittedQuery, currentEventFileId, saveTaskHistory]);
 
-  const isCreateNew = useRef(false)
-
-  const handleNewChatCreate = async () => {
-    if (isCreateNew.current) return
-    isCreateNew.current = true
-    // 设置默认的新对话名称
-    const panelId = DEFAULT_TABS[0].id
-    const chatListService = ServiceFactory.getChatListService(panelId);
-    try {
-      // 保存新的空聊天列表
-      const newChatName = await chatListService.createNewChat(panelId);
-      if (!newChatName) return
-      // 保存新的空聊天列表
-      await chatListService.saveChatList(newChatName, [], panelId);
-    } catch (error) {
-      isCreateNew.current = false
-      console.error('Error creating new chat:', error);
-    }
-  };
 
   // 处理自动模式搜索提交
   const handleAutoSearch = async (e: React.FormEvent) => {
@@ -282,8 +264,6 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
         // 存储事件文件ID以便后续用户响应使用
         setCurrentEventFileId(result.event_file_id);
         console.log('AutoModePage: Set currentEventFileId to:', result.event_file_id);
-        // 创建并存储新会话
-        handleNewChatCreate()
         // 清空输入框
         setAutoSearchTerm('');
       } catch (error) {
@@ -345,12 +325,6 @@ const AutoModePage: React.FC<AutoModePageProps> = ({ projectName, onSwitchToExpe
           <div className="text-gray-400 text-sm font-mono font-medium">
             {getMessage('projectName')}: {projectName}
           </div>
-          {/* 显示当前聊天列表信息 - 演示 Context 使用 */}
-          {chatListName && (
-            <div className="text-gray-500 text-xs font-mono">
-              当前聊天: {chatListName} | 总聊天数: {chatLists.length}
-            </div>
-          )}
         </div>
 
         {/* 消息区域 - 带滚动功能的主聊天界面，包含ChatPanel组件和侧边栏 */}

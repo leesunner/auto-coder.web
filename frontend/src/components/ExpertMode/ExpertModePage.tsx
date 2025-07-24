@@ -295,12 +295,6 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
       >
         {/* Left Sidebar - Chat */}
         <div className="border-r border-gray-700 flex flex-col">
-          {/* 显示当前聊天列表信息 - 演示 Context 使用 */}
-          {chatListName && (
-            <div className="bg-gray-800 px-3 py-1 text-gray-400 text-xs border-b border-gray-700">
-              当前聊天: {chatListName} ({chatLists.length} 个聊天)
-            </div>
-          )}
           <ChatPanels
             setPreviewFiles={setPreviewFiles}
             setActivePanel={setActivePanel as any}

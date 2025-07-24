@@ -184,6 +184,7 @@ const App: React.FC = () => {
           {/* Auto Mode Interface */}
           {
             <AutoModePage
+              isAutoMode={!isExpertMode}
               className={`${!isExpertMode ? '' : 'hidden'}`}
               projectName={projectName}
               onSwitchToExpertMode={() => setIsExpertMode(true)}
