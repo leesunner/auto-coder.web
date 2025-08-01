@@ -430,9 +430,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     const callback = (e) => {
       console.log(e.key);
-      // handleSave
+      // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (Mac)
+      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault(); // 阻止浏览器默认的保存行为
+        handleSave();
+      }
     };
     window.addEventListener("keydown", callback);
+    
+    // 清理函数，移除事件监听器
+    return () => {
+      window.removeEventListener("keydown", callback);
+    };
   }, [handleSave]);
 
   return (

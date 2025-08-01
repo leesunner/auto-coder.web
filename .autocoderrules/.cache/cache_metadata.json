@@ -1,0 +1,27 @@
+{
+  "summary": {
+    "rules_hash": "84c1d80229f50c95cb3b84c844ace5db",
+    "timestamp": 1754050782.3155575,
+    "rule_count": 1,
+    "rule_files": [
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\always_repsond_in_chinese.md"
+    ],
+    "cache_version": "1.0"
+  },
+  "index": {
+    "rules_hash": "f246267781bace3d9930149837c4874b",
+    "timestamp": 1754050817.5208783,
+    "rule_count": 8,
+    "rule_files": [
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\agentic_message_parser_extension.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\basic_settings_configuration.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\eventbus_parameter_modification.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\fastapi_router_organization.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\hotkey_management.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\index.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\project.md",
+      "D:\\code\\auto-coder.web-master\\.autocoderrules\\如何国际化.md"
+    ],
+    "cache_version": "1.0"
+  }
+}
