@@ -28,31 +28,33 @@ import type { MenuProps } from "antd";
 import { getMessage } from "../../../../lang";
 import "./FileTree.css";
 import FileTreeNode from "./components/FileTreeNode";
-import { sortTreeNodes, compactFolders } from './utils/treeUtils'
+import { sortTreeNodes, compactFolders } from "./utils/treeUtils";
 
 interface FileTreeProps {
   treeData: DataNode[];
-  expandedKeys?: string[];
   onSelect: (selectedKeys: React.Key[], info: any) => void;
   onRefresh: () => Promise<void>;
   onExpand: (selectedKeys: React.Key[], info: any) => void;
   projectName?: string;
-  setCompactFolders:(a:boolean)=>any,
-  isCompactFolders:boolean
+  setCompactFolders: (a: boolean) => any;
+  isCompactFolders: boolean;
+  activeKey?: string;
 }
 
 const { DirectoryTree } = Tree;
 
 const FileTree: React.FC<FileTreeProps> = ({
   treeData,
-  expandedKeys,
   onSelect,
   onExpand,
   onRefresh,
   projectName,
+  activeKey,
   setCompactFolders,
-  isCompactFolders
+  isCompactFolders,
 }) => {
+  const treeRef = useRef<any>(null);
+  const treeNodeRef = useRef<HTMLDivElement>(null);
   const [filteredTreeData, setFilteredTreeData] =
     useState<DataNode[]>(treeData);
   const [contextMenuNode, setContextMenuNode] = useState<DataNode | null>(null);
@@ -67,7 +69,8 @@ const FileTree: React.FC<FileTreeProps> = ({
     useState<boolean>(false);
   const [newDirName, setNewDirName] = useState<string>("");
   const [newDirParentPath, setNewDirParentPath] = useState<string>("");
-  const [_expandedKeys,setExpandedKeys] = useState<string[]>(expandedKeys||[])
+  const [_expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
   useEffect(() => {
     setFilteredTreeData(treeData);
@@ -75,6 +78,26 @@ const FileTree: React.FC<FileTreeProps> = ({
       handleSearch(searchValue);
     }
   }, [treeData]);
+
+  useEffect(() => {
+    if (!activeKey) return;
+
+    if (treeRef.current) {
+      const node = treeNodeRef.current?.querySelector(
+        `div[data-key='${activeKey}']`
+      );
+      node?.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+      });
+    }
+    setSelectedKeys([activeKey]);
+    setExpandedKeys((list) => {
+      const data = new Set([...list, activeKey]);
+
+      return [...data.values()];
+    });
+  }, [activeKey, treeRef, treeNodeRef]);
 
   const handleDelete = async (node: DataNode) => {
     try {
@@ -86,10 +109,10 @@ const FileTree: React.FC<FileTreeProps> = ({
         throw new Error("Failed to delete");
       }
 
-      message.success(getMessage('deleteSuccess', { name: node.title }));
+      message.success(getMessage("deleteSuccess", { name: node.title }));
       onRefresh();
     } catch (error) {
-      message.error(getMessage('deleteFailed'));
+      message.error(getMessage("deleteFailed"));
       console.error("Error:", error);
     }
   };
@@ -127,14 +150,16 @@ const FileTree: React.FC<FileTreeProps> = ({
         throw new Error(errorData.detail || "Failed to create file");
       }
 
-      message.success(getMessage('createSuccess', { name: newFileName }));
+      message.success(getMessage("createSuccess", { name: newFileName }));
       setIsNewFileModalVisible(false);
       setNewFileName("");
       onRefresh();
     } catch (error) {
       console.error("Error creating file:", error);
       message.error(
-        error instanceof Error ? error.message : getMessage('createFailed', { type: getMessage('newFile') })
+        error instanceof Error
+          ? error.message
+          : getMessage("createFailed", { type: getMessage("newFile") })
       );
     }
   };
@@ -157,14 +182,14 @@ const FileTree: React.FC<FileTreeProps> = ({
         throw new Error(errorData.detail || "Failed to create directory");
       }
 
-      message.success(getMessage('createDirSuccess', { name: newDirName }));
+      message.success(getMessage("createDirSuccess", { name: newDirName }));
       setIsNewDirModalVisible(false);
       setNewDirName("");
       onRefresh();
     } catch (error) {
       console.error("Error creating directory:", error);
       message.error(
-        error instanceof Error ? error.message : getMessage('createDirFailed')
+        error instanceof Error ? error.message : getMessage("createDirFailed")
       );
     }
   };
@@ -240,7 +265,7 @@ const FileTree: React.FC<FileTreeProps> = ({
       items.push({
         key: "new-file",
         icon: <FileAddOutlined />,
-        label: getMessage('newFile'),
+        label: getMessage("newFile"),
         onClick: () => {
           setNewFileParentPath(contextMenuNode.key.toString());
           setIsNewFileModalVisible(true);
@@ -250,7 +275,7 @@ const FileTree: React.FC<FileTreeProps> = ({
       items.push({
         key: "new-directory",
         icon: <FolderAddOutlined />,
-        label: getMessage('newDirectory'),
+        label: getMessage("newDirectory"),
         onClick: () => {
           setNewDirParentPath(contextMenuNode.key.toString());
           setIsNewDirModalVisible(true);
@@ -262,21 +287,21 @@ const FileTree: React.FC<FileTreeProps> = ({
       {
         key: "info",
         icon: <InfoCircleOutlined />,
-        label: getMessage('fileInfo'),
+        label: getMessage("fileInfo"),
         onClick: () => {
           if (contextMenuNode) {
-            message.info(getMessage('pathInfo', { path: contextMenuNode.key }));
+            message.info(getMessage("pathInfo", { path: contextMenuNode.key }));
           }
         },
       },
       {
         key: "copy",
         icon: <CopyOutlined />,
-        label: getMessage('copyPath'),
+        label: getMessage("copyPath"),
         onClick: () => {
           if (contextMenuNode) {
             navigator.clipboard.writeText(contextMenuNode.key.toString());
-            message.success(getMessage('pathCopied'));
+            message.success(getMessage("pathCopied"));
           }
         },
       },
@@ -286,18 +311,18 @@ const FileTree: React.FC<FileTreeProps> = ({
       {
         key: "delete",
         icon: <DeleteOutlined />,
-        label: getMessage('delete'),
+        label: getMessage("delete"),
         danger: true,
         onClick: () => {
           if (contextMenuNode) {
             const nodeKey = contextMenuNode.key.toString();
             const nodeName = nodeKey.split("/").pop() || nodeKey; // Extract name from path
             Modal.confirm({
-              title: getMessage('deleteConfirmation'),
-              content: getMessage('deleteConfirmText', { name: nodeName }),
-              okText: getMessage('yes'),
+              title: getMessage("deleteConfirmation"),
+              content: getMessage("deleteConfirmText", { name: nodeName }),
+              okText: getMessage("yes"),
               okType: "danger",
-              cancelText: getMessage('no'),
+              cancelText: getMessage("no"),
               onOk() {
                 handleDelete(contextMenuNode);
               },
@@ -315,9 +340,9 @@ const FileTree: React.FC<FileTreeProps> = ({
     setIsRefreshing(true);
     try {
       await onRefresh();
-      message.success(getMessage('refreshSuccess'));
+      message.success(getMessage("refreshSuccess"));
     } catch (error) {
-      message.error(getMessage('refreshFailed'));
+      message.error(getMessage("refreshFailed"));
       console.error("Error refreshing file tree:", error);
     } finally {
       setIsRefreshing(false);
@@ -325,50 +350,48 @@ const FileTree: React.FC<FileTreeProps> = ({
   };
 
   function addCustomTitles(nodes: DataNode[]): DataNode[] {
-    return nodes.map(node => ({
+    return nodes.map((node) => ({
       ...node,
       title: (
-        <FileTreeNode
-          node={node}
-          customIcons
-          showFullPath={!!searchValue}
-        />
+        <FileTreeNode node={node} customIcons showFullPath={!!searchValue} />
       ),
       children: node.children ? addCustomTitles(node.children) : undefined,
     }));
-  };
+  }
 
   // Handle tree selection
   const handleSelect = (selectedKeys: React.Key[], info: any) => {
-    onSelect?.(selectedKeys, {...info,isCompactFolders});
-  }
+    setSelectedKeys(selectedKeys as string[]);
+    onSelect?.(selectedKeys, { ...info, isCompactFolders });
+  };
 
   // Handle tree expansion
   const handleExpand = (selectedKeys: React.Key[], info: any) => {
-
-    const {expanded,node:{key}} = info
-    if(!expanded){
-      selectedKeys = (selectedKeys as string[]).filter(_key=>!_key.startsWith(key))
+    const {
+      expanded,
+      node: { key },
+    } = info;
+    if (!expanded) {
+      selectedKeys = (selectedKeys as string[]).filter(
+        (_key) => !_key.startsWith(key)
+      );
     }
-    setExpandedKeys(selectedKeys as string[])
-    onExpand?.(selectedKeys, {...info,isCompactFolders});
-  }
+    setExpandedKeys(selectedKeys as string[]);
+    onExpand?.(selectedKeys, { ...info, isCompactFolders });
+  };
 
-  useEffect(()=>{
-    setExpandedKeys(expandedKeys||[])
-  },[isCompactFolders,expandedKeys])
+  useEffect(() => {
+    setExpandedKeys([]);
+  }, [isCompactFolders]);
 
   // Processed tree data with custom rendering
   const processedTreeData = React.useMemo(() => {
-
     let processed = [...filteredTreeData];
 
     // Sort nodes
     processed = sortTreeNodes(processed);
-    processed = isCompactFolders ? compactFolders(processed) : processed
-    return isSearchActive
-      ? processed
-      : addCustomTitles(processed);
+    processed = isCompactFolders ? compactFolders(processed) : processed;
+    return isSearchActive ? processed : addCustomTitles(processed);
   }, [filteredTreeData, isSearchActive]);
 
   return (
@@ -376,8 +399,8 @@ const FileTree: React.FC<FileTreeProps> = ({
       <Modal
         title={
           newFileParentPath
-            ? getMessage('createFileIn', { path: newFileParentPath })
-            : getMessage('createFileInRoot')
+            ? getMessage("createFileIn", { path: newFileParentPath })
+            : getMessage("createFileInRoot")
         }
         open={isNewFileModalVisible}
         onOk={handleCreateNewFile}
@@ -391,14 +414,14 @@ const FileTree: React.FC<FileTreeProps> = ({
       >
         <Form layout="vertical">
           <Form.Item
-            label={getMessage('fileName')}
+            label={getMessage("fileName")}
             required
-            help={getMessage('fileNameHelp')}
+            help={getMessage("fileNameHelp")}
           >
             <Input
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
-              placeholder={getMessage('fileNamePlaceholder')}
+              placeholder={getMessage("fileNamePlaceholder")}
               autoFocus
             />
           </Form.Item>
@@ -408,8 +431,8 @@ const FileTree: React.FC<FileTreeProps> = ({
       <Modal
         title={
           newDirParentPath
-            ? getMessage('createDirIn', { path: newDirParentPath })
-            : getMessage('createDirInRoot')
+            ? getMessage("createDirIn", { path: newDirParentPath })
+            : getMessage("createDirInRoot")
         }
         open={isNewDirModalVisible}
         onOk={handleCreateNewDirectory}
@@ -423,14 +446,14 @@ const FileTree: React.FC<FileTreeProps> = ({
       >
         <Form layout="vertical">
           <Form.Item
-            label={getMessage('directoryName')}
+            label={getMessage("directoryName")}
             required
-            help={getMessage('directoryNameHelp')}
+            help={getMessage("directoryNameHelp")}
           >
             <Input
               value={newDirName}
               onChange={(e) => setNewDirName(e.target.value)}
-              placeholder={getMessage('directoryNamePlaceholder')}
+              placeholder={getMessage("directoryNamePlaceholder")}
               autoFocus
             />
           </Form.Item>
@@ -438,42 +461,49 @@ const FileTree: React.FC<FileTreeProps> = ({
       </Modal>
 
       <div className="file-tree-header">
-        <div title={projectName || getMessage('projectFiles')} className="file-tree-header-title truncate flex-1">
-          {projectName || getMessage('projectFiles')}
+        <div
+          title={projectName || getMessage("projectFiles")}
+          className="file-tree-header-title truncate flex-1"
+        >
+          {projectName || getMessage("projectFiles")}
         </div>
         <div className="file-tree-actions ml-2 shrink-0">
-          <Tooltip title={getMessage('toCompactFolders')}>
-            <Switch size="small" checked={isCompactFolders} onChange={setCompactFolders} />
+          <Tooltip title={getMessage("toCompactFolders")}>
+            <Switch
+              size="small"
+              checked={isCompactFolders}
+              onChange={setCompactFolders}
+            />
           </Tooltip>
-          <Tooltip title={getMessage('newFile')}>
+          <Tooltip title={getMessage("newFile")}>
             <button
               onClick={() => {
                 setNewFileParentPath("");
                 setIsNewFileModalVisible(true);
               }}
               className="action-button"
-              aria-label={getMessage('createNewFile')}
+              aria-label={getMessage("createNewFile")}
             >
               <FileAddOutlined />
             </button>
           </Tooltip>
-          <Tooltip title={getMessage('newDirectory')}>
+          <Tooltip title={getMessage("newDirectory")}>
             <button
               onClick={() => {
                 setNewDirParentPath("");
                 setIsNewDirModalVisible(true);
               }}
               className="action-button"
-              aria-label={getMessage('createNewDirectory')}
+              aria-label={getMessage("createNewDirectory")}
             >
               <FolderAddOutlined />
             </button>
           </Tooltip>
-          <Tooltip title={getMessage('refresh')}>
+          <Tooltip title={getMessage("refresh")}>
             <button
               onClick={handleRefresh}
               className="action-button"
-              aria-label={getMessage('refreshFileTree')}
+              aria-label={getMessage("refreshFileTree")}
             >
               {isRefreshing ? (
                 <svg
@@ -507,7 +537,7 @@ const FileTree: React.FC<FileTreeProps> = ({
       <div className="file-tree-search">
         <Input
           prefix={<SearchOutlined className="text-gray-400" />}
-          placeholder={getMessage('searchFiles')}
+          placeholder={getMessage("searchFiles")}
           className="custom-input"
           allowClear
           value={searchValue}
@@ -521,14 +551,14 @@ const FileTree: React.FC<FileTreeProps> = ({
             <div className="empty-state-icon">
               <FolderOutlined />
             </div>
-            <div className="empty-state-text">{getMessage('noFiles')}</div>
+            <div className="empty-state-text">{getMessage("noFiles")}</div>
           </div>
         ) : processedTreeData.length === 0 && isSearchActive ? (
           <div className="empty-state">
             <div className="empty-state-icon">
               <SearchOutlined />
             </div>
-            <div className="empty-state-text">{getMessage('noMatching')}</div>
+            <div className="empty-state-text">{getMessage("noMatching")}</div>
           </div>
         ) : (
           <Dropdown
@@ -536,18 +566,20 @@ const FileTree: React.FC<FileTreeProps> = ({
             trigger={["contextMenu"]}
             overlayClassName="vscode-dark-dropdown"
           >
-            <div className="file-tree">
+            <div ref={treeNodeRef} className="file-tree">
               <Tree
+                ref={treeRef}
                 showIcon={false}
                 autoExpandParent
                 expandedKeys={_expandedKeys}
                 // showLine
                 // defaultExpandAll
                 onSelect={handleSelect}
+                selectedKeys={selectedKeys}
                 onExpand={handleExpand}
                 onRightClick={handleRightClick}
                 treeData={processedTreeData}
-                height={999999}
+                height={9999}
               />
             </div>
           </Dropdown>

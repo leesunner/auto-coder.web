@@ -24,7 +24,7 @@ const FileTreeNode: React.FC<any> = ({
     node.icon && typeof node.icon !== "string" ? node.icon : computedIcon;
 
   return (
-    <div className="vscode-file-node">
+    <div className="vscode-file-node" data-key={node.key}>
       <span className="vscode-file-icon mr-1">{finalIcon}</span>
       <span className="vscode-file-name" title={node.title || node.key}>
         {displayName}

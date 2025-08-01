@@ -427,18 +427,16 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     </Menu>
   );
 
+  // Ctrl+S (Windows/Linux) 或 Cmd+S (Mac) 保存文件
   useEffect(() => {
-    const callback = (e) => {
-      console.log(e.key);
+    const callback = (e: KeyboardEvent) => {
       // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (Mac)
-      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault(); // 阻止浏览器默认的保存行为
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
         handleSave();
       }
     };
     window.addEventListener("keydown", callback);
-    
-    // 清理函数，移除事件监听器
     return () => {
       window.removeEventListener("keydown", callback);
     };
@@ -446,7 +444,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div className="code-editor-container">
-      <div className="code-editor-header">
+      {/* <div className="code-editor-header">
         <div className="code-editor-header-content">
           <div className="file-info">
             <span className="file-path">
@@ -476,7 +474,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             </button>
           )}
         </div>
-      </div>
+      </div> */}
 
       <Split
         className="code-editor-content"
@@ -491,6 +489,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       >
         <div className="file-tree-panel">
           <FileTree
+            activeKey={activeFile || undefined}
             isCompactFolders={isCompactFolders}
             setCompactFolders={undateCompactFolders}
             treeData={treeData}
