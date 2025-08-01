@@ -1,33 +1,65 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { message as AntdMessage, Modal, Input, Select, Button, Layout, Divider, Typography, Space, Dropdown, Menu, Tooltip } from 'antd';
-import { PlusOutlined, SettingOutlined, DeleteOutlined, EditOutlined, MessageOutlined, CodeOutlined, MenuOutlined, DownOutlined, SaveOutlined, ClearOutlined, PictureOutlined } from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
-import ChatListDropdown from './ChatListDropdown';
-import html2canvas from 'html2canvas';
-import './ChatPanel.css';
-import InputArea from './InputArea';
-import { getMessage } from '../../lang';
-import { useChatContext } from '../../contexts/ChatContext';
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-  FileGroup,
-  ConfigState,
-  CodingEvent,
-  ChatPanelProps,
-} from './types';
-import { FileMetadata } from '../../types/file_meta';
-import { ServiceFactory } from '../../services/ServiceFactory';
-import { ChatService } from '../../services/chatService';
-import { CodingService } from '../../services/codingService';
-import { AgenticEditService } from '../../services/agenticEditService';
-import { AutoCoderConfService } from '../../services/AutoCoderConfService';
-import { ChatListService } from '../../services/chatListService';
-import { FileGroupService } from '../../services/fileGroupService';
-import { Message as AutoModeMessage } from '../../components/AutoMode/types';
-import MessageList, { MessageProps } from '../../components/AutoMode/MessageList';
-import eventBus from '../../services/eventBus';
-import { EVENTS } from '../../services/eventBus';
-import { playTaskComplete, playErrorSound } from '../../components/AutoMode/utils/SoundEffects';
-import { NewChatEventData, AgenticModeChangedEventData, HotkeyEventData, FileGroupSelectionUpdatedEventData, SendMessageEventData, StopGenerationEventData } from '../../services/event_bus_data';
+  message as AntdMessage,
+  Modal,
+  Input,
+  Select,
+  Button,
+  Layout,
+  Divider,
+  Typography,
+  Space,
+  Dropdown,
+  Menu,
+  Tooltip,
+} from "antd";
+import {
+  PlusOutlined,
+  SettingOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  MessageOutlined,
+  CodeOutlined,
+  MenuOutlined,
+  DownOutlined,
+  SaveOutlined,
+  ClearOutlined,
+  PictureOutlined,
+} from "@ant-design/icons";
+import { v4 as uuidv4 } from "uuid";
+import ChatListDropdown from "./ChatListDropdown";
+import html2canvas from "html2canvas";
+import "./ChatPanel.css";
+import InputArea from "./InputArea";
+import { getMessage } from "../../lang";
+import { useChatContext } from "../../contexts/ChatContext";
+import { FileGroup, ConfigState, CodingEvent, ChatPanelProps } from "./types";
+import { FileMetadata } from "../../types/file_meta";
+import { ServiceFactory } from "../../services/ServiceFactory";
+import { ChatService } from "../../services/chatService";
+import { CodingService } from "../../services/codingService";
+import { AgenticEditService } from "../../services/agenticEditService";
+import { AutoCoderConfService } from "../../services/AutoCoderConfService";
+import { ChatListService } from "../../services/chatListService";
+import { FileGroupService } from "../../services/fileGroupService";
+import { Message as AutoModeMessage } from "../../components/AutoMode/types";
+import MessageList, {
+  MessageProps,
+} from "../../components/AutoMode/MessageList";
+import eventBus from "../../services/eventBus";
+import { EVENTS } from "../../services/eventBus";
+import {
+  playTaskComplete,
+  playErrorSound,
+} from "../../components/AutoMode/utils/SoundEffects";
+import {
+  NewChatEventData,
+  AgenticModeChangedEventData,
+  HotkeyEventData,
+  FileGroupSelectionUpdatedEventData,
+  SendMessageEventData,
+  StopGenerationEventData,
+} from "../../services/event_bus_data";
 
 const ChatPanel: React.FC<ChatPanelProps> = ({
   setPreviewFiles,
@@ -35,10 +67,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   setActivePanel,
   setClipboardContent,
   clipboardContent,
-  projectName = '',
+  projectName = "",
   setSelectedFiles,
-  panelId = '',
-  isActive = true
+  panelId = "",
+  isActive = true,
 }) => {
   // 使用useRef存储服务实例，确保在组件重渲染时保持同一个实例
   const chatServiceRef = useRef<ChatService | null>(null);
@@ -59,10 +91,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       codingServiceRef.current = ServiceFactory.getCodingService(panelId);
     }
     if (!agenticEditServiceRef.current) {
-      agenticEditServiceRef.current = ServiceFactory.getAgenticEditService(panelId);
+      agenticEditServiceRef.current =
+        ServiceFactory.getAgenticEditService(panelId);
     }
     if (!autoCoderConfServiceRef.current) {
-      autoCoderConfServiceRef.current = ServiceFactory.getAutoCoderConfService(panelId);
+      autoCoderConfServiceRef.current =
+        ServiceFactory.getAutoCoderConfService(panelId);
     }
     if (!chatListServiceRef.current) {
       chatListServiceRef.current = ServiceFactory.getChatListService(panelId);
@@ -89,15 +123,24 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   }, [panelId, ensureServices]);
 
   // 获取当前的服务实例
-  const chatService = chatServiceRef.current || ServiceFactory.getChatService(panelId);
-  const codingService = codingServiceRef.current || ServiceFactory.getCodingService(panelId);
-  const agenticEditService = agenticEditServiceRef.current || ServiceFactory.getAgenticEditService(panelId);
-  const autoCoderConfService = autoCoderConfServiceRef.current || ServiceFactory.getAutoCoderConfService(panelId);
-  const chatListService = chatListServiceRef.current || ServiceFactory.getChatListService(panelId);
-  const fileGroupService = fileGroupServiceRef.current || ServiceFactory.getFileGroupService(panelId);
+  const chatService =
+    chatServiceRef.current || ServiceFactory.getChatService(panelId);
+  const codingService =
+    codingServiceRef.current || ServiceFactory.getCodingService(panelId);
+  const agenticEditService =
+    agenticEditServiceRef.current ||
+    ServiceFactory.getAgenticEditService(panelId);
+  const autoCoderConfService =
+    autoCoderConfServiceRef.current ||
+    ServiceFactory.getAutoCoderConfService(panelId);
+  const chatListService =
+    chatListServiceRef.current || ServiceFactory.getChatListService(panelId);
+  const fileGroupService =
+    fileGroupServiceRef.current || ServiceFactory.getFileGroupService(panelId);
 
   // Step By Step 模式标记
-  const [enableAgenticMode, setEnableAgenticMode] = React.useState<boolean>(true);
+  const [enableAgenticMode, setEnableAgenticMode] =
+    React.useState<boolean>(true);
   // Rule 模式标记
   const [isRuleMode, setIsRuleMode] = useState<boolean>(false);
   // Command 模式标记
@@ -115,10 +158,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     isCommandModeRef.current = isCommandMode;
   }, [isCommandMode]);
 
-
   const showNewChatModal = () => {
     // 设置默认的新对话名称
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     setNewChatName(`chat_${timestamp}`);
 
     // 显示新对话模态框
@@ -127,12 +169,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const handleNewChatCancel = () => {
     setIsNewChatModalVisible(false);
-    setNewChatName('');
+    setNewChatName("");
   };
 
   const handleNewChatCreate = async () => {
     if (!newChatName.trim()) {
-      AntdMessage.error(getMessage('chatNameEmpty'));
+      AntdMessage.error(getMessage("chatNameEmpty"));
       return;
     }
 
@@ -140,16 +182,16 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       setChatListName(newChatName);
       // 清空当前对话内容
       setMessages([]);
-      setChatLists(prev => [newChatName, ...prev]);
+      setChatLists((prev) => [newChatName, ...prev]);
 
       // 保存新的空聊天列表
       await chatListService.saveChatList(newChatName, [], panelId);
 
-      AntdMessage.success(getMessage('newChatCreated'));
+      AntdMessage.success(getMessage("newChatCreated"));
       setIsNewChatModalVisible(false);
     } catch (error) {
-      console.error('Error creating new chat:', error);
-      AntdMessage.error(getMessage('createNewChatFailed'));
+      console.error("Error creating new chat:", error);
+      AntdMessage.error(getMessage("createNewChatFailed"));
     }
   };
 
@@ -168,28 +210,32 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       if (newChatName) {
         // 设置新的对话名称
         setChatListName(newChatName);
-        setChatLists(prev => [newChatName, ...prev.filter(name => name !== newChatName)]);
+        setChatLists((prev) => [
+          newChatName,
+          ...prev.filter((name) => name !== newChatName),
+        ]);
       }
     } catch (error) {
-      console.error('Error creating new chat directly:', error);
-      AntdMessage.error(getMessage('createNewChatFailed'));
+      console.error("Error creating new chat directly:", error);
+      AntdMessage.error(getMessage("createNewChatFailed"));
     }
   };
 
   const [messages, setMessages] = useState<AutoModeMessage[]>([]);
   const [fileGroups, setFileGroups] = useState<FileGroup[]>([]);
   const [showConfig, setShowConfig] = useState(false);
-  const [localRequestId, setLocalRequestId] = useState<string>('');
+  const [localRequestId, setLocalRequestId] = useState<string>("");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [config, setConfig] = useState<ConfigState>({
     human_as_model: false,
     extra_conf: {},
-    available_keys: []
+    available_keys: [],
   });
-  
+
   // 使用 Context 替代本地状态
-  const { chatLists, setChatLists, chatListName, setChatListName } = useChatContext();
-  
+  const { chatLists, setChatLists, chatListName, setChatListName } =
+    useChatContext();
+
   const [showChatListInput, setShowChatListInput] = useState(false);
 
   const [sendLoading, setSendLoading] = useState<boolean>(false);
@@ -206,8 +252,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   const [isMaximized, setIsMaximized] = useState<boolean>(false);
   const [pendingRevert, setPendingRevert] = useState<boolean>(false);
-  const [isNewChatModalVisible, setIsNewChatModalVisible] = useState<boolean>(false);
-  const [newChatName, setNewChatName] = useState<string>('');
+  const [isNewChatModalVisible, setIsNewChatModalVisible] =
+    useState<boolean>(false);
+  const [newChatName, setNewChatName] = useState<string>("");
   const [lastSelectedGroups, setLastSelectedGroups] = useState<string[]>([]);
   const [lastSelectedFiles, setLastSelectedFiles] = useState<string[]>([]);
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
@@ -231,17 +278,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     contextWindowUsage: 0,
     maxContextWindow: 100, // 默认值
     cacheHits: 0,
-    cacheMisses: 0
+    cacheMisses: 0,
   });
 
   // 添加 ref 来跟踪 localRequestId 的最新值
-  const localRequestIdRef = useRef<string>('');
+  const localRequestIdRef = useRef<string>("");
 
   // 滚动到对话区域底部
   const scrollToBottom = () => {
     if (messagesEndRef.current && messagesEndRef.current.parentNode) {
       // messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      (messagesEndRef.current.parentNode as HTMLElement).scrollTop = messagesEndRef.current.offsetTop;
+      (messagesEndRef.current.parentNode as HTMLElement).scrollTop =
+        messagesEndRef.current.offsetTop;
     }
   };
 
@@ -261,30 +309,45 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     let cacheMisses = 0;
 
     // 遍历所有消息，累计token统计
-    messages.forEach(message => {
-      if (message.contentType === 'token_stat' && message.metadata) {
+    messages.forEach((message) => {
+      if (message.contentType === "token_stat" && message.metadata) {
         inputTokens += message.metadata.input_tokens || 0;
         outputTokens += message.metadata.output_tokens || 0;
-        totalCost += (message.metadata.input_cost || 0) + (message.metadata.output_cost || 0);
-        contextWindowUsage = Math.max(contextWindowUsage, message.metadata.context_window || 0);
-        maxContextWindow = message.metadata.max_context_window || maxContextWindow;
+        totalCost +=
+          (message.metadata.input_cost || 0) +
+          (message.metadata.output_cost || 0);
+        contextWindowUsage = Math.max(
+          contextWindowUsage,
+          message.metadata.context_window || 0
+        );
+        maxContextWindow =
+          message.metadata.max_context_window || maxContextWindow;
         cacheHits += message.metadata.cache_hit || 0;
         cacheMisses += message.metadata.cache_miss || 0;
       }
 
-      if (message.metadata?.stream_out_type === "index_build" && message.metadata?.input_tokens) {
+      if (
+        message.metadata?.stream_out_type === "index_build" &&
+        message.metadata?.input_tokens
+      ) {
         inputTokens += message.metadata.input_tokens || 0;
         outputTokens += message.metadata.output_tokens || 0;
-        totalCost += (message.metadata.input_cost || 0) + (message.metadata.output_cost || 0);
-        contextWindowUsage = Math.max(contextWindowUsage, message.metadata.context_window || 0);
-        maxContextWindow = message.metadata.max_context_window || maxContextWindow;
+        totalCost +=
+          (message.metadata.input_cost || 0) +
+          (message.metadata.output_cost || 0);
+        contextWindowUsage = Math.max(
+          contextWindowUsage,
+          message.metadata.context_window || 0
+        );
+        maxContextWindow =
+          message.metadata.max_context_window || maxContextWindow;
         cacheHits += message.metadata.cache_hit || 0;
         cacheMisses += message.metadata.cache_miss || 0;
       }
 
       if (message.metadata?.path === "/agent/edit/window_length_change") {
-        const content = JSON.parse(message.content)
-        contextWindowUsage = content.tokens_used
+        const content = JSON.parse(message.content);
+        contextWindowUsage = content.tokens_used;
       }
     });
 
@@ -295,7 +358,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       contextWindowUsage,
       maxContextWindow,
       cacheHits,
-      cacheMisses
+      cacheMisses,
     });
   }, [messages]);
 
@@ -312,7 +375,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     const container = messagesContainerRef.current;
     if (container) {
       // 检查是否滚动到底部（考虑一个小的阈值，如100像素）
-      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        100;
       setIsAtBottom(isNearBottom);
     }
   }, []);
@@ -321,7 +386,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (container) {
-      container.addEventListener('scroll', handleScroll);
+      container.addEventListener("scroll", handleScroll);
       // 初始化时设置isAtBottom
       handleScroll();
     }
@@ -330,7 +395,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     return () => {
       const container = messagesContainerRef.current;
       if (container) {
-        container.removeEventListener('scroll', handleScroll);
+        container.removeEventListener("scroll", handleScroll);
       }
     };
   }, [handleScroll]);
@@ -347,16 +412,16 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 添加事件监听器
-    autoCoderConfService.on('configUpdated', handleConfigUpdated);
-    autoCoderConfService.on('error', handleError);
+    autoCoderConfService.on("configUpdated", handleConfigUpdated);
+    autoCoderConfService.on("error", handleError);
 
     // 初始加载配置 - 通过服务的事件回调机制自动设置
     // 不需要手动调用 API 了
 
     // 清理函数
     return () => {
-      autoCoderConfService.off('configUpdated', handleConfigUpdated);
-      autoCoderConfService.off('error', handleError);
+      autoCoderConfService.off("configUpdated", handleConfigUpdated);
+      autoCoderConfService.off("error", handleError);
     };
   }, []);
 
@@ -373,14 +438,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       if (lists && lists.length > 0) {
         setChatLists(lists);
       } else {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         const newChatName = `chat_${timestamp}`;
         setChatListName(newChatName);
         setChatLists([newChatName]);
       }
     } catch (error: any) {
-      console.error('Error fetching chat lists:', error);
-      AntdMessage.error(getMessage('getChatListsFailed'));
+      console.error("Error fetching chat lists:", error);
+      AntdMessage.error(getMessage("getChatListsFailed"));
     }
   };
 
@@ -391,18 +456,21 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       const sessionInfo = await chatListService.getCurrentSessionName(panelId);
       if (sessionInfo) {
         // 支持新的返回格式，可能是字符串或包含sessionName属性的对象
-        const sessionName = typeof sessionInfo === 'string' ? sessionInfo : sessionInfo.sessionName;
+        const sessionName =
+          typeof sessionInfo === "string"
+            ? sessionInfo
+            : sessionInfo.sessionName;
         if (sessionName) {
           setChatListName(sessionName);
           // 如果会话名称有效，加载该会话的消息
           if (!chatLists.includes(sessionName)) {
-            setChatLists(prev => [sessionName, ...prev]);
+            setChatLists((prev) => [sessionName, ...prev]);
           }
           await loadChatList(sessionName);
         }
       }
     } catch (error: any) {
-      console.error('Error getting current session name:', error);
+      console.error("Error getting current session name:", error);
       // 如果获取失败，不向用户显示错误，而是使用默认行为
     }
   };
@@ -414,13 +482,19 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   };
 
   // 保存聊天时将累计统计信息存入 metadata
-  const saveChatList = async (name: string, newMessages: AutoModeMessage[] = [], mPanelId: string = panelId) => {
-    console.log('save chat list:', name);
-    console.log('messages:', newMessages);
+  const saveChatList = async (
+    name: string,
+    newMessages: AutoModeMessage[] = [],
+    mPanelId: string = panelId
+  ) => {
+    console.log("save chat list:", name);
+    console.log("messages:", newMessages);
 
     // 组装 metadata
     const metadata = {
-      token_usage: (accumulatedStats.inputTokens ?? 0) + (accumulatedStats.outputTokens ?? 0),
+      token_usage:
+        (accumulatedStats.inputTokens ?? 0) +
+        (accumulatedStats.outputTokens ?? 0),
       cost: accumulatedStats.totalCost ?? 0,
       window_size: accumulatedStats.contextWindowUsage ?? 0,
       inputTokens: accumulatedStats.inputTokens,
@@ -432,7 +506,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       cacheMisses: accumulatedStats.cacheMisses,
     };
 
-    const success: boolean = await chatListService.saveChatList(name, newMessages, mPanelId, metadata);
+    const success: boolean = await chatListService.saveChatList(
+      name,
+      newMessages,
+      mPanelId,
+      metadata
+    );
     if (success) {
       setShowChatListInput(false);
       fetchChatLists();
@@ -450,15 +529,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           inputTokens: result.metadata.inputTokens ?? prev.inputTokens ?? 0,
           outputTokens: result.metadata.outputTokens ?? prev.outputTokens ?? 0,
           totalCost: result.metadata.totalCost ?? prev.totalCost ?? 0,
-          contextWindowUsage: result.metadata.contextWindowUsage ?? prev.contextWindowUsage ?? 0,
-          maxContextWindow: result.metadata.maxContextWindow ?? prev.maxContextWindow ?? 100,
+          contextWindowUsage:
+            result.metadata.contextWindowUsage ?? prev.contextWindowUsage ?? 0,
+          maxContextWindow:
+            result.metadata.maxContextWindow ?? prev.maxContextWindow ?? 100,
           cacheHits: result.metadata.cacheHits ?? prev.cacheHits ?? 0,
           cacheMisses: result.metadata.cacheMisses ?? prev.cacheMisses ?? 0,
         }));
       }
     } catch (error: any) {
-      console.error('Error loading chat list:', error);
-      AntdMessage.error(getMessage('loadChatListFailed'));
+      console.error("Error loading chat list:", error);
+      AntdMessage.error(getMessage("loadChatListFailed"));
     }
   };
 
@@ -471,24 +552,28 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     try {
       const success = await chatListService.deleteChatList(name);
       if (success) {
-        AntdMessage.success(getMessage('chatListDeletedSuccessfully'));
+        AntdMessage.success(getMessage("chatListDeletedSuccessfully"));
         fetchChatLists();
       } else {
-        AntdMessage.error(getMessage('deleteChatListFailed'));
+        AntdMessage.error(getMessage("deleteChatListFailed"));
       }
     } catch (error) {
-      console.error('Error deleting chat list:', error);
-      AntdMessage.error(getMessage('deleteChatListFailed'));
+      console.error("Error deleting chat list:", error);
+      AntdMessage.error(getMessage("deleteChatListFailed"));
     }
   };
 
   // 添加重命名聊天列表的函数
   const renameChatList = async (oldName: string, newName: string) => {
     try {
-      const success = await chatListService.renameChatList(oldName, newName, panelId);
+      const success = await chatListService.renameChatList(
+        oldName,
+        newName,
+        panelId
+      );
       if (success) {
         // 更新本地聊天列表
-        setChatLists(prev => {
+        setChatLists((prev) => {
           const newList = [...prev];
           const index = newList.indexOf(oldName);
           if (index !== -1) {
@@ -502,12 +587,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           setChatListName(newName);
         }
 
-        AntdMessage.success(getMessage('chatRenamedTo', { name: newName }));
+        AntdMessage.success(getMessage("chatRenamedTo", { name: newName }));
         return true;
       }
       return false;
     } catch (error) {
-      console.error('Error renaming chat list:', error);
+      console.error("Error renaming chat list:", error);
       return false;
     }
   };
@@ -515,7 +600,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const updateConfig = async (key: string, value: boolean | string) => {
     const success = await autoCoderConfService.updateConfig(key, value);
     if (success) {
-      AntdMessage.success(getMessage('configurationUpdatedSuccessfully'));
+      AntdMessage.success(getMessage("configurationUpdatedSuccessfully"));
     }
   };
 
@@ -527,81 +612,98 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const [lastFetchTime, setLastFetchTime] = useState<number>(0);
 
   // 处理任务完成后的逻辑
-  const handleTaskCompletion = useCallback(async (hasError: boolean) => {
-    if (hasError) {
-      AntdMessage.error(getMessage('taskCompletedWithErrors'));
-      if (soundEnabledRef.current) {
-        console.log("play error sound")
-        playErrorSound();
-      }
-    } else {
-      AntdMessage.success(getMessage('taskCompletedSuccessfully'));
+  const handleTaskCompletion = useCallback(
+    async (hasError: boolean) => {
+      if (hasError) {
+        AntdMessage.error(getMessage("taskCompletedWithErrors"));
+        if (soundEnabledRef.current) {
+          console.log("play error sound");
+          playErrorSound();
+        }
+      } else {
+        AntdMessage.success(getMessage("taskCompletedSuccessfully"));
 
-      // 使用 ref 中的最新值
-      const currentRequestId = localRequestIdRef.current;
+        // 使用 ref 中的最新值
+        const currentRequestId = localRequestIdRef.current;
 
-      // 在任务完成时设置标记，表示应该保存消息
-      // 而不是直接保存，让 useEffect 在消息状态更新后处理保存
-      setShouldSaveMessages(true);
-      // 等待一个渲染周期
-      await new Promise(resolve => setTimeout(resolve, 0));
+        // 在任务完成时设置标记，表示应该保存消息
+        // 而不是直接保存，让 useEffect 在消息状态更新后处理保存
+        setShouldSaveMessages(true);
+        // 等待一个渲染周期
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // 如果是编码模式且有eventFileId，获取变更文件并打开
-      if (isWriteModeRef.current && currentRequestId) {
-        try {
-          const response = await fetch(`/api/current-changes?event_file_id=${currentRequestId}`);
-          if (!response.ok) {
-            throw new Error('Failed to fetch current changes');
-          }
-          const data = await response.json();
-          console.log('ChatPanel: Received current changes:', data);
-          if (data.commits && data.commits.length > 0) {
-            const commit_id = data.commits[0]["hash"]
-            const response = await fetch(`/api/commits/${commit_id}`);
+        // 如果是编码模式且有eventFileId，获取变更文件并打开
+        if (isWriteModeRef.current && currentRequestId) {
+          try {
+            const response = await fetch(
+              `/api/current-changes?event_file_id=${currentRequestId}`
+            );
             if (!response.ok) {
-              throw new Error('Failed to fetch commit details');
+              throw new Error("Failed to fetch current changes");
             }
-            const commit_data = await response.json();
-            const changed_files = commit_data["files"]
-            console.log('ChatPanel: Changed files:', changed_files);
-            // Convert changed_files to FileMetadata format
-            const fileMetadataList: FileMetadata[] = changed_files.map((file: { filename: string }) => ({
-              path: file.filename,
-              isSelected: true,
-              modifiedBy: 'expert_chat_box'
-            }));
-            setSelectedFiles(fileMetadataList);
-            setActivePanel('code');
+            const data = await response.json();
+            console.log("ChatPanel: Received current changes:", data);
+            if (data.commits && data.commits.length > 0) {
+              const commit_id = data.commits[0]["hash"];
+              const response = await fetch(`/api/commits/${commit_id}`);
+              if (!response.ok) {
+                throw new Error("Failed to fetch commit details");
+              }
+              const commit_data = await response.json();
+              const changed_files = commit_data["files"];
+              console.log("ChatPanel: Changed files:", changed_files);
+              // Convert changed_files to FileMetadata format
+              const fileMetadataList: FileMetadata[] = changed_files.map(
+                (file: { filename: string }) => ({
+                  path: file.filename,
+                  isSelected: true,
+                  modifiedBy: "expert_chat_box",
+                })
+              );
+              setSelectedFiles(fileMetadataList);
+              setActivePanel("code");
+            }
+          } catch (error) {
+            console.error("Error fetching current changes:", error);
+            AntdMessage.error(getMessage("fetchChangedFilesFailed"));
           }
-        } catch (error) {
-          console.error('Error fetching current changes:', error);
-          AntdMessage.error(getMessage('fetchChangedFilesFailed'));
         }
       }
-    }
-    endChatRunning();
-    setSendLoading(false);
-    setRequestId("");
-    setLocalRequestId("");
-    if (soundEnabledRef.current) {
-      console.log("play task completed")
-      playTaskComplete()
-    }
-  }, [isWriteMode, setSelectedFiles, setActivePanel, setSendLoading, setRequestId, setLocalRequestId, setShouldSaveMessages, soundEnabled]);
+      endChatRunning();
+      setSendLoading(false);
+      setRequestId("");
+      setLocalRequestId("");
+      if (soundEnabledRef.current) {
+        console.log("play task completed");
+        playTaskComplete();
+      }
+    },
+    [
+      isWriteMode,
+      setSelectedFiles,
+      setActivePanel,
+      setSendLoading,
+      setRequestId,
+      setLocalRequestId,
+      setShouldSaveMessages,
+      soundEnabled,
+    ]
+  );
 
   const fetchFileGroups = useCallback(async () => {
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTime;
 
-    if (timeSinceLastFetch >= 30000) { // 30秒
+    if (timeSinceLastFetch >= 30000) {
+      // 30秒
       try {
-        const response = await fetch('/api/file-groups');
-        if (!response.ok) throw new Error('Failed to fetch file groups');
+        const response = await fetch("/api/file-groups");
+        if (!response.ok) throw new Error("Failed to fetch file groups");
         const data = await response.json();
         setFileGroups(data.groups);
         setLastFetchTime(now);
       } catch (error) {
-        console.error('Failed to load file groups');
+        console.error("Failed to load file groups");
       }
     }
   }, [lastFetchTime]);
@@ -624,16 +726,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   useEffect(() => {
     // 仅当需要保存且有消息且有聊天名称时保存
     if (shouldSaveMessages && chatListName && messages.length > 0) {
-      chatListService.saveChatList(chatListName, messages, panelId)
+      chatListService
+        .saveChatList(chatListName, messages, panelId)
         .then((success: boolean) => {
           if (success) {
-            console.log('Chat list saved with latest messages:', chatListName);
+            console.log("Chat list saved with latest messages:", chatListName);
           }
           // 重置保存标记
           setShouldSaveMessages(false);
         })
         .catch((error: any) => {
-          console.error('Error saving chat list:', error);
+          console.error("Error saving chat list:", error);
           // 重置保存标记
           setShouldSaveMessages(false);
         });
@@ -642,9 +745,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 修改消息更新逻辑，使用函数式更新减少不必要的组件重渲染
   const updateMessage = useCallback((newMessage: AutoModeMessage) => {
-    setMessages(prevMessages => {
+    setMessages((prevMessages) => {
       // 查找是否有相同id的消息
-      const messageIndex = prevMessages.findIndex(msg => msg.id === newMessage.id);
+      const messageIndex = prevMessages.findIndex(
+        (msg) => msg.id === newMessage.id
+      );
       if (messageIndex !== -1) {
         // 更新现有消息
         const updatedMessages = [...prevMessages];
@@ -658,127 +763,154 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   }, []);
 
   // 方便手动添加用户消息
-  const addUserMessage = useCallback((content: string) => {
-    const timestamp = Date.now();
-    const uuid = uuidv4();
-    const nextId = messageIdCounter + 1;
-    setMessageIdCounter(nextId);
+  const addUserMessage = useCallback(
+    (content: string) => {
+      const timestamp = Date.now();
+      const uuid = uuidv4();
+      const nextId = messageIdCounter + 1;
+      setMessageIdCounter(nextId);
 
-    const newMessage: AutoModeMessage = {
-      id: `user-${uuid}-${timestamp}-${nextId}`,
-      type: 'USER_RESPONSE',
-      content,
-      contentType: 'markdown',
-      isUser: true,
-      isStreaming: true,
-      isThinking: false
-    };
+      const newMessage: AutoModeMessage = {
+        id: `user-${uuid}-${timestamp}-${nextId}`,
+        type: "USER_RESPONSE",
+        content,
+        contentType: "markdown",
+        isUser: true,
+        isStreaming: true,
+        isThinking: false,
+      };
 
-    // 使用函数式更新
-    setMessages(prev => {
-      return [...prev, newMessage]
-    });
+      // 使用函数式更新
+      setMessages((prev) => {
+        return [...prev, newMessage];
+      });
 
-    // 标记需要保存消息
-    if (chatListName) {
-      setShouldSaveMessages(true);
-    }
+      // 标记需要保存消息
+      if (chatListName) {
+        setShouldSaveMessages(true);
+      }
 
-    return newMessage.id;
-  }, [messageIdCounter, chatListName]);
+      return newMessage.id;
+    },
+    [messageIdCounter, chatListName]
+  );
 
   // 方便手动添加机器人消息
-  const addBotMessage = useCallback((content: string) => {
-    const timestamp = Date.now();
-    const uuid = uuidv4();
-    const nextId = messageIdCounter + 1;
-    setMessageIdCounter(nextId);
+  const addBotMessage = useCallback(
+    (content: string) => {
+      const timestamp = Date.now();
+      const uuid = uuidv4();
+      const nextId = messageIdCounter + 1;
+      setMessageIdCounter(nextId);
 
-    const newMessage: AutoModeMessage = {
-      id: `bot-${uuid}-${timestamp}-${nextId}`,
-      type: 'RESULT',
-      content,
-      contentType: 'markdown',
-      isUser: false,
-      isStreaming: false,
-      isThinking: false
-    };
+      const newMessage: AutoModeMessage = {
+        id: `bot-${uuid}-${timestamp}-${nextId}`,
+        type: "RESULT",
+        content,
+        contentType: "markdown",
+        isUser: false,
+        isStreaming: false,
+        isThinking: false,
+      };
 
-    // 使用函数式更新
-    setMessages(prev => [...prev, newMessage]);
+      // 使用函数式更新
+      setMessages((prev) => [...prev, newMessage]);
 
-    // 标记需要保存消息
-    if (chatListName) {
-      setShouldSaveMessages(true);
-    }
+      // 标记需要保存消息
+      if (chatListName) {
+        setShouldSaveMessages(true);
+      }
 
-    return newMessage.id;
-  }, [messageIdCounter, chatListName]);
+      return newMessage.id;
+    },
+    [messageIdCounter, chatListName]
+  );
 
-  const updateMessageStatus = useCallback((messageId: string, status: 'sending' | 'sent' | 'error') => {
-    setMessages(prev =>
-      prev.map(msg =>
-        msg.id === messageId
-          ? { ...msg, isStreaming: status === 'sending', isThinking: status === 'sending' }
-          : msg
-      )
-    );
-  }, []);
+  const updateMessageStatus = useCallback(
+    (messageId: string, status: "sending" | "sent" | "error") => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                isStreaming: status === "sending",
+                isThinking: status === "sending",
+              }
+            : msg
+        )
+      );
+    },
+    []
+  );
 
   // 处理从特定消息重新开始对话
-  const handleRefreshFromMessage = useCallback((data: { messageId: string, messageContent: string, panelId?: string }) => {
-    // 检查事件是否与当前面板相关
-    if (data.panelId && data.panelId !== panelId) {
-      return; // 如果事件不属于当前面板，直接返回
-    }
+  const handleRefreshFromMessage = useCallback(
+    (data: { messageId: string; messageContent: string; panelId?: string }) => {
+      // 检查事件是否与当前面板相关
+      if (data.panelId && data.panelId !== panelId) {
+        return; // 如果事件不属于当前面板，直接返回
+      }
 
-    // 清理该消息后面的所有消息
-    setMessages(prevMessages => {
-      // 找到消息在数组中的实际位置
-      const messagePosition = prevMessages.findIndex(msg => msg.id === data.messageId);
-      if (messagePosition === -1) return prevMessages; // 如果找不到消息，不做任何改变
+      // 清理该消息后面的所有消息
+      setMessages((prevMessages) => {
+        // 找到消息在数组中的实际位置
+        const messagePosition = prevMessages.findIndex(
+          (msg) => msg.id === data.messageId
+        );
+        if (messagePosition === -1) return prevMessages; // 如果找不到消息，不做任何改变
 
-      // 只保留到该消息的所有消息（包括该消息）
-      return prevMessages.slice(0, messagePosition);
-    });
+        // 只保留到该消息的所有消息（包括该消息）
+        return prevMessages.slice(0, messagePosition);
+      });
 
-    // 设置编辑器内容为该消息的内容，准备重新发送
-    if (editorRef.current) {
-      editorRef.current.setValue(data.messageContent);
+      // 设置编辑器内容为该消息的内容，准备重新发送
+      if (editorRef.current) {
+        editorRef.current.setValue(data.messageContent);
 
-      // 等待DOM更新后，聚焦编辑器并自动提交消息
+        // 等待DOM更新后，聚焦编辑器并自动提交消息
+        setTimeout(() => {
+          if (editorRef.current) {
+            editorRef.current.focus();
+            // 可选：自动提交消息
+            // handleSendMessage();
+          }
+        }, 100);
+      }
+
+      // 滚动到底部
       setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.focus();
-          // 可选：自动提交消息
-          // handleSendMessage();
-        }
-      }, 100);
-    }
-
-    // 滚动到底部
-    setTimeout(() => {
-      scrollToBottom();
-    }, 200);
-
-  }, [panelId]);
+        scrollToBottom();
+      }, 200);
+    },
+    [panelId]
+  );
 
   // 更新消息监听器的设置
-  const setupMessageListener = useCallback((service: typeof chatService | typeof codingService | typeof agenticEditService) => {
-    service.on('message', (autoModeMessage: AutoModeMessage) => {
-      console.log('ChatPanel: Received message from service:',
-        service === chatService ? 'chatService' : 'codingService',
-        autoModeMessage.type,
-        autoModeMessage.id);
+  const setupMessageListener = useCallback(
+    (
+      service:
+        | typeof chatService
+        | typeof codingService
+        | typeof agenticEditService
+    ) => {
+      service.on("message", (autoModeMessage: AutoModeMessage) => {
+        console.log(
+          "ChatPanel: Received message from service:",
+          service === chatService ? "chatService" : "codingService",
+          autoModeMessage.type,
+          autoModeMessage.id
+        );
 
-      eventBus.publish(EVENTS.CHAT.NEW_MESSAGE, autoModeMessage);
+        eventBus.publish(EVENTS.CHAT.NEW_MESSAGE, autoModeMessage);
 
-      // 使用优化的消息更新函数
-      updateMessage(autoModeMessage);
-    });
+        // 使用优化的消息更新函数
+        updateMessage(autoModeMessage);
+      });
 
-    service.on('taskComplete', handleTaskCompletion);
-  }, [handleTaskCompletion, updateMessage]);
+      service.on("taskComplete", handleTaskCompletion);
+    },
+    [handleTaskCompletion, updateMessage]
+  );
 
   // 在组件挂载时设置事件监听器
   useEffect(() => {
@@ -797,24 +929,37 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       EVENTS.CHAT.NEW_MESSAGE,
       (message: any) => {
         // 如果消息包含 panelId 且与当前面板不匹配，直接返回
-        if (message && typeof message === 'object' && message.panelId && message.panelId !== panelId) {
+        if (
+          message &&
+          typeof message === "object" &&
+          message.panelId &&
+          message.panelId !== panelId
+        ) {
           return;
         }
 
         // 检查message是否为对象且具有action和commit_id属性
-        if (message && typeof message === 'object' && message.action && message.commit_id) {
-          console.log('ChatPanel: Received object message from eventBus:', message);
+        if (
+          message &&
+          typeof message === "object" &&
+          message.action &&
+          message.commit_id
+        ) {
+          console.log(
+            "ChatPanel: Received object message from eventBus:",
+            message
+          );
 
           const { action, commit_id, mode } = message;
 
           // 如果mode为chat，设置isWriteMode为false
-          if (mode === 'chat') {
+          if (mode === "chat") {
             setIsWriteMode(false);
           }
 
           // 根据action构建不同的命令格式
-          let command = '';
-          if (action === 'review') {
+          let command = "";
+          if (action === "review") {
             command = `/review commit=${commit_id}`;
           }
 
@@ -824,9 +969,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             // 自动发送消息
             handleSendMessage();
           }
-        } else if (typeof message === 'string') {
+        } else if (typeof message === "string") {
           // 向后兼容，仍然处理字符串类型的消息
-          console.log('ChatPanel: Received string message from eventBus:', message);
+          console.log(
+            "ChatPanel: Received string message from eventBus:",
+            message
+          );
           if (editorRef.current) {
             editorRef.current.setValue(message);
             handleSendMessage();
@@ -844,7 +992,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           return;
         }
 
-        console.log('ChatPanel: RAG enabled changed to', enabled);
+        console.log("ChatPanel: RAG enabled changed to", enabled);
         setEnableRag(enabled);
       }
     );
@@ -858,7 +1006,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           return;
         }
 
-        console.log('ChatPanel: MCPs enabled changed to', enabled);
+        console.log("ChatPanel: MCPs enabled changed to", enabled);
         setEnableMCPs(enabled);
       }
     );
@@ -878,14 +1026,19 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           return;
         }
 
-        console.log('ChatPanel: Step By Step mode changed to', data.enabled);
+        console.log("ChatPanel: Step By Step mode changed to", data.enabled);
         setEnableAgenticMode(data.enabled);
       }
     );
 
     // 监听发送消息事件
     const handleSendMessageEvent = (data: SendMessageEventData) => {
-      console.log('接受新消息:', data, panelId, data.panelId && data.panelId !== panelId)
+      console.log(
+        "接受新消息:",
+        data,
+        panelId,
+        data.panelId && data.panelId !== panelId
+      );
       // 如果传入了panelId且与当前面板的panelId不匹配，则不处理此事件
       if (data.panelId && data.panelId !== panelId) {
         return;
@@ -903,8 +1056,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
     // 监听停止生成事件
     const handleStopGenerationEvent = (data: StopGenerationEventData) => {
-      console.log('监听停止生成事件')
-      endChatRunning()
+      console.log("监听停止生成事件");
+      endChatRunning();
       // 如果传入了panelId且与当前面板的panelId不匹配，则不处理此事件
       if (data.panelId && data.panelId !== panelId) {
         return;
@@ -932,8 +1085,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       unsubscribeMCPsEnabled();
       unsubscribeAgentic();
       unsubscribeSendMessage();
-      unsubscribeStopGeneration()
-
+      unsubscribeStopGeneration();
     };
   }, [setupMessageListener, handleRefreshFromMessage, panelId]);
 
@@ -943,60 +1095,75 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // }, [messages]);
 
   function endChatRunning() {
-    isChatRunningRef.current = false
+    isChatRunningRef.current = false;
   }
 
-
   const handleSendMessage = async (text?: string) => {
-    console.log('==== 发送消息时的状态 ====');
-    console.log('chatListName:', chatListNameRef.current);
-    console.log('messages 长度:', messagesRef.current.length);
+    console.log("==== 发送消息时的状态 ====");
+    console.log("chatListName:", chatListNameRef.current);
+    console.log("messages 长度:", messagesRef.current.length);
 
-    console.log('isWriteMode:', isWriteModeRef.current);
-    console.log('isRuleMode:', isRuleModeRef.current);
-    console.log('isCommandMode:', isCommandModeRef.current);
+    console.log("isWriteMode:", isWriteModeRef.current);
+    console.log("isRuleMode:", isRuleModeRef.current);
+    console.log("isCommandMode:", isCommandModeRef.current);
 
-    console.log('enableAgenticMode:', enableAgenticModeRef.current);
-    console.log('enableRag:', enableRagRef.current);
-    console.log('enableMCPs:', enableMCPsRef.current);
-    console.log('lastSelectedGroups:', lastSelectedGroupsRef.current);
-    console.log('lastSelectedFiles:', lastSelectedFilesRef.current);
-    console.log('messageIdCounter:', messageIdCounterRef.current);
-    console.log('panelId:', panelIdRef.current);
-    console.log('sendLoading:', sendLoadingRef.current);
-    console.log('localRequestId:', localRequestIdRef.current);
+    console.log("enableAgenticMode:", enableAgenticModeRef.current);
+    console.log("enableRag:", enableRagRef.current);
+    console.log("enableMCPs:", enableMCPsRef.current);
+    console.log("lastSelectedGroups:", lastSelectedGroupsRef.current);
+    console.log("lastSelectedFiles:", lastSelectedFilesRef.current);
+    console.log("messageIdCounter:", messageIdCounterRef.current);
+    console.log("panelId:", panelIdRef.current);
+    console.log("sendLoading:", sendLoadingRef.current);
+    console.log("localRequestId:", localRequestIdRef.current);
 
-    console.log('=======================');
+    console.log("=======================");
 
     const trimmedText = text?.trim() || editorRef.current?.getValue()?.trim();
     if (!trimmedText) {
-      AntdMessage.warning(getMessage('pleaseEnterMessage'));
+      AntdMessage.warning(getMessage("pleaseEnterMessage"));
       return;
     }
 
     // 控制开关
-    if (isChatRunningRef.current) return
-    isChatRunningRef.current = true
+    if (isChatRunningRef.current) return;
+    isChatRunningRef.current = true;
 
     // 优先设置loading，防止频繁点击点击
     setSendLoading(true);
 
-
     // 如果有当前对话名称且有消息，先保存当前对话
     if (chatListNameRef.current && messagesRef.current.length > 0) {
-      await saveChatList(chatListNameRef.current, messagesRef.current, panelIdRef.current);
-      console.log('Chat list saved before sending new message:', chatListNameRef.current);
+      await saveChatList(
+        chatListNameRef.current,
+        messagesRef.current,
+        panelIdRef.current
+      );
+      console.log(
+        "Chat list saved before sending new message:",
+        chatListNameRef.current
+      );
     }
 
     // 在发送消息前，再次调用文件组服务确保上下文是最新的
-    if (lastSelectedGroupsRef.current.length > 0 || lastSelectedFilesRef.current.length > 0) {
+    if (
+      lastSelectedGroupsRef.current.length > 0 ||
+      lastSelectedFilesRef.current.length > 0
+    ) {
       try {
-        console.log('ChatPanel: Re-syncing file groups before sending message', lastSelectedGroupsRef.current, lastSelectedFilesRef.current);
+        console.log(
+          "ChatPanel: Re-syncing file groups before sending message",
+          lastSelectedGroupsRef.current,
+          lastSelectedFilesRef.current
+        );
         // 再切换文件组
-        const result = await fileGroupService.switchFileGroups(lastSelectedGroupsRef.current, lastSelectedFilesRef.current);
-        console.log('ChatPanel: File groups re-synced successfully', result);
+        const result = await fileGroupService.switchFileGroups(
+          lastSelectedGroupsRef.current,
+          lastSelectedFilesRef.current
+        );
+        console.log("ChatPanel: File groups re-synced successfully", result);
       } catch (error) {
-        console.error('ChatPanel: Error re-syncing file groups', error);
+        console.error("ChatPanel: Error re-syncing file groups", error);
         // 继续发送消息，不阻止用户操作
       }
     } else {
@@ -1004,110 +1171,135 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       try {
         await fileGroupService.clearCurrentFiles();
       } catch (error) {
-        console.error('ChatPanel: Error clearing current files', error);
+        console.error("ChatPanel: Error clearing current files", error);
       }
     }
 
     // 添加用户消息
-    console.log('addUserMessage: ', trimmedText)
+    console.log("addUserMessage: ", trimmedText);
     const messageId = addUserMessage(trimmedText);
     editorRef.current?.setValue("");
 
-    updateMessageStatus(messageId, 'sent');
+    updateMessageStatus(messageId, "sent");
 
     try {
       // 处理Rule模式
       let processedText = trimmedText;
       if (isRuleModeRef.current) {
-        console.log('ChatPanel: Rule mode enabled, accessing context prompt');
+        console.log("ChatPanel: Rule mode enabled, accessing context prompt");
         try {
-          const response = await fetch('/api/rules/context/prompt', {
-            method: 'POST',
+          const response = await fetch("/api/rules/context/prompt", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              query: trimmedText
+              query: trimmedText,
             }),
           });
 
           if (!response.ok) {
-            throw new Error(`Failed to get rule context prompt: ${response.statusText}`);
+            throw new Error(
+              `Failed to get rule context prompt: ${response.statusText}`
+            );
           }
 
           const data = await response.json();
           if (data.prompt) {
             processedText = data.prompt;
-            console.log('ChatPanel: Received prompt from rules API');
+            console.log("ChatPanel: Received prompt from rules API");
 
             // 添加一条系统消息，说明使用了Rule模式
-            addBotMessage(getMessage('ruleModePromptGenerated'));
+            addBotMessage(getMessage("ruleModePromptGenerated"));
           }
         } catch (error: unknown) {
-          console.error('Error fetching rule context prompt:', error);
+          console.error("Error fetching rule context prompt:", error);
           // 添加一条bot消息，显示错误信息
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          addBotMessage(getMessage('ruleModePromptError', { error: errorMessage }));
-          endChatRunning()
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          addBotMessage(
+            getMessage("ruleModePromptError", { error: errorMessage })
+          );
+          endChatRunning();
           return;
         }
       }
 
       // 根据当前模式使用适当的服务
-      if (isWriteModeRef.current || isRuleModeRef.current || isCommandModeRef.current) {
+      if (
+        isWriteModeRef.current ||
+        isRuleModeRef.current ||
+        isCommandModeRef.current
+      ) {
         // 编码模式
         if (enableAgenticModeRef.current) {
-          const result = await agenticEditService.executeCommand(processedText, true);
-          console.log('ChatPanel: Received result from agenticEditService:', result);
+          const result = await agenticEditService.executeCommand(
+            processedText,
+            true
+          );
+          console.log(
+            "ChatPanel: Received result from agenticEditService:",
+            result
+          );
           setRequestId(result.event_file_id);
           setLocalRequestId(result.event_file_id);
         } else {
-          console.log('ChatPanel: Sending message to codingService');
+          console.log("ChatPanel: Sending message to codingService");
           const result = await codingService.executeCommand(`${processedText}`);
-          console.log('ChatPanel: Received result from codingService:', result);
+          console.log("ChatPanel: Received result from codingService:", result);
           setRequestId(result.event_file_id);
           setLocalRequestId(result.event_file_id);
         }
-
       } else {
         // 聊天模式
-        console.log('ChatPanel: Sending message to chatService');
+        console.log("ChatPanel: Sending message to chatService");
 
         let commandText = processedText;
 
         // 检查是否同时启用了 RAG 和 MCP
-        if (enableRagRef.current && enableMCPsRef.current && !isWriteModeRef.current) {
+        if (
+          enableRagRef.current &&
+          enableMCPsRef.current &&
+          !isWriteModeRef.current
+        ) {
           Modal.warning({
-            title: getMessage('ragMcpConflictTitle'),
-            content: getMessage('ragMcpConflictContent'),
+            title: getMessage("ragMcpConflictTitle"),
+            content: getMessage("ragMcpConflictContent"),
             centered: true,
           });
           setSendLoading(false); // 重置加载状态
-          endChatRunning()
+          endChatRunning();
           return; // 阻止发送消息
         }
 
         // 检查是否启用了RAG（且未启用MCP）
-        if (enableRagRef.current && !enableMCPsRef.current && !isWriteModeRef.current) {
-          console.log('ChatPanel: RAG enabled, prepending /rag to message');
+        if (
+          enableRagRef.current &&
+          !enableMCPsRef.current &&
+          !isWriteModeRef.current
+        ) {
+          console.log("ChatPanel: RAG enabled, prepending /rag to message");
           commandText = `/rag ${processedText}`;
         }
         // 检查是否启用了MCP（且未启用RAG）
-        else if (enableMCPsRef.current && !enableRagRef.current && !isWriteModeRef.current) {
-          console.log('ChatPanel: MCPs enabled, prepending /mcp to message');
+        else if (
+          enableMCPsRef.current &&
+          !enableRagRef.current &&
+          !isWriteModeRef.current
+        ) {
+          console.log("ChatPanel: MCPs enabled, prepending /mcp to message");
           commandText = `/mcp ${processedText}`;
         }
         const result = await chatService.executeCommand(commandText);
-        console.log('ChatPanel: Received result from chatService:', result);
+        console.log("ChatPanel: Received result from chatService:", result);
         setRequestId(result.event_file_id);
         setLocalRequestId(result.event_file_id);
       }
     } catch (error) {
-
-      console.error('Error sending message:', error);
-      AntdMessage.error(getMessage('failedToSendMessage'));
-      updateMessageStatus(messageId, 'error');
-      addBotMessage(getMessage('processingError'));
+      console.error("Error sending message:", error);
+      AntdMessage.error(getMessage("failedToSendMessage"));
+      updateMessageStatus(messageId, "error");
+      addBotMessage(getMessage("processingError"));
       endChatRunning();
       setSendLoading(false);
     }
@@ -1119,22 +1311,22 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       // 根据当前模式和子模式使用适当的服务来取消任务
       if (isWriteModeRef.current || isRuleModeRef.current) {
         if (enableAgenticModeRef.current) {
-          console.log('ChatPanel: Stopping agentic edit task');
+          console.log("ChatPanel: Stopping agentic edit task");
           await agenticEditService.cancelTask();
         } else {
-          console.log('ChatPanel: Stopping coding task');
+          console.log("ChatPanel: Stopping coding task");
           await codingService.cancelTask();
         }
       } else {
-        console.log('ChatPanel: Stopping chat task');
+        console.log("ChatPanel: Stopping chat task");
         await chatService.cancelTask();
       }
 
-      AntdMessage.info(getMessage('generationStopped'));
+      AntdMessage.info(getMessage("generationStopped"));
       setSendLoading(false);
     } catch (error) {
-      console.error('Error stopping generation:', error);
-      AntdMessage.error(getMessage('failedToStopGeneration'));
+      console.error("Error stopping generation:", error);
+      AntdMessage.error(getMessage("failedToStopGeneration"));
     }
   };
 
@@ -1142,7 +1334,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const handleExportMessagesAsImage = async () => {
     const container = messagesContainerRef.current;
     if (!container) {
-      AntdMessage.error(getMessage('messageAreaNotFound'));
+      AntdMessage.error(getMessage("messageAreaNotFound"));
       return;
     }
     // 记录原始样式
@@ -1152,27 +1344,29 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
     try {
       // 展开消息区域，确保完整内容渲染
-      container.style.height = container.scrollHeight + 'px';
-      container.style.maxHeight = 'none';
-      container.style.overflow = 'visible';
+      container.style.height = container.scrollHeight + "px";
+      container.style.maxHeight = "none";
+      container.style.overflow = "visible";
 
       // 等待浏览器渲染
-      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
 
       const canvas = await html2canvas(container, {
-        backgroundColor: '#1a1a1a',
+        backgroundColor: "#1a1a1a",
         scale: 2,
-        useCORS: true
+        useCORS: true,
       });
 
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
       link.href = dataUrl;
-      link.download = `chat_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+      link.download = `chat_${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}.png`;
       link.click();
     } catch (error) {
-      console.error('导出图片失败:', error);
-      AntdMessage.error(getMessage('exportImageFailed'));
+      console.error("导出图片失败:", error);
+      AntdMessage.error(getMessage("exportImageFailed"));
     } finally {
       // 恢复原样式
       container.style.height = originalHeight;
@@ -1184,14 +1378,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 删除聊天列表的处理函数
   const handleDeleteChat = async (name: string) => {
     Modal.confirm({
-      title: getMessage('confirmDeleteTitle'),
-      content: getMessage('confirmDeleteContent', { name }),
-      okText: getMessage('deleteButton'),
-      okType: 'danger',
-      cancelText: getMessage('cancelButton'),
+      title: getMessage("confirmDeleteTitle"),
+      content: getMessage("confirmDeleteContent", { name }),
+      okText: getMessage("deleteButton"),
+      okType: "danger",
+      cancelText: getMessage("cancelButton"),
       onOk: async () => {
         await deleteChatList(name);
-        AntdMessage.success(getMessage('chatDeleted'));
+        AntdMessage.success(getMessage("chatDeleted"));
       },
     });
   };
@@ -1204,14 +1398,22 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 监听聊天列表重命名事件
-    const handleChatListRenamed = ({ oldName, newName, eventPanelId }: { oldName: string, newName: string, eventPanelId?: string }) => {
+    const handleChatListRenamed = ({
+      oldName,
+      newName,
+      eventPanelId,
+    }: {
+      oldName: string;
+      newName: string;
+      eventPanelId?: string;
+    }) => {
       // 只处理本面板的事件或全局事件
       if (eventPanelId && eventPanelId !== panelId) {
         return;
       }
 
       // 更新本地聊天列表
-      setChatLists(prev => {
+      setChatLists((prev) => {
         const newList = [...prev];
         const index = newList.indexOf(oldName);
         if (index !== -1) {
@@ -1227,14 +1429,20 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 监听聊天列表删除事件
-    const handleChatListDeleted = ({ name, eventPanelId }: { name: string, eventPanelId?: string }) => {
+    const handleChatListDeleted = ({
+      name,
+      eventPanelId,
+    }: {
+      name: string;
+      eventPanelId?: string;
+    }) => {
       // 只处理本面板的事件或全局事件
       if (eventPanelId && eventPanelId !== panelId) {
         return;
       }
 
       // 从列表中移除已删除的聊天
-      setChatLists(prev => prev.filter(item => item !== name));
+      setChatLists((prev) => prev.filter((item) => item !== name));
 
       // 如果当前正在使用的聊天被删除，创建一个新的
       if (chatListName === name) {
@@ -1243,32 +1451,37 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 监听新聊天创建事件
-    const handleNewChatCreated = ({ name, eventPanelId }: { name: string, eventPanelId?: string }) => {
+    const handleNewChatCreated = ({
+      name,
+      eventPanelId,
+    }: {
+      name: string;
+      eventPanelId?: string;
+    }) => {
       // 只处理本面板的事件或全局事件
       if (eventPanelId && eventPanelId !== panelId) {
         return;
       }
 
       setChatListName(name);
-      setChatLists(prev => [name, ...prev.filter(item => item !== name)]);
+      setChatLists((prev) => [name, ...prev.filter((item) => item !== name)]);
       setMessages([]);
     };
 
     // 添加事件监听器
-    chatListService.on('error', handleError);
-    chatListService.on('chatListRenamed', handleChatListRenamed);
-    chatListService.on('chatListDeleted', handleChatListDeleted);
-    chatListService.on('newChatCreated', handleNewChatCreated);
+    chatListService.on("error", handleError);
+    chatListService.on("chatListRenamed", handleChatListRenamed);
+    chatListService.on("chatListDeleted", handleChatListDeleted);
+    chatListService.on("newChatCreated", handleNewChatCreated);
 
     // 清理函数
     return () => {
-      chatListService.off('error', handleError);
-      chatListService.off('chatListRenamed', handleChatListRenamed);
-      chatListService.off('chatListDeleted', handleChatListDeleted);
-      chatListService.off('newChatCreated', handleNewChatCreated);
+      chatListService.off("error", handleError);
+      chatListService.off("chatListRenamed", handleChatListRenamed);
+      chatListService.off("chatListDeleted", handleChatListDeleted);
+      chatListService.off("newChatCreated", handleNewChatCreated);
     };
   }, [chatListName, panelId]);
-
 
   // 监听RAG启用状态变更事件
   useEffect(() => {
@@ -1277,7 +1490,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 订阅事件
-    const unsubscribe = eventBus.subscribe(EVENTS.RAG.ENABLED_CHANGED, handleRagEnabledChanged);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.RAG.ENABLED_CHANGED,
+      handleRagEnabledChanged
+    );
 
     return () => {
       unsubscribe();
@@ -1286,13 +1502,19 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 监听文件组选择更新事件
   useEffect(() => {
-    const handleFileGroupSelectionUpdated = (data: FileGroupSelectionUpdatedEventData) => {
+    const handleFileGroupSelectionUpdated = (
+      data: FileGroupSelectionUpdatedEventData
+    ) => {
       // 如果传入了panelId且与当前面板的panelId不匹配，则不处理此事件
       if (data.panelId && data.panelId !== panelId) {
         return;
       }
 
-      console.log('ChatPanel: Received file group selection update event', data.groupNames, data.filePaths);
+      console.log(
+        "ChatPanel: Received file group selection update event",
+        data.groupNames,
+        data.filePaths
+      );
       // 保存最近选择的文件组和文件
       setLastSelectedGroups(data.groupNames);
       setLastSelectedFiles(data.filePaths);
@@ -1317,7 +1539,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 订阅事件
-    const unsubscribe = eventBus.subscribe(EVENTS.MCPS.ENABLED_CHANGED, handleMcpsEnabledChanged);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.MCPS.ENABLED_CHANGED,
+      handleMcpsEnabledChanged
+    );
 
     return () => {
       unsubscribe();
@@ -1335,20 +1560,22 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
     // 监听Chat面板刷新消息事件
     const handleRefreshFromMessage = (data: {
-      messageId: string,
-      messageContent: string
+      messageId: string;
+      messageContent: string;
     }) => {
-      const { messageId, messageContent } = data
+      const { messageId, messageContent } = data;
       // 查找消息索引
-      const msgIndex = messages.findIndex(m => m.id === messageId);
-      console.log('刷新消息index：', msgIndex)
+      const msgIndex = messages.findIndex((m) => m.id === messageId);
+      console.log("刷新消息index：", msgIndex);
       if (msgIndex >= 0) {
         // 保留点击的消息及之前的所有消息
         const updatedMessages = messages.slice(0, msgIndex + 1);
         setMessages(updatedMessages);
 
         // 将最后一条用户消息的内容设置为编辑器内容
-        const lastUserMsg = [...updatedMessages].reverse().find(m => m.isUser);
+        const lastUserMsg = [...updatedMessages]
+          .reverse()
+          .find((m) => m.isUser);
         if (lastUserMsg) {
           setEditorContent(lastUserMsg.content);
         }
@@ -1356,7 +1583,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     // 订阅刷新事件
-    const unsubscribe = eventBus.subscribe(EVENTS.CHAT.REFRESH_FROM_MESSAGE, handleRefreshFromMessage);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.CHAT.REFRESH_FROM_MESSAGE,
+      handleRefreshFromMessage
+    );
 
     return () => {
       unsubscribe();
@@ -1374,7 +1604,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       setMessages([]);
 
       // 重置编辑器内容
-      setEditorContent('');
+      setEditorContent("");
 
       // 重置其他状态
       endChatRunning();
@@ -1384,30 +1614,30 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       const newSessionId = uuidv4();
 
       // 发送重置请求到服务器
-      await fetch('/api/chat/reset', {
-        method: 'POST',
+      await fetch("/api/chat/reset", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           session_id: newSessionId,
-          panel_id: panelId || "main"
-        })
+          panel_id: panelId || "main",
+        }),
       });
 
-      console.log('Chat reset successfully');
+      console.log("Chat reset successfully");
     } catch (error) {
-      console.error('Failed to reset chat:', error);
+      console.error("Failed to reset chat:", error);
     } finally {
       setPendingRevert(false);
     }
   };
 
   // 添加编辑器内容状态
-  const [editorContent, setEditorContent] = useState<string>('');
+  const [editorContent, setEditorContent] = useState<string>("");
 
   // 添加其他状态的 ref 引用
-  const chatListNameRef = useRef<string>('');
+  const chatListNameRef = useRef<string>("");
   const messagesRef = useRef<AutoModeMessage[]>([]);
   const isRuleModeRef = useRef<boolean>(false);
   const enableAgenticModeRef = useRef<boolean>(true);
@@ -1416,7 +1646,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const lastSelectedGroupsRef = useRef<string[]>([]);
   const lastSelectedFilesRef = useRef<string[]>([]);
   const messageIdCounterRef = useRef<number>(0);
-  const panelIdRef = useRef<string>('');
+  const panelIdRef = useRef<string>("");
   const sendLoadingRef = useRef<boolean>(false);
 
   // 更新 ref 引用的值
@@ -1471,16 +1701,29 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         <Layout.Header className="bg-gray-800 px-2 py-0.5 h-8 flex justify-between items-center border-b border-gray-700 shadow-sm transition-all duration-300 sticky top-0 z-10">
           <div className="flex items-center space-x-2 flex-1 min-w-0 overflow-hidden">
             <div className="flex items-center flex-shrink-0">
-              <svg className="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                className="w-3 h-3 mr-0.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+                  stroke="#8B5CF6"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
-              <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text font-bold text-xs">auto-coder.web</span>
+              <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text font-bold text-xs">
+                Aitocder
+              </span>
             </div>
             <div className="flex items-center min-w-0 flex-1 overflow-hidden">
               <span className="text-gray-400 text-xs mx-0.5">|</span>
               <div className="flex items-center min-w-0 flex-1 overflow-hidden">
                 <span className="text-gray-200 text-xs font-medium truncate">
-                  {projectName || getMessage('noProjectSelected')}
+                  {projectName || getMessage("noProjectSelected")}
                 </span>
               </div>
             </div>
@@ -1500,29 +1743,29 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               panelId={panelId}
             />
 
-            <Tooltip title={getMessage('clearCurrentChat')}>
+            <Tooltip title={getMessage("clearCurrentChat")}>
               <Button
-                icon={<ClearOutlined style={{ fontSize: '10px' }} />}
+                icon={<ClearOutlined style={{ fontSize: "10px" }} />}
                 onClick={() => {
                   if (chatListName) {
                     Modal.confirm({
-                      title: getMessage('confirmClear'),
-                      content: getMessage('confirmClearContent'),
-                      okText: getMessage('clearButton'),
-                      okType: 'danger',
-                      cancelText: getMessage('cancelButton'),
+                      title: getMessage("confirmClear"),
+                      content: getMessage("confirmClearContent"),
+                      okText: getMessage("clearButton"),
+                      okType: "danger",
+                      cancelText: getMessage("cancelButton"),
                       onOk: async () => {
                         // 清空消息列表
                         setMessages([]);
                         // 触发会话更新逻辑
                         if (chatListName) {
                           await saveChatList(chatListName, [], panelId);
-                          AntdMessage.success(getMessage('chatCleared'));
+                          AntdMessage.success(getMessage("chatCleared"));
                         }
                       },
                     });
                   } else {
-                    AntdMessage.warning(getMessage('selectOrCreateChat'));
+                    AntdMessage.warning(getMessage("selectOrCreateChat"));
                   }
                 }}
                 className="text-gray-300 border-gray-600 bg-gray-700 hover:bg-gray-600 px-1 py-0 h-6 w-6 flex items-center justify-center"
@@ -1530,18 +1773,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               />
             </Tooltip>
 
-            <Tooltip title={getMessage('saveCurrentChat')}>
+            <Tooltip title={getMessage("saveCurrentChat")}>
               <Button
-                icon={<SaveOutlined style={{ fontSize: '10px' }} />}
+                icon={<SaveOutlined style={{ fontSize: "10px" }} />}
                 onClick={() => {
                   if (chatListName && messages.length > 0) {
                     // 使用与自动保存相同的机制
                     setShouldSaveMessages(true);
-                    AntdMessage.success(getMessage('chatSaved'));
+                    AntdMessage.success(getMessage("chatSaved"));
                   } else if (!chatListName) {
-                    AntdMessage.warning(getMessage('selectOrCreateChat'));
+                    AntdMessage.warning(getMessage("selectOrCreateChat"));
                   } else {
-                    AntdMessage.warning(getMessage('noMessagesToSave'));
+                    AntdMessage.warning(getMessage("noMessagesToSave"));
                   }
                 }}
                 className="text-gray-300 border-gray-600 bg-gray-700 hover:bg-gray-600 px-1 py-0 h-6 w-6 flex items-center justify-center"
@@ -1549,18 +1792,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               />
             </Tooltip>
 
-            <Tooltip title={getMessage('settings')}>
+            <Tooltip title={getMessage("settings")}>
               <Button
-                icon={<SettingOutlined style={{ fontSize: '10px' }} />}
+                icon={<SettingOutlined style={{ fontSize: "10px" }} />}
                 onClick={() => setShowConfig(!showConfig)}
                 className="text-gray-300 border-gray-600 bg-gray-700 hover:bg-gray-600 px-1 py-0 h-6 w-6 flex items-center justify-center"
                 size="small"
               />
             </Tooltip>
 
-            <Tooltip title={getMessage('exportChatAsImage')}>
+            <Tooltip title={getMessage("exportChatAsImage")}>
               <Button
-                icon={<PictureOutlined style={{ fontSize: '10px' }} />}
+                icon={<PictureOutlined style={{ fontSize: "10px" }} />}
                 onClick={handleExportMessagesAsImage}
                 className="text-gray-300 border-gray-600 bg-gray-700 hover:bg-gray-600 px-1 py-0 h-6 w-6 flex items-center justify-center"
                 size="small"
@@ -1575,8 +1818,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             className="flex-1 overflow-y-auto bg-gray-900 p-2 transition-all duration-300 relative"
             ref={messagesContainerRef}
             style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0)',
-              backgroundSize: '20px 20px'
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0)",
+              backgroundSize: "20px 20px",
             }}
           >
             {/* Token统计组件 */}
@@ -1584,24 +1828,37 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               <div className="sticky top-0 right-0 float-right bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-sm p-0.5 m-0.5 shadow-md z-10">
                 <div className="font-mono text-gray-400 flex flex-col items-end gap-0 text-[9px] leading-tight">
                   <div className="flex items-center">
-                    <span>{getMessage('tokens')}: </span>
-                    <span className="text-green-500 ml-0.5">↑ {accumulatedStats.inputTokens}</span>
-                    <span className="text-red-500 ml-0.5">↓ {accumulatedStats.outputTokens}</span>
+                    <span>{getMessage("tokens")}: </span>
+                    <span className="text-green-500 ml-0.5">
+                      ↑ {accumulatedStats.inputTokens}
+                    </span>
+                    <span className="text-red-500 ml-0.5">
+                      ↓ {accumulatedStats.outputTokens}
+                    </span>
                   </div>
-                  {(accumulatedStats.cacheHits > 0 || accumulatedStats.cacheMisses > 0) && (
+                  {(accumulatedStats.cacheHits > 0 ||
+                    accumulatedStats.cacheMisses > 0) && (
                     <div className="flex items-center">
-                      <span>{getMessage('cache')}: </span>
-                      <span className="text-white ml-0.5">⊕ {accumulatedStats.cacheHits}</span>
-                      <span className="text-white ml-0.5">→ {accumulatedStats.cacheMisses}</span>
+                      <span>{getMessage("cache")}: </span>
+                      <span className="text-white ml-0.5">
+                        ⊕ {accumulatedStats.cacheHits}
+                      </span>
+                      <span className="text-white ml-0.5">
+                        → {accumulatedStats.cacheMisses}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center">
-                    <span>{getMessage('apiCost')}: </span>
-                    <span className="text-white ml-0.5">${accumulatedStats.totalCost.toFixed(5)}</span>
+                    <span>{getMessage("apiCost")}: </span>
+                    <span className="text-white ml-0.5">
+                      ${accumulatedStats.totalCost.toFixed(5)}
+                    </span>
                   </div>
                   <div className="flex items-center">
-                    <span>{getMessage('contextWindow')}: </span>
-                    <span className="text-white ml-0.5">{Math.round(accumulatedStats.contextWindowUsage / 1024)}K</span>
+                    <span>{getMessage("contextWindow")}: </span>
+                    <span className="text-white ml-0.5">
+                      {Math.round(accumulatedStats.contextWindowUsage / 1024)}K
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1609,12 +1866,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-gray-400 animate-fade-in">
-                <MessageOutlined style={{ fontSize: '36px', marginBottom: '10px', opacity: 0.5 }} />
+                <MessageOutlined
+                  style={{
+                    fontSize: "36px",
+                    marginBottom: "10px",
+                    opacity: 0.5,
+                  }}
+                />
                 <Typography.Title level={5} className="!text-gray-300 mb-1">
-                  {getMessage('startNewConversation')}
+                  {getMessage("startNewConversation")}
                 </Typography.Title>
                 <Typography.Text className="text-gray-400 text-center max-w-md text-xs">
-                  {getMessage('askAnything')}
+                  {getMessage("askAnything")}
                 </Typography.Text>
               </div>
             ) : (
@@ -1624,17 +1887,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                   onUserResponse={async (response, eventId) => {
                     if (eventId && pendingResponseEvent) {
                       const { requestId, eventData } = pendingResponseEvent;
-                      await fetch('/api/event/response', {
-                        method: 'POST',
+                      await fetch("/api/event/response", {
+                        method: "POST",
                         headers: {
-                          'Content-Type': 'application/json',
+                          "Content-Type": "application/json",
                         },
 
                         body: JSON.stringify({
                           request_id: requestId,
                           event: eventData,
-                          response: JSON.stringify({ "value": response })
-                        })
+                          response: JSON.stringify({ value: response }),
+                        }),
                       });
                       setPendingResponseEvent(null);
                     }
@@ -1646,7 +1909,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
             {/* 添加"滚动到底部"按钮，当有新消息且用户不在底部时显示 */}
             {!isAtBottom && messages.length > 0 && (
-              <Tooltip title={getMessage('scrollToBottom')}>
+              <Tooltip title={getMessage("scrollToBottom")}>
                 <Button
                   type="primary"
                   shape="circle"
@@ -1657,15 +1920,28 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                     setIsAtBottom(true);
                   }}
                   className="sticky bottom-2 right-0 float-right z-10 bg-indigo-600 hover:bg-indigo-700 border-0 shadow-lg flex items-center justify-center"
-                  style={{ width: '36px', height: '36px' }}
+                  style={{ width: "36px", height: "36px" }}
                 />
               </Tooltip>
             )}
-            <div className={`sticky bottom-0 left-0 w-full flex items-center justify-center ${sendLoading && isChatRunningRef.current ? '' : 'hidden'}`}>
+            <div
+              className={`sticky bottom-0 left-0 w-full flex items-center justify-center ${
+                sendLoading && isChatRunningRef.current ? "" : "hidden"
+              }`}
+            >
               <div className="flex space-x-1 mt-1">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                <div
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
               </div>
             </div>
           </div>
@@ -1702,36 +1978,50 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
       {/* 新建对话模态框 */}
       <Modal
-        title={<span style={{ color: '#FFFFFF' }}>{getMessage('createNewChat')}</span>}
+        title={
+          <span style={{ color: "#FFFFFF" }}>
+            {getMessage("createNewChat")}
+          </span>
+        }
         open={isNewChatModalVisible}
         onOk={handleNewChatCreate}
         onCancel={handleNewChatCancel}
-        okText={getMessage('createButton')}
-        cancelText={getMessage('cancelButton')}
+        okText={getMessage("createButton")}
+        cancelText={getMessage("cancelButton")}
         centered
         okButtonProps={{
           disabled: !newChatName.trim(),
-          style: { backgroundColor: '#8B5CF6', borderColor: '#8B5CF6' }
+          style: { backgroundColor: "#8B5CF6", borderColor: "#8B5CF6" },
         }}
-        bodyStyle={{ backgroundColor: '#1F2937', color: '#E5E7EB' }}
+        bodyStyle={{ backgroundColor: "#1F2937", color: "#E5E7EB" }}
         style={{ top: 20 }}
         className="custom-modal"
       >
         <div className="mb-4">
-          <Typography.Text strong className="block mb-2" style={{ color: '#FFFFFF' }}>{getMessage('chatName')}</Typography.Text>
+          <Typography.Text
+            strong
+            className="block mb-2"
+            style={{ color: "#FFFFFF" }}
+          >
+            {getMessage("chatName")}
+          </Typography.Text>
           <Input
             value={newChatName}
             onChange={(e) => setNewChatName(e.target.value)}
-            placeholder={getMessage('enterChatName')}
+            placeholder={getMessage("enterChatName")}
             onPressEnter={handleNewChatCreate}
-            prefix={<MessageOutlined style={{ color: '#8B5CF6' }} />}
+            prefix={<MessageOutlined style={{ color: "#8B5CF6" }} />}
             autoFocus
             size="large"
-            style={{ backgroundColor: '#374151', borderColor: '#4B5563', color: '#FFFFFF' }}
+            style={{
+              backgroundColor: "#374151",
+              borderColor: "#4B5563",
+              color: "#FFFFFF",
+            }}
           />
           {!newChatName.trim() && (
             <Typography.Text type="danger" className="mt-1 block">
-              {getMessage('chatNameEmpty')}
+              {getMessage("chatNameEmpty")}
             </Typography.Text>
           )}
         </div>

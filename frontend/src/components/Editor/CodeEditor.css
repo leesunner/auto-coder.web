@@ -120,7 +120,8 @@
   color: #ffffff !important;
 }
 
-.editor-panel .ant-tabs-tab-btn {
+.editor-panel .ant-tabs-tab-btn,
+.more {
   color: #969696;
 }
 
@@ -180,7 +181,8 @@
 .vscode-dark-dropdown .ant-dropdown-menu {
   background-color: #252526 !important;
   border: 1px solid #3c3c3c !important;
-  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.48), 0 6px 16px 0 rgba(0, 0, 0, 0.32) !important;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.48),
+    0 6px 16px 0 rgba(0, 0, 0, 0.32) !important;
   padding: 4px 0 !important;
 }
 

@@ -13,6 +13,7 @@ import { queryToString } from "@/utils/formatUtils";
 import "./CodeEditor.css";
 import type { StopGenerationEventData } from "@/services/event_bus_data";
 import { useAgentFileSelect } from "../AutoMode/utils/agentFileSelect";
+import { EllipsisOutlined } from "@ant-design/icons";
 
 interface CodeEditorProps {
   selectedFiles?: FileMetadata[];
@@ -426,6 +427,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     </Menu>
   );
 
+  useEffect(() => {
+    const callback = (e) => {
+      console.log(e.key);
+      // handleSave
+    };
+    window.addEventListener("keydown", callback);
+  }, [handleSave]);
+
   return (
     <div className="code-editor-container">
       <div className="code-editor-header">
@@ -483,10 +492,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
         <div className="editor-panel">
           <Tabs
+            size="small"
             type="editable-card"
             onChange={handleTabChange}
             onEdit={handleTabEdit}
             activeKey={activeFile || undefined}
+            more={{
+              icon: (
+                <span className="more">
+                  <EllipsisOutlined />
+                </span>
+              ),
+            }}
           >
             {fileTabs.map((tab) => {
               const fileMeta = selectedFiles.find((f) => f.path === tab.key);
