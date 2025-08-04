@@ -477,11 +477,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       </div> */}
 
       <Split
-        className="code-editor-content"
+        className="code-editor-content split-horizontal"
         sizes={[20, 80]}
         minSize={[300, 300]}
         expandToMin={false}
-        gutterSize={10}
+        gutterSize={0.5}
         gutterAlign="center"
         snapOffset={30}
         dragInterval={1}
@@ -499,61 +499,65 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           />
         </div>
         <div className="editor-panel">
-          <Tabs
-            size="small"
-            type="editable-card"
-            onChange={handleTabChange}
-            onEdit={handleTabEdit}
-            activeKey={activeFile || undefined}
-            more={{
-              icon: (
-                <span className="more">
-                  <EllipsisOutlined />
-                </span>
-              ),
-            }}
-          >
-            {fileTabs.map((tab) => {
-              const fileMeta = selectedFiles.find((f) => f.path === tab.key);
-              return (
-                <Tabs.TabPane
-                  key={tab.key}
-                  tab={
-                    <Dropdown
-                      overlay={renderContextMenu(tab.key, tab.label)}
-                      trigger={["contextMenu"]}
-                      overlayClassName="vscode-dark-dropdown"
-                    >
-                      <span
-                        style={{
-                          color:
-                            fileMeta?.modifiedBy === "expert_chat_box"
-                              ? "#ff4d4f"
-                              : "inherit",
-                          display: "inline-block", // Necessary for Dropdown trigger
-                        }}
+          <div className={`h-full ${fileTabs?.length ? "block" : "hidden"}`}>
+            <Tabs
+              size="small"
+              type="editable-card"
+              onChange={handleTabChange}
+              onEdit={handleTabEdit}
+              activeKey={activeFile || undefined}
+              more={{
+                icon: (
+                  <span className="more">
+                    <EllipsisOutlined />
+                  </span>
+                ),
+              }}
+            >
+              {fileTabs.map((tab) => {
+                const fileMeta = selectedFiles.find((f) => f.path === tab.key);
+                return (
+                  <Tabs.TabPane
+                    key={tab.key}
+                    tab={
+                      <Dropdown
+                        overlay={renderContextMenu(tab.key, tab.label)}
+                        trigger={["contextMenu"]}
+                        overlayClassName="vscode-dark-dropdown"
                       >
-                        {tab.label}
-                      </span>
-                    </Dropdown>
-                  }
-                  closable={true}
-                >
-                  <MonacoEditor
-                    code={tab.content}
-                    language={getLanguageByFileName(tab.key)}
-                    onChange={(value) => {
-                      setFileTabs((prev) =>
-                        prev.map((t) =>
-                          t.key === tab.key ? { ...t, content: value || "" } : t
-                        )
-                      );
-                    }}
-                  />
-                </Tabs.TabPane>
-              );
-            })}
-          </Tabs>
+                        <span
+                          style={{
+                            color:
+                              fileMeta?.modifiedBy === "expert_chat_box"
+                                ? "#ff4d4f"
+                                : "inherit",
+                            display: "inline-block", // Necessary for Dropdown trigger
+                          }}
+                        >
+                          {tab.label}
+                        </span>
+                      </Dropdown>
+                    }
+                    closable={true}
+                  >
+                    <MonacoEditor
+                      code={tab.content}
+                      language={getLanguageByFileName(tab.key)}
+                      onChange={(value) => {
+                        setFileTabs((prev) =>
+                          prev.map((t) =>
+                            t.key === tab.key
+                              ? { ...t, content: value || "" }
+                              : t
+                          )
+                        );
+                      }}
+                    />
+                  </Tabs.TabPane>
+                );
+              })}
+            </Tabs>
+          </div>
         </div>
       </Split>
     </div>

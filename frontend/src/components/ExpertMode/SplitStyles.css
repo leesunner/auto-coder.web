@@ -7,38 +7,38 @@
   height: 100% !important;
   width: 100% !important;
 }
-
-/* 垂直分隔条(gutter)的样式 */
-.split-vertical > .gutter {
-  height: 5px !important;
-  width: 100% !important; /* 确保宽度为100% */
-  background-color: #4B5563; /* Tailwind 的 gray-600 */
+.gutter {
+  position: relative !important;
+  left: 0 !important; /* 确保从左边开始 */
+  top: 0 !important;
+  transition: background-color 0.2s;
+  background-color: transparent; /* Tailwind 的 gray-600 */
   cursor: row-resize !important;
   margin: 0 !important;
   z-index: 10 !important;
-  transition: background-color 0.2s;
-  position: relative !important;
-  left: 0 !important; /* 确保从左边开始 */
-  right: 0 !important; /* 确保延伸到右边 */
 }
 
-.split-vertical > .gutter:hover,
-.split-vertical > .gutter.dragging {
-  background-color: #3B82F6; /* Tailwind 的 blue-500 */
+.gutter:hover,
+.gutter.dragging {
+  background-color: #3b82f6;
+}
+
+/* 垂直分隔条(gutter)的样式 */
+.split-vertical > .gutter {
+  width: 100% !important; /* 确保宽度为100% */
+}
+.gutter:hover::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #3b82f6; /* Tailwind 的 blue-500 */
 }
 
 /* 添加一个小拖动手柄图标 */
-.split-vertical > .gutter::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 30px;
-  height: 2px;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 1px;
-  box-shadow: 0 -2px 0 rgba(255, 255, 255, 0.6), 0 2px 0 rgba(255, 255, 255, 0.6);
+.split-vertical > .gutter:hover::after {
+  width: 100%;
+  height: 5px !important;
 }
 
 /* 水平分割的容器 (如果需要) */
@@ -49,25 +49,22 @@
 
 /* 水平分隔条的样式 (如果需要) */
 .split-horizontal > .gutter {
-  width: 5px !important;
-  background-color: #4B5563;
+  height: 100%;
   cursor: col-resize !important;
-  margin: 0 !important;
-  z-index: 10 !important;
-  transition: background-color 0.2s;
 }
 
-.split-horizontal > .gutter:hover,
-.split-horizontal > .gutter.dragging {
-  background-color: #3B82F6;
+/* 添加一个小拖动手柄图标 */
+.split-horizontal > .gutter:hover::after {
+  height: 100% !important;
+  width: 5px;
 }
 
 /* 添加滚动条隐藏的样式 */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
-} 
+  display: none; /* Chrome, Safari and Opera */
+}
