@@ -459,8 +459,8 @@ export const messages: { [key: string]: Message } = {
     zh: "开启索引允许系统自动构建和更新索引，以便更好地理解代码",
   },
   projectTypeDescription: {
-    en: "The file extensions list that Aitocder will focus on. Files with extensions not in the list will be ignored",
-    zh: "让 Aitocder 关注的后后缀名里列表，不在名单里的，Aitocder 不会关注",
+    en: "The file extensions list that AitoCoder will focus on. Files with extensions not in the list will be ignored",
+    zh: "让 AitoCoder 关注的后后缀名里列表，不在名单里的，AitoCoder 不会关注",
   },
   projectType: {
     en: "Project Type",

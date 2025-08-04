@@ -380,7 +380,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
               />
             </svg>
             <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text font-bold text-3xl">
-              Aitocder
+              AitoCoder
             </span>
           </div>
           <div className="text-gray-400 text-sm font-mono font-medium">

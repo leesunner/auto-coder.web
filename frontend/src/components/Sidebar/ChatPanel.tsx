@@ -1716,7 +1716,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 />
               </svg>
               <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-transparent bg-clip-text font-bold text-xs">
-                Aitocder
+                AitoCoder
               </span>
             </div>
             <div className="flex items-center min-w-0 flex-1 overflow-hidden">

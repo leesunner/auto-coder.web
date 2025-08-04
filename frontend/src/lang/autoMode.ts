@@ -198,44 +198,44 @@ export const autoModeMessages: { [key: string]: Message } = {
 
   // Agentic Edit相关
   agenticEditToolResultReplaceInFileTool: {
-    en: "Aitocder updated the file",
-    zh: "Aitocder 更新了文件",
+    en: "AitoCoder updated the file",
+    zh: "AitoCoder 更新了文件",
   },
   agenticEditToolResultWriteToFileTool: {
-    en: "Aitocder wrote to the file",
-    zh: "Aitocder 写入了文件",
+    en: "AitoCoder wrote to the file",
+    zh: "AitoCoder 写入了文件",
   },
   agenticEditToolResultReadFileTool: {
-    en: "Aitocder read the file",
-    zh: "Aitocder 读取了文件",
+    en: "AitoCoder read the file",
+    zh: "AitoCoder 读取了文件",
   },
   agenticEditToolResultListFilesTool: {
-    en: "Aitocder listed the following files in this directory:",
-    zh: "Aitocder 列出了此目录中的以下文件:",
+    en: "AitoCoder listed the following files in this directory:",
+    zh: "AitoCoder 列出了此目录中的以下文件:",
   },
   agenticEditToolResultSearchFilesTool: {
-    en: "Aitocder found the following files matching the pattern:",
-    zh: "Aitocder 找到了与此模式匹配的以下文件:",
+    en: "AitoCoder found the following files matching the pattern:",
+    zh: "AitoCoder 找到了与此模式匹配的以下文件:",
   },
   agenticEditReplaceInFileToolTitle: {
-    en: "Aitocder wants to replace the content of this file",
-    zh: "Aitocder 想要替换此文件中的内容",
+    en: "AitoCoder wants to replace the content of this file",
+    zh: "AitoCoder 想要替换此文件中的内容",
   },
   agenticEditWriteToFileToolTitle: {
-    en: "Aitocder wants to write to this file",
-    zh: "Aitocder 想要写入此文件",
+    en: "AitoCoder wants to write to this file",
+    zh: "AitoCoder 想要写入此文件",
   },
   agenticEditReadFileToolTitle: {
-    en: "Aitocder wants to read this file",
-    zh: "Aitocder 想要读取此文件",
+    en: "AitoCoder wants to read this file",
+    zh: "AitoCoder 想要读取此文件",
   },
   agenticEditListFilesToolTitle: {
-    en: "Aitocder wants to list files in this directory",
-    zh: "Aitocder 想要列出此目录中的文件",
+    en: "AitoCoder wants to list files in this directory",
+    zh: "AitoCoder 想要列出此目录中的文件",
   },
   agenticEditSearchFilesToolTitle: {
-    en: "Aitocder wants to search for files matching this pattern",
-    zh: "Aitocder 想要搜索与此模式匹配的文件",
+    en: "AitoCoder wants to search for files matching this pattern",
+    zh: "AitoCoder 想要搜索与此模式匹配的文件",
   },
 
   // 对话框
