@@ -46,11 +46,6 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     setActiveTerminal(newId);
   };
 
-  // 暴露方法给外部调用者
-  useImperativeHandle(ref, () => ({
-    addTerminal,
-  }));
-
   const removeTerminal = (id: string) => {
     if (terminals.length > 1) {
       const newTerminals = terminals.filter((t) => t.id !== id);
@@ -68,6 +63,11 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
   };
 
   const submitTerminalOptions = () => {};
+
+  // 暴露方法给外部调用者
+  useImperativeHandle(ref, () => ({
+    addTerminal,
+  }));
 
   return (
     <div className="flex h-full">

@@ -263,7 +263,13 @@ const Terminal: React.FC<TerminalProps> = ({
     };
   }, [useLocalHost]); // 添加useLocalHost作为依赖
 
-  useEffect(() => {}, [fontSize]);
+  useEffect(() => {
+    if (!xtermRef.current) return;
+
+    xtermRef.current.options.fontSize = fontSize;
+    const { cols, rows } = xtermRef.current;
+    xtermRef.current.resize(cols, rows);
+  }, [fontSize, xtermRef]);
 
   return (
     <div className="h-full w-full bg-[#1e1e1e]">
