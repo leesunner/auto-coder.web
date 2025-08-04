@@ -1,9 +1,14 @@
 import { Tooltip, Dropdown } from "antd";
-import { UpOutlined, DownOutlined, PlusOutlined, CaretDownOutlined } from "@ant-design/icons";
+import {
+  UpOutlined,
+  DownOutlined,
+  PlusOutlined,
+  CaretDownOutlined,
+} from "@ant-design/icons";
 import TerminalManager from "../../Terminal/TerminalManager";
 import OutputPanel from "../../Terminal/OutputPanel";
 import { getMessage } from "@/lang";
-import { useState } from "react";
+import { useRef, useState, type Ref } from "react";
 
 function TerminalOutput(props: any) {
   const {
@@ -14,7 +19,7 @@ function TerminalOutput(props: any) {
     toggleFullscreen,
   } = props;
   const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
-
+  const terminalManager = useRef<typeof TerminalManager>(null);
   // 处理新建终端的shell选择
   const handleAddTerminalWithShell = (shellType: string) => {
     console.log(`创建新终端，Shell类型: ${shellType}`);
@@ -25,31 +30,31 @@ function TerminalOutput(props: any) {
   // 下拉菜单项配置
   const shellMenuItems = [
     {
-      key: 'bash',
+      key: "bash",
       label: (
         <div className="flex items-center gap-2 px-2 py-1">
           <span>{getMessage("bash")}</span>
         </div>
       ),
-      onClick: () => handleAddTerminalWithShell('bash'),
+      onClick: () => handleAddTerminalWithShell("bash"),
     },
     {
-      key: 'zsh',
+      key: "zsh",
       label: (
         <div className="flex items-center gap-2 px-2 py-1">
           <span>{getMessage("zsh")}</span>
         </div>
       ),
-      onClick: () => handleAddTerminalWithShell('zsh'),
+      onClick: () => handleAddTerminalWithShell("zsh"),
     },
     {
-      key: 'powershell',
+      key: "powershell",
       label: (
         <div className="flex items-center gap-2 px-2 py-1">
           <span>{getMessage("powershell")}</span>
         </div>
       ),
-      onClick: () => handleAddTerminalWithShell('powershell'),
+      onClick: () => handleAddTerminalWithShell("powershell"),
     },
   ];
   return (
@@ -74,26 +79,33 @@ function TerminalOutput(props: any) {
                 {tab.label}
               </button>
             ))}
-            
-            {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
-            {activeToolPanel === "terminal" && (
-              <Dropdown
-                menu={{ items: shellMenuItems }}
-                placement="bottomLeft"
-                trigger={['hover']}
-                overlayClassName="terminal-shell-dropdown"
-              >
-                <Tooltip title={getMessage("addTerminalWithShell")}>
-                  <button className="ml-2 flex items-center gap-1 px-2 py-0.5 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
-                    <PlusOutlined style={{ fontSize: "10px" }} />
-                    <CaretDownOutlined style={{ fontSize: "8px" }} />
-                  </button>
-                </Tooltip>
-              </Dropdown>
-            )}
           </div>
 
           <div className="flex items-center pr-2">
+            {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
+            {activeToolPanel === "terminal" && (
+              <div className="mr-2 flex items-center text-white">
+                <button
+                  onClick={() => terminalManager.current?.addTerminal()}
+                  className="ml-1 flex items-center gap-1 px-1 py-1 hover:bg-gray-700 rounded-none transition-colors"
+                >
+                  <PlusOutlined />
+                </button>
+
+                <Dropdown
+                  menu={{ items: shellMenuItems }}
+                  placement="topLeft"
+                  trigger={["click"]}
+                  overlayClassName="terminal-shell-dropdown"
+                >
+                  {/* <Tooltip title={getMessage("addTerminalWithShell")}> */}
+                  <button className="flex items-center gap-0 px-0.5 py-0.5 text-white hover:bg-gray-700 rounded-none transition-colors">
+                    <DownOutlined style={{ fontSize: "10px" }} />
+                  </button>
+                  {/* </Tooltip> */}
+                </Dropdown>
+              </div>
+            )}
             {/* 全屏切换按钮 - 当终端区域被最小化时隐藏 */}
             {!isTerminalMinimized && (
               <Tooltip
@@ -177,7 +189,7 @@ function TerminalOutput(props: any) {
             activeToolPanel === "terminal" ? "block" : "hidden"
           }`}
         >
-          <TerminalManager />
+          <TerminalManager ref={terminalManager} />
         </div>
       </div>
     </>

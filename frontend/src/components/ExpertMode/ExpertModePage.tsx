@@ -470,6 +470,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                       </svg>
                       <span>{getMessage("settings")}</span>
                     </button>
+                    {/* 更多下拉菜单 */}
                     <div className="relative tools-dropdown-container">
                       <button
                         className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
