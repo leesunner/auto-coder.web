@@ -12,6 +12,7 @@ import ChatPanels from "../Sidebar/ChatPanels";
 import CodeEditorPanel from "../MainContent/CodeEditorPanel";
 import FileGroupPanel from "../MainContent/FileGroupPanel";
 import SettingsPanel from "../MainContent/SettingsPanel";
+import { Dropdown, type DropdownMenuItem } from "@/components/Common";
 // Lazy load HistoryPanel
 const HistoryPanel = lazy(() => import("../MainContent/HistoryPanel"));
 import TodoPanel from "../MainContent/TodoPanel";
@@ -316,6 +317,83 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
     setShowToolsDropdown(!showToolsDropdown);
   };
 
+  // 参考原有"更多下拉菜单"的菜单项配置
+  const moreMenuItems: DropdownMenuItem[] = [
+    {
+      key: "preview_static",
+      label: getMessage("previewChangesStatic"),
+      icon: (
+        <svg
+          className="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          />
+        </svg>
+      ),
+      disabled: true, // 预览功能已屏蔽
+      onClick: () => {
+        console.log("预览功能已被屏蔽");
+      },
+    },
+    {
+      key: "clipboard",
+      label: getMessage("clipboard"),
+      icon: (
+        <svg
+          className="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
+        </svg>
+      ),
+      onClick: () => {
+        setActivePanel("clipboard");
+      },
+    },
+    {
+      key: "todo",
+      label: getMessage("todos"),
+      icon: (
+        <svg
+          className="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+          />
+        </svg>
+      ),
+      onClick: () => {
+        setActivePanel("todo");
+      },
+    },
+  ];
+
   return (
     <>
       {/* 用户询问对话框 - 当需要用户输入时显示的模态框 */}
@@ -471,7 +549,11 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                       <span>{getMessage("settings")}</span>
                     </button>
                     {/* 更多下拉菜单 */}
-                    <div className="relative tools-dropdown-container">
+                    <Dropdown
+                      trigger={["click"]}
+                      placement="bottomRight"
+                      menu={{ items: moreMenuItems }}
+                    >
                       <button
                         className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
                           ${
@@ -479,7 +561,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                               ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
                               : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
                           } flex items-center space-x-2`}
-                        onClick={toggleToolsDropdown}
+                        // onClick={toggleToolsDropdown}
                       >
                         <svg
                           className="w-3 h-3"
@@ -496,104 +578,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                         </svg>
                         <span>{getMessage("more")}</span>
                       </button>
-                      {showToolsDropdown && (
-                        <div
-                          className="absolute z-[9999] mt-2 w-56 origin-top-right rounded-md bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                          style={{ zIndex: 9999 }}
-                        >
-                          <div className="py-1">
-                            {/* Static Preview Button - 预览功能已屏蔽 */}
-                            <button
-                              className={`w-full cursor-not-allowed px-4 py-2 text-sm flex items-center space-x-2 !bg-gray-800/60 !text-gray-500 ${
-                                activePanel === "preview_static"
-                                  ? "bg-blue-600 text-white"
-                                  : "text-gray-300 hover:bg-gray-700"
-                              }`}
-                              onClick={() => {
-                                // 预览功能已屏蔽 - 不执行任何操作
-                                console.log("预览功能已被屏蔽");
-                              }}
-                              title="预览功能暂时不可用"
-                              disabled
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                />
-                              </svg>
-                              <span>{getMessage("previewChangesStatic")}</span>
-                            </button>
-                            <button
-                              className={`w-full px-4 py-2 text-sm flex items-center space-x-2 ${
-                                activePanel === "clipboard"
-                                  ? "bg-blue-600 text-white"
-                                  : "text-gray-300 hover:bg-gray-700"
-                              }`}
-                              onClick={() => {
-                                setActivePanel("clipboard");
-                                setShowToolsDropdown(false);
-                              }}
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                                />
-                              </svg>
-                              <span>{getMessage("clipboard")}</span>
-                            </button>
-
-                            <button
-                              className={`w-full px-4 py-2 text-sm flex items-center space-x-2 ${
-                                activePanel === "todo"
-                                  ? "bg-blue-600 text-white"
-                                  : "text-gray-300 hover:bg-gray-700"
-                              }`}
-                              onClick={() => {
-                                setActivePanel("todo");
-                                setShowToolsDropdown(false);
-                              }}
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                                />
-                              </svg>
-                              <span>{getMessage("todos")}</span>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    </Dropdown>
                   </div>
                 </div>
 

@@ -1,4 +1,5 @@
-import { Tooltip, Dropdown } from "antd";
+import { Tooltip } from "antd";
+import { Dropdown } from "@/components/Common";
 import {
   UpOutlined,
   DownOutlined,
@@ -25,6 +26,8 @@ function TerminalOutput(props: any) {
     console.log(`创建新终端，Shell类型: ${shellType}`);
     // 这里可以添加实际的终端创建逻辑
     // 例如：调用TerminalManager的addTerminal方法，并传递shell类型
+    if (!terminalManager.current) return;
+    terminalManager.current?.addTerminal(shellType);
   };
 
   // 下拉菜单项配置
@@ -84,6 +87,10 @@ function TerminalOutput(props: any) {
           <div className="flex items-center pr-2">
             {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
             {activeToolPanel === "terminal" && (
+              //   <Tooltip
+              //     placement="bottomLeft"
+              //     title={getMessage("addTerminalWithShell")}
+              //   >
               <div className="mr-2 flex items-center text-white">
                 <button
                   onClick={() => terminalManager.current?.addTerminal()}
@@ -93,18 +100,19 @@ function TerminalOutput(props: any) {
                 </button>
 
                 <Dropdown
-                  menu={{ items: shellMenuItems }}
-                  placement="topLeft"
                   trigger={["click"]}
-                  overlayClassName="terminal-shell-dropdown"
+                  placement="bottomLeft"
+                  menu={{ items: shellMenuItems }}
+                  size="small"
+                  selectClass="w-32"
+                  defaultActiveKey="bash"
                 >
-                  {/* <Tooltip title={getMessage("addTerminalWithShell")}> */}
                   <button className="flex items-center gap-0 px-0.5 py-0.5 text-white hover:bg-gray-700 rounded-none transition-colors">
                     <DownOutlined style={{ fontSize: "10px" }} />
                   </button>
-                  {/* </Tooltip> */}
                 </Dropdown>
               </div>
+              //   </Tooltip>
             )}
             {/* 全屏切换按钮 - 当终端区域被最小化时隐藏 */}
             {!isTerminalMinimized && (

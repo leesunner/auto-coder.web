@@ -37,7 +37,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
   const [activeTerminal, setActiveTerminal] = useState<string>("1");
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
 
-  const addTerminal = () => {
+  const addTerminal = (type?: string) => {
     const newId = String(terminals.length + 1);
     setTerminals([
       ...terminals,
@@ -73,9 +73,9 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     <div className="flex h-full">
       <Split
         className="flex-1 flex split-horizontal bg-[#2d2d2d] overflow-auto"
-        minSize={[360, 150]}
+        sizes={[80, 20]}
+        minSize={[360, 100]}
         gutterSize={0.5}
-        // snapOffset={200}
         dragInterval={1}
         //   snapOffset={100}
       >
@@ -95,7 +95,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
 
         {/* Right Panel - Terminal Management */}
         <div className="bg-gray-900 flex flex-col">
-          <div className="p-2 border-b border-gray-700">
+          {/* <div className="p-2 border-b border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <Tooltip title={getMessage("newTerminal")}>
@@ -116,7 +116,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
                 </Tooltip>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="flex-1 overflow-y-auto">
             {terminals.map((terminal) => (
               <div

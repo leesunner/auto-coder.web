@@ -55,7 +55,15 @@ const Terminal: React.FC<TerminalProps> = ({
 
   useEffect(() => {
     if (!terminalRef.current) return;
-
+    const createWs = () => {
+      const { protocol, host } = window.location;
+      const _host = useLocalHost ? "127.0.0.1:8007" : host;
+      let _wsProtocol = "ws";
+      if (protocol.startsWith("https")) {
+        _wsProtocol = "wss";
+      }
+      return new WebSocket(`${_wsProtocol}://${_host}/ws/terminal`);
+    };
     // Initialize xterm.js
     const xterm = new XTerminal({
       cursorBlink: true,
@@ -88,8 +96,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
     // Initialize WebSocket connection with heartbeat
     // const host = window.location.host
-    const host = useLocalHost ? "127.0.0.1:8007" : window.location.host;
-    const ws = new WebSocket(`ws://${host}/ws/terminal`);
+    const ws = createWs();
     websocketRef.current = ws;
 
     ws.onopen = () => {
@@ -121,8 +128,8 @@ const Terminal: React.FC<TerminalProps> = ({
         if (websocketRef.current?.readyState === WebSocket.CLOSED) {
           xterm.writeln("\r\n" + getMessage("connectionLost"));
           // const host = window.location.host
-          const host = useLocalHost ? "127.0.0.1:8007" : window.location.host;
-          const newWs = new WebSocket(`ws://${host}/ws/terminal`);
+
+          const newWs = createWs();
           websocketRef.current = newWs;
 
           // Reattach all event handlers
@@ -202,8 +209,8 @@ const Terminal: React.FC<TerminalProps> = ({
         reconnectTimeoutRef.current = setTimeout(() => {
           if (websocketRef.current?.readyState === WebSocket.CLOSED) {
             // const host = window.location.host
-            const host = useLocalHost ? "127.0.0.1:8007" : window.location.host;
-            const newWs = new WebSocket(`ws://${host}/ws/terminal`);
+
+            const newWs = createWs();
             websocketRef.current = newWs;
             // Reattach all event handlers
             newWs.onopen = ws.onopen;
