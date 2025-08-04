@@ -1,45 +1,51 @@
-import React, { useEffect, useRef } from 'react';
-import { Terminal as XTerminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import { SearchAddon } from '@xterm/addon-search';
-import { getMessage } from '../../lang';
-import '@xterm/xterm/css/xterm.css';
+import React, { useEffect, useRef } from "react";
+import { Terminal as XTerminal } from "@xterm/xterm";
+import { FitAddon } from "@xterm/addon-fit";
+import { WebLinksAddon } from "@xterm/addon-web-links";
+import { SearchAddon } from "@xterm/addon-search";
+import { getMessage } from "../../lang";
+import "@xterm/xterm/css/xterm.css";
 
 interface TerminalProps {
   useLocalHost?: boolean; // 控制是否使用本地固定地址
+  fontSize?: number;
 }
 
 // 检测是否为开发环境
 const isDevEnvironment = (): boolean => {
   // 方法1: 检查 NODE_ENV
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     return true;
   }
-  
+
   // 方法2: 检查是否在本地开发服务器端口运行
   const port = window.location.port;
   const hostname = window.location.hostname;
-  
+
   // 常见的开发服务器端口和主机名
-  const devPorts = ['3000', '3001', '5173'];
-  const devHosts = ['localhost', '127.0.0.1', '0.0.0.0'];
-  
+  const devPorts = ["3000", "3001", "5173"];
+  const devHosts = ["localhost", "127.0.0.1", "0.0.0.0"];
+
   if (devHosts.includes(hostname) && devPorts.includes(port)) {
     return true;
   }
-  
+
   // 方法3: 检查URL中是否包含开发相关的标识
   const url = window.location.href;
-  if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('dev')) {
+  if (
+    url.includes("localhost") ||
+    url.includes("127.0.0.1") ||
+    url.includes("dev")
+  ) {
     return true;
   }
-  
+
   return false;
 };
 
-const Terminal: React.FC<TerminalProps> = ({ 
-  useLocalHost = isDevEnvironment() // 根据环境自动设置默认值
+const Terminal: React.FC<TerminalProps> = ({
+  useLocalHost = isDevEnvironment(), // 根据环境自动设置默认值
+  fontSize = 14,
 }) => {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<XTerminal | null>(null);
@@ -53,11 +59,11 @@ const Terminal: React.FC<TerminalProps> = ({
     // Initialize xterm.js
     const xterm = new XTerminal({
       cursorBlink: true,
-      fontSize: 14,
+      fontSize: fontSize,
       fontFamily: 'Menlo, Monaco, "Courier New", monospace',
       theme: {
-        background: '#1e1e1e',
-        foreground: '#d4d4d4',
+        background: "#1e1e1e",
+        foreground: "#d4d4d4",
       },
       rows: 24,
       cols: 80,
@@ -74,7 +80,7 @@ const Terminal: React.FC<TerminalProps> = ({
 
     // Open terminal in the container
     xterm.open(terminalRef.current);
-    
+
     // Ensure dimensions are set before fitting
     setTimeout(() => {
       fitAddon.fit();
@@ -87,20 +93,20 @@ const Terminal: React.FC<TerminalProps> = ({
     websocketRef.current = ws;
 
     ws.onopen = () => {
-      xterm.writeln(getMessage('connectedToTerminal'));
-      
+      xterm.writeln(getMessage("connectedToTerminal"));
+
       // Start heartbeat with error handling and retry mechanism
       const startHeartbeat = () => {
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
         }
-        
+
         heartbeatIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
             try {
-              ws.send(JSON.stringify({ type: 'heartbeat' }));
+              ws.send(JSON.stringify({ type: "heartbeat" }));
             } catch (error) {
-              console.error('Failed to send heartbeat:', error);
+              console.error("Failed to send heartbeat:", error);
               handleReconnect();
             }
           }
@@ -111,14 +117,14 @@ const Terminal: React.FC<TerminalProps> = ({
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
         }
-        
+
         if (websocketRef.current?.readyState === WebSocket.CLOSED) {
-          xterm.writeln('\r\n' + getMessage('connectionLost'));
+          xterm.writeln("\r\n" + getMessage("connectionLost"));
           // const host = window.location.host
           const host = useLocalHost ? "127.0.0.1:8007" : window.location.host;
           const newWs = new WebSocket(`ws://${host}/ws/terminal`);
           websocketRef.current = newWs;
-          
+
           // Reattach all event handlers
           newWs.onopen = ws.onopen;
           newWs.onmessage = ws.onmessage;
@@ -131,28 +137,30 @@ const Terminal: React.FC<TerminalProps> = ({
 
       // Send initial size with error handling
       try {
-        ws.send(JSON.stringify({
-          type: 'resize',
-          cols: xterm.cols,
-          rows: xterm.rows
-        }));
+        ws.send(
+          JSON.stringify({
+            type: "resize",
+            cols: xterm.cols,
+            rows: xterm.rows,
+          })
+        );
       } catch (error) {
-        console.error('Failed to send initial size:', error);
-        xterm.writeln('\r\n' + getMessage('failedToInitTerminalSize'));
+        console.error("Failed to send initial size:", error);
+        xterm.writeln("\r\n" + getMessage("failedToInitTerminalSize"));
       }
     };
 
     ws.onmessage = (event) => {
       try {
         const data = event.data;
-        if (typeof data === 'string') {
+        if (typeof data === "string") {
           let isHeartbeat = false;
           try {
             const jsonData = JSON.parse(data);
             isHeartbeat =
-              typeof jsonData === 'object' &&
+              typeof jsonData === "object" &&
               jsonData !== null &&
-              jsonData.type === 'heartbeat';
+              jsonData.type === "heartbeat";
           } catch {
             /* Not JSON – fall through */
           }
@@ -167,14 +175,14 @@ const Terminal: React.FC<TerminalProps> = ({
           reader.readAsText(data);
         }
       } catch (error) {
-        console.error('Error writing to terminal:', error);
-        xterm.writeln('\r\n' + getMessage('errorWritingToTerminal') + error);
+        console.error("Error writing to terminal:", error);
+        xterm.writeln("\r\n" + getMessage("errorWritingToTerminal") + error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      xterm.writeln('\r\n' + getMessage('websocketError') + error);
+      console.error("WebSocket error:", error);
+      xterm.writeln("\r\n" + getMessage("websocketError") + error);
     };
 
     ws.onclose = (event) => {
@@ -182,10 +190,14 @@ const Terminal: React.FC<TerminalProps> = ({
         clearInterval(heartbeatIntervalRef.current);
       }
 
-      xterm.writeln(`\r\n${getMessage('connectionClosed')}${event.code}${getMessage('reason')}${event.reason}`);
-      
+      xterm.writeln(
+        `\r\n${getMessage("connectionClosed")}${event.code}${getMessage(
+          "reason"
+        )}${event.reason}`
+      );
+
       if (!event.wasClean) {
-        xterm.writeln('\r\n' + getMessage('websocketClosedUnexpectedly'));
+        xterm.writeln("\r\n" + getMessage("websocketClosedUnexpectedly"));
         // Try to reconnect after a delay
         reconnectTimeoutRef.current = setTimeout(() => {
           if (websocketRef.current?.readyState === WebSocket.CLOSED) {
@@ -206,7 +218,9 @@ const Terminal: React.FC<TerminalProps> = ({
     // Handle terminal input
     xterm.onData((data) => {
       if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        websocketRef.current.send(JSON.stringify({ type: 'stdin', payload: data }));
+        websocketRef.current.send(
+          JSON.stringify({ type: "stdin", payload: data })
+        );
       }
     });
 
@@ -214,15 +228,17 @@ const Terminal: React.FC<TerminalProps> = ({
     const handleResize = () => {
       fitAddon.fit();
       if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        websocketRef.current.send(JSON.stringify({
-          type: 'resize',
-          cols: xterm.cols,
-          rows: xterm.rows
-        }));
+        websocketRef.current.send(
+          JSON.stringify({
+            type: "resize",
+            cols: xterm.cols,
+            rows: xterm.rows,
+          })
+        );
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Store refs for cleanup
     xtermRef.current = xterm;
@@ -243,9 +259,11 @@ const Terminal: React.FC<TerminalProps> = ({
         xtermRef.current.dispose();
         xtermRef.current = null;
       }
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [useLocalHost]); // 添加useLocalHost作为依赖
+
+  useEffect(() => {}, [fontSize]);
 
   return (
     <div className="h-full w-full bg-[#1e1e1e]">

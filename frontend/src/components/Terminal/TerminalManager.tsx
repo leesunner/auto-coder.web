@@ -12,11 +12,12 @@ import { getMessage } from "../../lang";
 interface TerminalTab {
   id: string;
   name: string;
+  fontSize?: number;
 }
 
 const TerminalManager: React.FC = () => {
   const [terminals, setTerminals] = useState<TerminalTab[]>([
-    { id: "1", name: `${getMessage("terminal")} 1` },
+    { id: "1", name: `${getMessage("terminal")} 1`, fontSize: 14 },
   ]);
 
   // 在组件挂载时触发resize事件
@@ -36,7 +37,7 @@ const TerminalManager: React.FC = () => {
     const newId = String(terminals.length + 1);
     setTerminals([
       ...terminals,
-      { id: newId, name: `${getMessage("terminal")} ${newId}` },
+      { id: newId, name: `${getMessage("terminal")} ${newId}`, fontSize: 14 },
     ]);
     setActiveTerminal(newId);
   };
@@ -56,6 +57,8 @@ const TerminalManager: React.FC = () => {
       terminals.map((t) => (t.id === id ? { ...t, name: newName } : t))
     );
   };
+
+  const submitTerminalOptions = () => {};
 
   return (
     <div className="flex h-full">
@@ -169,6 +172,7 @@ const TerminalManager: React.FC = () => {
         onCancel={() => setIsSettingsVisible(false)}
         footer={null}
         className="dark-theme-modal"
+        onOk={submitTerminalOptions}
       >
         <div className="p-4 space-y-4">
           <div>
