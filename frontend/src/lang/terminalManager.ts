@@ -38,5 +38,13 @@ export const terminalManagerMessages = {
   collapseTerminal: {
     en: "collapseTerminal",
     zh: "收起终端"
+  },
+  addTerminalWithShell: {
+    en: "Add Terminal with Shell",
+    zh: "添加终端并选择Shell"
+  },
+  selectShellType: {
+    en: "Select Shell Type",
+    zh: "选择Shell类型"
   }
 };

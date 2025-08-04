@@ -1,5 +1,5 @@
-import { Tooltip } from "antd";
-import { UpOutlined, DownOutlined } from "@ant-design/icons";
+import { Tooltip, Dropdown } from "antd";
+import { UpOutlined, DownOutlined, PlusOutlined, CaretDownOutlined } from "@ant-design/icons";
 import TerminalManager from "../../Terminal/TerminalManager";
 import OutputPanel from "../../Terminal/OutputPanel";
 import { getMessage } from "@/lang";
@@ -14,12 +14,50 @@ function TerminalOutput(props: any) {
     toggleFullscreen,
   } = props;
   const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
+
+  // 处理新建终端的shell选择
+  const handleAddTerminalWithShell = (shellType: string) => {
+    console.log(`创建新终端，Shell类型: ${shellType}`);
+    // 这里可以添加实际的终端创建逻辑
+    // 例如：调用TerminalManager的addTerminal方法，并传递shell类型
+  };
+
+  // 下拉菜单项配置
+  const shellMenuItems = [
+    {
+      key: 'bash',
+      label: (
+        <div className="flex items-center gap-2 px-2 py-1">
+          <span>{getMessage("bash")}</span>
+        </div>
+      ),
+      onClick: () => handleAddTerminalWithShell('bash'),
+    },
+    {
+      key: 'zsh',
+      label: (
+        <div className="flex items-center gap-2 px-2 py-1">
+          <span>{getMessage("zsh")}</span>
+        </div>
+      ),
+      onClick: () => handleAddTerminalWithShell('zsh'),
+    },
+    {
+      key: 'powershell',
+      label: (
+        <div className="flex items-center gap-2 px-2 py-1">
+          <span>{getMessage("powershell")}</span>
+        </div>
+      ),
+      onClick: () => handleAddTerminalWithShell('powershell'),
+    },
+  ];
   return (
     <>
       {/* Tool Panel Navigation */}
       <div className="bg-[#1f1f1f] border-b border-gray-700 px-2">
         <div className="flex items-center justify-between gap-1">
-          <div>
+          <div className="flex items-center gap-1">
             {[
               { key: "output", label: getMessage("output") },
               { key: "terminal", label: getMessage("terminal") },
@@ -36,6 +74,23 @@ function TerminalOutput(props: any) {
                 {tab.label}
               </button>
             ))}
+            
+            {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
+            {activeToolPanel === "terminal" && (
+              <Dropdown
+                menu={{ items: shellMenuItems }}
+                placement="bottomLeft"
+                trigger={['hover']}
+                overlayClassName="terminal-shell-dropdown"
+              >
+                <Tooltip title={getMessage("addTerminalWithShell")}>
+                  <button className="ml-2 flex items-center gap-1 px-2 py-0.5 text-xs text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors">
+                    <PlusOutlined style={{ fontSize: "10px" }} />
+                    <CaretDownOutlined style={{ fontSize: "8px" }} />
+                  </button>
+                </Tooltip>
+              </Dropdown>
+            )}
           </div>
 
           <div className="flex items-center pr-2">
