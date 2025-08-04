@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, forwardRef, useImperativeHandle } from "react";
 import Terminal from "./Terminal";
 import Split from "react-split";
 import {
@@ -15,7 +15,11 @@ interface TerminalTab {
   fontSize?: number;
 }
 
-const TerminalManager: React.FC = () => {
+export interface TerminalManagerRef {
+  addTerminal: () => void;
+}
+
+const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
   const [terminals, setTerminals] = useState<TerminalTab[]>([
     { id: "1", name: `${getMessage("terminal")} 1`, fontSize: 14 },
   ]);
@@ -41,6 +45,11 @@ const TerminalManager: React.FC = () => {
     ]);
     setActiveTerminal(newId);
   };
+
+  // 暴露方法给外部调用者
+  useImperativeHandle(ref, () => ({
+    addTerminal,
+  }));
 
   const removeTerminal = (id: string) => {
     if (terminals.length > 1) {
@@ -201,6 +210,6 @@ const TerminalManager: React.FC = () => {
       </Modal>
     </div>
   );
-};
+});
 
 export default TerminalManager;
