@@ -87,18 +87,18 @@ function TerminalOutput(props: any) {
           <div className="flex items-center pr-2">
             {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
             {activeToolPanel === "terminal" && (
-              //   <Tooltip
-              //     placement="bottomLeft"
-              //     title={getMessage("addTerminalWithShell")}
-              //   >
               <div className="mr-2 flex items-center text-white">
-                <button
-                  onClick={() => terminalManager.current?.addTerminal()}
-                  className="ml-1 flex items-center gap-1 px-1 py-1 hover:bg-gray-700 rounded-none transition-colors"
+                <Tooltip
+                  placement="bottomLeft"
+                  title={getMessage("addTerminalWithShell")}
                 >
-                  <PlusOutlined />
-                </button>
-
+                  <button
+                    onClick={() => terminalManager.current?.addTerminal()}
+                    className="ml-1 flex items-center gap-1 px-1 py-1 hover:bg-gray-700 rounded-none transition-colors"
+                  >
+                    <PlusOutlined />
+                  </button>
+                </Tooltip>
                 <Dropdown
                   trigger={["click"]}
                   placement="bottomLeft"
@@ -112,7 +112,6 @@ function TerminalOutput(props: any) {
                   </button>
                 </Dropdown>
               </div>
-              //   </Tooltip>
             )}
             {/* 全屏切换按钮 - 当终端区域被最小化时隐藏 */}
             {!isTerminalMinimized && (

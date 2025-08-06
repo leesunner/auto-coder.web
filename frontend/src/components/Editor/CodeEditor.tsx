@@ -479,7 +479,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       <Split
         className="code-editor-content split-horizontal"
         sizes={[20, 80]}
-        minSize={[300, 300]}
+        minSize={[209, 300]}
         expandToMin={false}
         gutterSize={0.5}
         gutterAlign="center"

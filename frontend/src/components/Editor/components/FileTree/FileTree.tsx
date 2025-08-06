@@ -359,25 +359,42 @@ const FileTree: React.FC<FileTreeProps> = ({
     }));
   }
 
-  // Handle tree selection
-  const handleSelect = (selectedKeys: React.Key[], info: any) => {
-    setSelectedKeys(selectedKeys as string[]);
-    onSelect?.(selectedKeys, { ...info, isCompactFolders });
-  };
-
-  // Handle tree expansion
-  const handleExpand = (selectedKeys: React.Key[], info: any) => {
+  const handleExpandCall = (selectedKeys: React.Key[], info: any) => {
     const {
       expanded,
       node: { key },
     } = info;
+
     if (!expanded) {
       selectedKeys = (selectedKeys as string[]).filter(
         (_key) => !_key.startsWith(key)
       );
     }
-    setExpandedKeys(selectedKeys as string[]);
     onExpand?.(selectedKeys, { ...info, isCompactFolders });
+    return selectedKeys;
+  };
+
+  // Handle tree expansion
+  const handleExpand = (selectedKeys: React.Key[], info: any) => {
+    const _selectedKeys = handleExpandCall(selectedKeys, info);
+    setExpandedKeys(_selectedKeys as string[]);
+  };
+
+  // Handle tree selection
+  const handleSelect = (selectedKeys: React.Key[], info: any) => {
+    setSelectedKeys(selectedKeys as string[]);
+    const { key, isLeaf } = info.node;
+    if (!isLeaf) {
+      const isIn = _expandedKeys.includes(key);
+      const list = new Set([..._expandedKeys].concat([key])).values();
+      handleExpand([...(list as any)], {
+        ...info,
+        expanded: !isIn,
+      });
+      return;
+    }
+
+    onSelect?.(selectedKeys, { ...info, isCompactFolders });
   };
 
   useEffect(() => {
@@ -572,6 +589,7 @@ const FileTree: React.FC<FileTreeProps> = ({
                 showIcon={false}
                 autoExpandParent
                 expandedKeys={_expandedKeys}
+                // multiple
                 // showLine
                 // defaultExpandAll
                 onSelect={handleSelect}

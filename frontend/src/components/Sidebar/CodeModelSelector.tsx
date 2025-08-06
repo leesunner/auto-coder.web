@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Select, message, Tag, Tooltip, notification } from 'antd';
-import { CodeOutlined } from '@ant-design/icons';
-import { getMessage } from '../../lang';
-import '../../styles/custom_antd.css';
-import './ragSelectorStyles.css';
-import eventBus, { EVENTS } from '../../services/eventBus';
-import { validModelHasApiKey } from '@/utils/validModelHasApiKey';
+import React, { useState, useEffect, useCallback } from "react";
+import { Select, message, Tag, Tooltip, notification } from "antd";
+import { CodeOutlined } from "@ant-design/icons";
+import { getMessage } from "../../lang";
+import "../../styles/custom_antd.css";
+import "./ragSelectorStyles.css";
+import eventBus, { EVENTS } from "../../services/eventBus";
+import { validModelHasApiKey } from "@/utils/validModelHasApiKey";
 
 interface Model {
   name: string;
@@ -13,7 +13,21 @@ interface Model {
   model_type: string;
 }
 
-const CodeModelSelector: React.FC = () => {
+export const getModels = async (needHasApiKey = false) => {
+  const response = await fetch("/api/models");
+  if (!response.ok) {
+    throw new Error(getMessage("failedToFetchModels"));
+  }
+  const data: any[] = await response.json();
+  let _list = data.sort((a, b) => (a.api_key ? -1 : 1));
+  if (needHasApiKey) {
+    _list = _list.filter((model) => !!model.api_key);
+  }
+  return _list;
+};
+
+const CodeModelSelector: React.FC<{ needApiKey: boolean }> = (props) => {
+  const { needApiKey = false } = props;
   const [availableModels, setAvailableModels] = useState<Model[]>([]);
   const [selectedCodeModels, setSelectedCodeModels] = useState<string[]>([]);
   const [loadingModels, setLoadingModels] = useState(false);
@@ -24,15 +38,11 @@ const CodeModelSelector: React.FC = () => {
   const fetchModels = useCallback(async () => {
     setLoadingModels(true);
     try {
-      const response = await fetch('/api/models');
-      if (!response.ok) {
-        throw new Error(getMessage('failedToFetchModels'));
-      }
-      const data = await response.json();
+      const data = await getModels(needApiKey);
       setAvailableModels(data);
     } catch (error) {
-      console.error('Error fetching models:', error);
-      message.error(getMessage('errorFetchingModels'));
+      console.error("Error fetching models:", error);
+      message.error(getMessage("errorFetchingModels"));
     } finally {
       setLoadingModels(false);
     }
@@ -42,10 +52,12 @@ const CodeModelSelector: React.FC = () => {
   const fetchCurrentConfig = async () => {
     setLoadingConfig(true);
     try {
-      const response = await fetch('/api/conf');
+      const response = await fetch("/api/conf");
       if (!response.ok) {
         // Don't throw error on initial load if conf doesn't exist or fails, just log.
-        console.warn('Failed to fetch initial configuration, proceeding with defaults.');
+        console.warn(
+          "Failed to fetch initial configuration, proceeding with defaults."
+        );
         setSelectedCodeModels([]); // Default to empty array
         return; // Exit function early
       }
@@ -53,22 +65,27 @@ const CodeModelSelector: React.FC = () => {
       const currentConfig = data.conf;
 
       if (currentConfig && currentConfig.code_model) {
-        const models = typeof currentConfig.code_model === 'string'
-          ? currentConfig.code_model.split(',').map((m: string) => m.trim()).filter((m: string) => m) // Handle empty strings after split
-          : Array.isArray(currentConfig.code_model) ? currentConfig.code_model : []; // Ensure it's an array
+        const models =
+          typeof currentConfig.code_model === "string"
+            ? currentConfig.code_model
+                .split(",")
+                .map((m: string) => m.trim())
+                .filter((m: string) => m) // Handle empty strings after split
+            : Array.isArray(currentConfig.code_model)
+            ? currentConfig.code_model
+            : []; // Ensure it's an array
         setSelectedCodeModels(models);
       } else {
         setSelectedCodeModels([]); // Ensure it's an empty array if not set or config is missing
       }
     } catch (error) {
-      console.error('Error fetching current configuration:', error);
+      console.error("Error fetching current configuration:", error);
       // Don't show error message on initial load failure, maybe just log
       setSelectedCodeModels([]); // Default to empty on error as well
     } finally {
       setLoadingConfig(false);
     }
   };
-
 
   // Update or delete the configuration key
   const updateOrDeleteConfig = async (key: string, value: string[]) => {
@@ -81,19 +98,21 @@ const CodeModelSelector: React.FC = () => {
       if (isEmpty) {
         // Use DELETE endpoint with key in path
         response = await fetch(`/api/conf/${key}`, {
-          method: 'DELETE',
+          method: "DELETE",
         });
       } else {
         // Use POST endpoint with key-value in body
-        response = await fetch('/api/conf', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ [key]: value.join(',') }),
+        response = await fetch("/api/conf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [key]: value.join(",") }),
         });
       }
 
       if (!response.ok) {
-        let errorDetail = isEmpty ? getMessage('failedToDeleteConfiguration') : getMessage('failedToUpdateConfiguration');
+        let errorDetail = isEmpty
+          ? getMessage("failedToDeleteConfiguration")
+          : getMessage("failedToUpdateConfiguration");
         try {
           const errorData = await response.json();
           if (errorData && errorData.detail) {
@@ -110,15 +129,17 @@ const CodeModelSelector: React.FC = () => {
       // Optionally show success message
       // message.success(`Configuration '${key}' ${isEmpty ? 'cleared' : 'updated'} successfully.`);
     } catch (error: any) {
-      console.error(`Error ${isEmpty ? 'deleting' : 'updating'} configuration key ${key}:`, error);
-      message.error(error.message || getMessage('failedToUpdateConfiguration'));
+      console.error(
+        `Error ${isEmpty ? "deleting" : "updating"} configuration key ${key}:`,
+        error
+      );
+      message.error(error.message || getMessage("failedToUpdateConfiguration"));
       // Refetch to show the actual current state after failure to revert UI optimistic update
       fetchCurrentConfig();
     } finally {
       setIsUpdating(false);
     }
   };
-
 
   useEffect(() => {
     fetchModels();
@@ -130,7 +151,7 @@ const CodeModelSelector: React.FC = () => {
     const handleCodeModelUpdate = (updatedModels: string[]) => {
       // Ensure it's an array before comparing/setting
       const modelsArray = Array.isArray(updatedModels) ? updatedModels : [];
-      setSelectedCodeModels(prev => {
+      setSelectedCodeModels((prev) => {
         // Only update if the value is actually different
         if (JSON.stringify(prev) !== JSON.stringify(modelsArray)) {
           console.log("CodeModelSelector received update:", modelsArray);
@@ -140,7 +161,10 @@ const CodeModelSelector: React.FC = () => {
       });
     };
 
-    const unsubscribe = eventBus.subscribe(EVENTS.CONFIG.CODE_MODEL_UPDATED, handleCodeModelUpdate);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.CONFIG.CODE_MODEL_UPDATED,
+      handleCodeModelUpdate
+    );
 
     // Cleanup subscription on component unmount
     return () => {
@@ -151,11 +175,16 @@ const CodeModelSelector: React.FC = () => {
   // Subscribe to model list updates from event bus
   useEffect(() => {
     const handleModelListUpdate = () => {
-      console.log("CodeModelSelector received model list update, fetching models...");
+      console.log(
+        "CodeModelSelector received model list update, fetching models..."
+      );
       fetchModels();
     };
 
-    const unsubscribe = eventBus.subscribe(EVENTS.CONFIG.MODEL_LIST_UPDATED, handleModelListUpdate);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.CONFIG.MODEL_LIST_UPDATED,
+      handleModelListUpdate
+    );
 
     // Cleanup subscription on component unmount
     return () => {
@@ -163,33 +192,34 @@ const CodeModelSelector: React.FC = () => {
     };
   }, [fetchModels]); // Dependency includes fetchModels to ensure it uses the latest version
 
-
   const handleModelChange = (value: string[]) => {
     const validValues = Array.isArray(value) ? value : []; // Ensure it's always an array
 
     if (!validModelHasApiKey(availableModels, value)) {
-      notification.info({ message: getMessage('modelApiKeyNotConfigured'), duration: 1.5})
+      notification.info({
+        message: getMessage("modelApiKeyNotConfigured"),
+        duration: 1.5,
+      });
     }
 
     // Optimistically update UI
     setSelectedCodeModels(validValues);
     // Trigger API update (which will publish event on success)
-    updateOrDeleteConfig('code_model', validValues);
+    updateOrDeleteConfig("code_model", validValues);
   };
-
 
   const isLoading = loadingModels || loadingConfig;
 
   return (
     <div className="w-full mb-0">
-      <Tooltip title={getMessage('codeModelDescription')}>
+      <Tooltip title={getMessage("codeModelDescription")}>
         <div className="flex items-center cursor-default h-5">
           <CodeOutlined
             className="mr-1 text-gray-400 flex-shrink-0"
-            style={{ fontSize: '11px' }}
+            style={{ fontSize: "11px" }}
           />
           <span className="text-xxs text-gray-400 truncate max-w-[80%]">
-            {getMessage('codeModel')}
+            {getMessage("codeModel")}
           </span>
         </div>
       </Tooltip>
@@ -201,36 +231,38 @@ const CodeModelSelector: React.FC = () => {
         popupClassName="custom-select-dropdown"
         value={selectedCodeModels}
         onChange={handleModelChange}
-        options={availableModels.map(model => ({
+        options={availableModels.map((model) => ({
           value: model.name,
-          label: model.name
+          label: model.name,
         }))}
         showSearch
-        filterOption={(input: string, option?: { label: string, value: string }) =>
-          option?.label.toLowerCase().includes(input.toLowerCase()) || false
-        }
+        filterOption={(
+          input: string,
+          option?: { label: string; value: string }
+        ) => option?.label.toLowerCase().includes(input.toLowerCase()) || false}
         tagRender={(props) => {
           const { label, closable, onClose, value } = props;
 
           // Don't truncate the first selected item, but truncate others if needed
-          const displayLabel = (typeof label === 'string' && label.length > 10 ?
-            `${label.substring(0, 20)}...` :
-            label);
+          const displayLabel =
+            typeof label === "string" && label.length > 10
+              ? `${label.substring(0, 20)}...`
+              : label;
 
           return (
             <Tag
               color="blue"
               closable={closable}
               onClose={onClose}
-              style={{ marginRight: 2, padding: '0 4px' }}
+              style={{ marginRight: 2, padding: "0 4px" }}
               className="text-xs"
-              title={typeof label === 'string' ? label : undefined} // Show full name on hover
+              title={typeof label === "string" ? label : undefined} // Show full name on hover
             >
               {displayLabel}
             </Tag>
           );
         }}
-        placeholder={getMessage('selectCodeModelsPlaceholder')}
+        placeholder={getMessage("selectCodeModelsPlaceholder")}
         size="small"
         dropdownMatchSelectWidth={false}
         maxTagCount={1}

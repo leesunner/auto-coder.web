@@ -94,7 +94,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
         </div>
 
         {/* Right Panel - Terminal Management */}
-        <div className="bg-gray-900 flex flex-col">
+        <div className="bg-[#1f1f1f] flex flex-col">
           {/* <div className="p-2 border-b border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
@@ -117,7 +117,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
               </div>
             </div>
           </div> */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto ">
             {terminals.map((terminal) => (
               <div
                 key={terminal.id}
