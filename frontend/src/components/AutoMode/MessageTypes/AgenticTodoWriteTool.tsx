@@ -4,7 +4,7 @@ import { getMessage } from "../../../lang";
 import "./MessageStyles.css";
 
 interface AgenticTodoWriteToolProps {
-  message: MessageProps & { content: TodoTask };
+  message: MessageProps;
 }
 
 type TodoTask =
@@ -42,12 +42,12 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  let todoData: TodoData = { tasks: [] };
+  let todoData: TodoTask = {};
   let action = "";
   let success = false;
 
   try {
-    const parsed = JSON.parse(message.content || "{}");
+    const parsed: TodoTask = JSON.parse(message.content || "{}");
     action = parsed.action || "";
     success = parsed.success ?? true;
 
