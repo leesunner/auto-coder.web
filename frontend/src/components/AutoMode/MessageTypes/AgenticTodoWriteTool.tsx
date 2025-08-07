@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import type { MessageProps } from '../MessageList';
-import { getMessage } from '../../../lang';
-import './MessageStyles.css';
+import React, { useState } from "react";
+import type { MessageProps } from "../MessageList";
+import { getMessage } from "../../../lang";
+import "./MessageStyles.css";
 
 interface AgenticTodoWriteToolProps {
-  message: MessageProps;
+  message: MessageProps & { content: ContentData };
 }
 
 interface TodoTask {
   task_id: string;
   content: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  priority: 'high' | 'medium' | 'low';
+  status: "pending" | "in_progress" | "completed";
+  priority: "high" | "medium" | "low";
   notes?: string;
   created_at?: string;
   updated_at?: string;
@@ -27,18 +27,50 @@ interface TodoData {
   };
 }
 
-const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) => {
+type ContentData =
+  | {
+      tool_name: string;
+      action: "create";
+      task_id: null;
+      //content就是todolist的内容: "\n<task>创建俄罗斯方块游戏主组件 (TetrisGame.vue)</task>\n<task>XXXX</task>
+      content: string;
+      priority: "high";
+      status: null;
+      notes: null;
+    }
+  | {
+      tool_name: string;
+      action: "mark_progress";
+      task_id: string;
+      content: null;
+      priority: null;
+      status: null;
+      notes: null;
+    }
+  | {
+      tool_name: string;
+      action: "mark_completed";
+      task_id: string;
+      content: null;
+      priority: null;
+      status: null;
+      notes: string;
+    };
+
+const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
+  message,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  
+
   let todoData: TodoData = { tasks: [] };
-  let action = '';
+  let action = "";
   let success = false;
 
   try {
-    const parsed = JSON.parse(message.content || '{}');
-    action = parsed.action || '';
+    const parsed = JSON.parse(message.content || "{}");
+    action = parsed.action || "";
     success = parsed.success ?? true;
-    
+
     // 解析todo数据
     if (parsed.todo_data) {
       todoData = parsed.todo_data;
@@ -46,59 +78,59 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
       todoData = { tasks: parsed.tasks };
     }
   } catch (e) {
-    console.error('Failed to parse todo content:', e);
+    console.error("Failed to parse todo content:", e);
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'text-green-400 bg-green-600/20';
-      case 'in_progress':
-        return 'text-yellow-400 bg-yellow-600/20';
-      case 'pending':
+      case "completed":
+        return "text-green-400 bg-green-600/20";
+      case "in_progress":
+        return "text-yellow-400 bg-yellow-600/20";
+      case "pending":
       default:
-        return 'text-gray-400 bg-gray-600/20';
+        return "text-gray-400 bg-gray-600/20";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return 'text-red-400 bg-red-600/20';
-      case 'medium':
-        return 'text-yellow-400 bg-yellow-600/20';
-      case 'low':
+      case "high":
+        return "text-red-400 bg-red-600/20";
+      case "medium":
+        return "text-yellow-400 bg-yellow-600/20";
+      case "low":
       default:
-        return 'text-blue-400 bg-blue-600/20';
+        return "text-blue-400 bg-blue-600/20";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'completed':
-        return getMessage('todoTaskCompleted');
-      case 'in_progress':
-        return getMessage('todoTaskInProgress');
-      case 'pending':
+      case "completed":
+        return getMessage("todoTaskCompleted");
+      case "in_progress":
+        return getMessage("todoTaskInProgress");
+      case "pending":
       default:
-        return getMessage('todoTaskPending');
+        return getMessage("todoTaskPending");
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'high':
-        return getMessage('todoTaskHigh');
-      case 'medium':
-        return getMessage('todoTaskMedium');
-      case 'low':
+      case "high":
+        return getMessage("todoTaskHigh");
+      case "medium":
+        return getMessage("todoTaskMedium");
+      case "low":
       default:
-        return getMessage('todoTaskLow');
+        return getMessage("todoTaskLow");
     }
   };
 
   const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return '-';
+    if (!dateStr) return "-";
     try {
       const date = new Date(dateStr);
       return date.toLocaleString();
@@ -115,7 +147,11 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
           className="message-toggle-button text-gray-400"
         >
           {isCollapsed ? (
-            <svg className="message-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+            <svg
+              className="message-toggle-icon"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
               <path
                 fillRule="evenodd"
                 d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -123,7 +159,11 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
               />
             </svg>
           ) : (
-            <svg className="message-toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+            <svg
+              className="message-toggle-icon"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
               <path
                 fillRule="evenodd"
                 d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
@@ -134,7 +174,12 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
         </button>
 
         <span className="message-title-icon">
-          <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4 text-purple-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -143,9 +188,9 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
             />
           </svg>
         </span>
-        
+
         <span className="message-title-text ml-1 text-purple-400 font-semibold">
-          {getMessage('agenticTodoWriteToolTitle')}
+          {getMessage("agenticTodoWriteToolTitle")}
         </span>
 
         {todoData.summary && (
@@ -162,13 +207,18 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
             总计: <span className="text-white">{todoData.summary.total}</span>
           </span>
           <span className="text-gray-400">
-            待处理: <span className="text-gray-300">{todoData.summary.pending}</span>
+            待处理:{" "}
+            <span className="text-gray-300">{todoData.summary.pending}</span>
           </span>
           <span className="text-yellow-400">
-            进行中: <span className="text-yellow-300">{todoData.summary.in_progress}</span>
+            进行中:{" "}
+            <span className="text-yellow-300">
+              {todoData.summary.in_progress}
+            </span>
           </span>
           <span className="text-green-400">
-            已完成: <span className="text-green-300">{todoData.summary.completed}</span>
+            已完成:{" "}
+            <span className="text-green-300">{todoData.summary.completed}</span>
           </span>
         </div>
       )}
@@ -189,10 +239,18 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
                   </p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
-                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(task.status)}`}>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                      task.status
+                    )}`}
+                  >
                     {getStatusText(task.status)}
                   </span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
+                      task.priority
+                    )}`}
+                  >
                     {getPriorityText(task.priority)}
                   </span>
                 </div>
@@ -201,7 +259,9 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
               {/* 备注 */}
               {task.notes && (
                 <div className="mb-2">
-                  <span className="text-xs text-gray-400">{getMessage('todoTaskNotes')}:</span>
+                  <span className="text-xs text-gray-400">
+                    {getMessage("todoTaskNotes")}:
+                  </span>
                   <p className="text-xs text-gray-300 mt-1 pl-2 border-l-2 border-gray-600">
                     {task.notes}
                   </p>
@@ -213,12 +273,14 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
                 <div className="flex gap-4 text-xs text-gray-500">
                   {task.created_at && (
                     <span>
-                      {getMessage('todoTaskCreatedAt')}: {formatDateTime(task.created_at)}
+                      {getMessage("todoTaskCreatedAt")}:{" "}
+                      {formatDateTime(task.created_at)}
                     </span>
                   )}
                   {task.updated_at && task.updated_at !== task.created_at && (
                     <span>
-                      {getMessage('todoTaskUpdatedAt')}: {formatDateTime(task.updated_at)}
+                      {getMessage("todoTaskUpdatedAt")}:{" "}
+                      {formatDateTime(task.updated_at)}
                     </span>
                   )}
                 </div>
@@ -231,7 +293,12 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({ message }) 
       {/* 空状态 */}
       {!isCollapsed && todoData.tasks.length === 0 && (
         <div className="mt-3 text-center py-6 text-gray-500">
-          <svg className="w-8 h-8 mx-auto mb-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-8 h-8 mx-auto mb-2 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
