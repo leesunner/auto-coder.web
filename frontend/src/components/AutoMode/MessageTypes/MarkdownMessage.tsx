@@ -70,6 +70,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
           output_cost: { label: "输出成本", format: (v) => `$${v}` },
           speed: { label: "速度", format: (v) => `${v} tokens/秒` },
           conversation_id: { label: "会话ID" },
+          "Tokens Used": { label: "token消耗" },
         };
 
         // 1. 处理已知属性（按定义的顺序）
@@ -83,6 +84,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
           "input_cost",
           "output_cost",
           "conversation_id",
+          "Tokens Used",
         ];
 
         orderedKeys.forEach((key) => {

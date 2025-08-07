@@ -237,6 +237,46 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "AitoCoder wants to search for files matching this pattern",
     zh: "AitoCoder 想要搜索与此模式匹配的文件",
   },
+  agenticTodoWriteToolTitle: {
+    en: "AitoCoder listed the todo list",
+    zh: "AitoCoder 列出了待办列表",
+  },
+  todoTaskPending: {
+    en: "Pending",
+    zh: "待处理",
+  },
+  todoTaskInProgress: {
+    en: "In Progress", 
+    zh: "进行中",
+  },
+  todoTaskCompleted: {
+    en: "Completed",
+    zh: "已完成",
+  },
+  todoTaskHigh: {
+    en: "High",
+    zh: "高",
+  },
+  todoTaskMedium: {
+    en: "Medium", 
+    zh: "中",
+  },
+  todoTaskLow: {
+    en: "Low",
+    zh: "低",
+  },
+  todoTaskNotes: {
+    en: "Notes",
+    zh: "备注",
+  },
+  todoTaskCreatedAt: {
+    en: "Created",
+    zh: "创建时间",
+  },
+  todoTaskUpdatedAt: {
+    en: "Updated", 
+    zh: "更新时间",
+  },
 
   // 对话框
   askUserDialogTitle: {
