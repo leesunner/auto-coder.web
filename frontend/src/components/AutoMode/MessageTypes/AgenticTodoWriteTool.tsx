@@ -4,28 +4,38 @@ import { getMessage } from "../../../lang";
 import "./MessageStyles.css";
 
 interface AgenticTodoWriteToolProps {
-  message: MessageProps;
+  message: MessageProps & { content: TodoTask };
 }
 
-interface TodoTask {
-  task_id: string;
-  content: string;
-  status: "pending" | "in_progress" | "completed";
-  priority: "high" | "medium" | "low";
-  notes?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface TodoData {
-  tasks: TodoTask[];
-  summary?: {
-    total: number;
-    pending: number;
-    in_progress: number;
-    completed: number;
-  };
-}
+type TodoTask =
+  | {
+      tool_name: string;
+      action: "create";
+      task_id: null;
+      //content就是todolist的内容: "\n<task>创建俄罗斯方块游戏主组件 (TetrisGame.vue)</task>\n<task>XXXX</task>
+      content: string;
+      priority: "high";
+      status: null;
+      notes: null;
+    }
+  | {
+      tool_name: string;
+      action: "mark_progress";
+      task_id: string;
+      content: null;
+      priority: null;
+      status: null;
+      notes: null;
+    }
+  | {
+      tool_name: string;
+      action: "mark_completed";
+      task_id: string;
+      content: null;
+      priority: null;
+      status: null;
+      notes: string;
+    };
 
 const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
   message,
@@ -34,62 +44,18 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
 
   let todoData: TodoData = { tasks: [] };
   let action = "";
-  let toolContent = "";
-  let priority = "";
+  let success = false;
 
   try {
     const parsed = JSON.parse(message.content || "{}");
     action = parsed.action || "";
-    toolContent = parsed.content || "";
-    priority = parsed.priority || "";
+    success = parsed.success ?? true;
 
-    // 如果是创建操作且有content，需要解析任务列表
-    if (action === "create" && toolContent) {
-      // 解析 <task>内容</task> 格式的任务列表
-      const taskMatches = toolContent.match(/<task>(.*?)<\/task>/g);
-      if (taskMatches) {
-        const tasks: TodoTask[] = taskMatches.map((match, index) => {
-          const taskContent = match.replace(/<\/?task>/g, '').trim();
-          return {
-            task_id: `task_${index + 1}`,
-            content: taskContent,
-            status: "pending" as const,
-            priority: priority as "high" | "medium" | "low" || "medium",
-            created_at: new Date().toISOString(),
-          };
-        });
-        
-        todoData = {
-          tasks,
-          summary: {
-            total: tasks.length,
-            pending: tasks.length,
-            in_progress: 0,
-            completed: 0,
-          }
-        };
-      }
-    } else if (action === "mark_progress" || action === "mark_completed") {
-      // 对于状态更新操作，显示操作信息
-      const taskId = parsed.task_id || "";
-      const notes = parsed.notes || "";
-      
-      todoData = {
-        tasks: [{
-          task_id: taskId,
-          content: action === "mark_progress" ? "任务标记为进行中" : "任务标记为已完成",
-          status: action === "mark_progress" ? "in_progress" : "completed",
-          priority: "medium",
-          notes: notes,
-          updated_at: new Date().toISOString(),
-        }],
-        summary: {
-          total: 1,
-          pending: 0,
-          in_progress: action === "mark_progress" ? 1 : 0,
-          completed: action === "mark_completed" ? 1 : 0,
-        }
-      };
+    // 解析todo数据
+    if (parsed.todo_data) {
+      todoData = parsed.todo_data;
+    } else if (parsed.tasks) {
+      todoData = { tasks: parsed.tasks };
     }
   } catch (e) {
     console.error("Failed to parse todo content:", e);
@@ -204,24 +170,18 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
         </span>
 
         <span className="message-title-text ml-1 text-purple-400 font-semibold">
-          {action === "create" ? getMessage("agenticTodoWriteToolTitle") : 
-           action === "mark_progress" ? "标记任务为进行中" :
-           action === "mark_completed" ? "标记任务为已完成" :
-           getMessage("agenticTodoWriteToolTitle")}
+          {getMessage("agenticTodoWriteToolTitle")}
         </span>
 
         {todoData.summary && (
           <span className="text-xs px-2 py-0.5 ml-2 rounded-full bg-purple-600/30 text-purple-400">
-            {action === "create" ? `${todoData.summary.total} 项任务` :
-             action === "mark_progress" ? "进行中" :
-             action === "mark_completed" ? "已完成" :
-             `${todoData.summary.total} 项任务`}
+            {todoData.summary.total} 项任务
           </span>
         )}
       </div>
 
       {/* 摘要信息 */}
-      {todoData.summary && !isCollapsed && action === "create" && (
+      {todoData.summary && !isCollapsed && (
         <div className="mt-2 flex gap-4 text-xs">
           <span className="text-gray-400">
             总计: <span className="text-white">{todoData.summary.total}</span>
@@ -240,13 +200,6 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
             已完成:{" "}
             <span className="text-green-300">{todoData.summary.completed}</span>
           </span>
-        </div>
-      )}
-
-      {/* 操作信息 */}
-      {!isCollapsed && (action === "mark_progress" || action === "mark_completed") && (
-        <div className="mt-2 text-xs text-gray-400">
-          操作类型: <span className="text-white">{action === "mark_progress" ? "标记为进行中" : "标记为已完成"}</span>
         </div>
       )}
 
@@ -318,7 +271,7 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       )}
 
       {/* 空状态 */}
-      {!isCollapsed && todoData.tasks.length === 0 && action === "create" && (
+      {!isCollapsed && todoData.tasks.length === 0 && (
         <div className="mt-3 text-center py-6 text-gray-500">
           <svg
             className="w-8 h-8 mx-auto mb-2 text-gray-600"
@@ -330,22 +283,10 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 0 012 2"
             />
           </svg>
-          <p className="text-sm">未能解析到待办任务</p>
-        </div>
-      )}
-
-      {/* 操作结果显示 */}
-      {!isCollapsed && (action === "mark_progress" || action === "mark_completed") && toolContent && (
-        <div className="mt-3 p-3 bg-gray-800/50 border border-gray-700 rounded-lg">
-          <div className="text-sm text-gray-300">
-            <span className="font-medium">操作详情:</span>
-          </div>
-          <div className="mt-2 text-xs text-gray-400">
-            {action === "mark_progress" ? "任务已标记为进行中" : "任务已标记为已完成"}
-          </div>
+          <p className="text-sm">暂无待办任务</p>
         </div>
       )}
     </div>
