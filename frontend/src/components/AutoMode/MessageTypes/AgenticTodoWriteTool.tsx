@@ -148,7 +148,7 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       parsedTasks = [
         {
           id: todoData.task_id,
-          content: `任务 ${todoData.task_id}`,
+          content: `${getMessage("todoTaskLabel")} ${todoData.task_id}`,
           status: "in_progress",
           priority: "medium",
         },
@@ -158,7 +158,7 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       parsedTasks = [
         {
           id: todoData.task_id,
-          content: `任务 ${todoData.task_id}`,
+          content: `${getMessage("todoTaskLabel")} ${todoData.task_id}`,
           status: "completed",
           priority: "medium",
           notes: todoData.notes || undefined,
@@ -169,7 +169,7 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       parsedTasks = [
         {
           id: todoData.task_id,
-          content: todoData.content || `任务 ${todoData.task_id}`,
+          content: todoData.content || `${getMessage("todoTaskLabel")} ${todoData.task_id}`,
           status: todoData.status || "pending",
           priority: todoData.priority || "medium",
           notes: todoData.notes || undefined,
@@ -241,17 +241,17 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
   const getActionText = (action: string) => {
     switch (action) {
       case "create":
-        return "创建了待办列表";
+        return getMessage("todoActionCreate");
       case "add_task":
-        return "添加了新任务";
+        return getMessage("todoActionAddTask");
       case "mark_progress":
-        return "任务为进行中";
+        return getMessage("todoActionMarkProgress");
       case "mark_completed":
-        return "任务为已完成";
+        return getMessage("todoActionMarkCompleted");
       case "update":
-        return "更新了任务";
+        return getMessage("todoActionUpdate");
       default:
-        return "操作了待办列表";
+        return getMessage("todoActionDefault");
     }
   };
 
@@ -334,17 +334,17 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       {taskStats.total > 0 && !isCollapsed && (
         <div className="mt-2 flex gap-4 text-xs">
           <span className="text-gray-400">
-            总计: <span className="text-white">{taskStats.total}</span>
+            {getMessage("todoStatsTotal")}: <span className="text-white">{taskStats.total}</span>
           </span>
           <span className="text-gray-400">
-            待处理: <span className="text-gray-300">{taskStats.pending}</span>
+            {getMessage("todoStatsPending")}: <span className="text-gray-300">{taskStats.pending}</span>
           </span>
           <span className="text-yellow-400">
-            进行中:{" "}
+            {getMessage("todoStatsInProgress")}:{" "}
             <span className="text-yellow-300">{taskStats.in_progress}</span>
           </span>
           <span className="text-green-400">
-            已完成:{" "}
+            {getMessage("todoStatsCompleted")}:{" "}
             <span className="text-green-300">{taskStats.completed}</span>
           </span>
         </div>
@@ -423,17 +423,17 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 0 012 2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
           <p className="text-sm">
             {action === "create"
-              ? "创建待办列表"
+              ? getMessage("todoEmptyStateCreate")
               : action === "mark_progress"
-              ? "待办任务进行中"
+              ? getMessage("todoEmptyStateMarkProgress")
               : action === "mark_completed"
-              ? "待办任务已完成"
-              : "待办操作"}
+              ? getMessage("todoEmptyStateMarkCompleted")
+              : getMessage("todoEmptyStateDefault")}
           </p>
         </div>
       )}

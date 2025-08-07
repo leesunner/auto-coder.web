@@ -277,8 +277,69 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Updated",
     zh: "更新时间",
   },
+  todoActionCreate: {
+    en: "Created todo list",
+    zh: "创建了待办列表",
+  },
+  todoActionAddTask: {
+    en: "Added new task",
+    zh: "添加了新任务",
+  },
+  todoActionMarkProgress: {
+    en: "Marked task as in progress",
+    zh: "任务为进行中",
+  },
+  todoActionMarkCompleted: {
+    en: "Marked task as completed",
+    zh: "任务为已完成",
+  },
+  todoActionUpdate: {
+    en: "Updated task",
+    zh: "更新了任务",
+  },
+  todoActionDefault: {
+    en: "Operated todo list",
+    zh: "操作了待办列表",
+  },
+  todoStatsTotal: {
+    en: "Total",
+    zh: "总计",
+  },
+  todoStatsPending: {
+    en: "Pending",
+    zh: "待处理",
+  },
+  todoStatsInProgress: {
+    en: "In Progress",
+    zh: "进行中",
+  },
+  todoStatsCompleted: {
+    en: "Completed",
+    zh: "已完成",
+  },
+  todoEmptyStateCreate: {
+    en: "Create todo list",
+    zh: "创建待办列表",
+  },
+  todoEmptyStateMarkProgress: {
+    en: "Todo task in progress",
+    zh: "待办任务进行中",
+  },
+  todoEmptyStateMarkCompleted: {
+    en: "Todo task completed",
+    zh: "待办任务已完成",
+  },
+  todoEmptyStateDefault: {
+    en: "Todo operation",
+    zh: "待办操作",
+  },
+  todoTaskLabel: {
+    en: "Task",
+    zh: "任务",
+  },
 
   // 对话框
+=======
   askUserDialogTitle: {
     en: "User Input Required",
     zh: "需要用户输入",
