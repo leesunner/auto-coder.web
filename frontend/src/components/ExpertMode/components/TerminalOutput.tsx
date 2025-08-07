@@ -1,17 +1,20 @@
 import { Tooltip } from "antd";
 import { Dropdown } from "@/components/Common";
-import {
-  UpOutlined,
-  DownOutlined,
-  PlusOutlined,
-  CaretDownOutlined,
-} from "@ant-design/icons";
+import { UpOutlined, DownOutlined, PlusOutlined } from "@ant-design/icons";
 import TerminalManager from "../../Terminal/TerminalManager";
 import OutputPanel from "../../Terminal/OutputPanel";
 import { getMessage } from "@/lang";
-import { useRef, useState, type Ref } from "react";
+import { useRef, useState } from "react";
 
-function TerminalOutput(props: any) {
+type Props = {
+  toggleTerminalExpand: () => void;
+  isTerminalMinimized: boolean;
+  requestId: string;
+  isFull: boolean;
+  toggleFullscreen: () => void;
+};
+
+function TerminalOutput(props: Props) {
   const {
     toggleTerminalExpand,
     isTerminalMinimized,
@@ -20,7 +23,7 @@ function TerminalOutput(props: any) {
     toggleFullscreen,
   } = props;
   const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
-  const terminalManager = useRef<typeof TerminalManager>(null);
+  const terminalManager = useRef<any>(null);
   // 处理新建终端的shell选择
   const handleAddTerminalWithShell = (shellType: string) => {
     console.log(`创建新终端，Shell类型: ${shellType}`);
@@ -87,31 +90,32 @@ function TerminalOutput(props: any) {
           <div className="flex items-center pr-2">
             {/* 新建终端按钮 - 只在terminal标签页激活时显示 */}
             {activeToolPanel === "terminal" && (
-              <div className="mr-2 flex items-center text-white">
-                <Tooltip
-                  placement="bottomLeft"
-                  title={getMessage("addTerminalWithShell")}
-                >
+              <Tooltip
+                placement="bottomLeft"
+                title={getMessage("addTerminalWithShell")}
+              >
+                <div className="mr-2 flex items-center text-white">
                   <button
                     onClick={() => terminalManager.current?.addTerminal()}
                     className="ml-1 flex items-center gap-1 px-1 py-1 hover:bg-gray-700 rounded-none transition-colors"
                   >
                     <PlusOutlined />
                   </button>
-                </Tooltip>
-                <Dropdown
-                  trigger={["click"]}
-                  placement="bottomLeft"
-                  menu={{ items: shellMenuItems }}
-                  size="small"
-                  selectClass="w-32"
-                  defaultActiveKey="bash"
-                >
-                  <button className="flex items-center gap-0 px-0.5 py-0.5 text-white hover:bg-gray-700 rounded-none transition-colors">
-                    <DownOutlined style={{ fontSize: "10px" }} />
-                  </button>
-                </Dropdown>
-              </div>
+
+                  <Dropdown
+                    trigger={["click"]}
+                    placement="topLeft"
+                    menu={{ items: shellMenuItems }}
+                    size="small"
+                    selectClass="w-32"
+                    defaultActiveKey="bash"
+                  >
+                    <button className="flex items-center gap-0 px-0.5 py-0.5 text-white hover:bg-gray-700 rounded-none transition-colors">
+                      <DownOutlined style={{ fontSize: "10px" }} />
+                    </button>
+                  </Dropdown>
+                </div>
+              </Tooltip>
             )}
             {/* 全屏切换按钮 - 当终端区域被最小化时隐藏 */}
             {!isTerminalMinimized && (

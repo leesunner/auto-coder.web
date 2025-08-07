@@ -1,10 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Table, message, Popconfirm, Modal, Space, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined, MinusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { getMessage } from '../../lang';
-import eventBus, { EVENTS } from '../../services/eventBus'; // Import eventBus
-import '../../styles/custom_antd.css';
-import './ModelConfig.css';
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Table,
+  message,
+  Popconfirm,
+  Modal,
+  Space,
+  Select,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  PlusCircleOutlined,
+  MinusCircleOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
+import { getMessage } from "../../lang";
+import eventBus, { EVENTS } from "../../services/eventBus"; // Import eventBus
+import "../../styles/custom_antd.css";
+import "./ModelConfig.css";
 
 // 定义模型数据结构
 interface ModelInfo {
@@ -28,21 +45,25 @@ const ProviderManagement: React.FC = () => {
   const [providers, setProviders] = useState<ProviderConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingProvider, setEditingProvider] = useState<ProviderConfig | null>(null);
+  const [editingProvider, setEditingProvider] = useState<ProviderConfig | null>(
+    null
+  );
 
   // 获取所有供应商
   const fetchProviders = async () => {
-  setLoading(true);
+    setLoading(true);
     try {
-      const response = await fetch('/api/providers');
+      const response = await fetch("/api/providers");
       if (!response.ok) {
-        throw new Error('Failed to fetch providers');
+        throw new Error("Failed to fetch providers");
       }
       const data = await response.json();
       setProviders(data);
     } catch (error) {
-      console.error('Error fetching providers:', error);
-      message.error(getMessage('modelOperationFailed', { message: String(error) }));
+      console.error("Error fetching providers:", error);
+      message.error(
+        getMessage("modelOperationFailed", { message: String(error) })
+      );
     } finally {
       setLoading(false);
     }
@@ -63,36 +84,38 @@ const ProviderManagement: React.FC = () => {
         models: values.models || [],
       };
 
-      const url = editingProvider 
-        ? `/api/providers/${editingProvider.name}` 
-        : '/api/providers';
-      
-      const method = editingProvider ? 'PUT' : 'POST';
-      
+      const url = editingProvider
+        ? `/api/providers/${editingProvider.name}`
+        : "/api/providers";
+
+      const method = editingProvider ? "PUT" : "POST";
+
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(providerData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save provider');
+        throw new Error("Failed to save provider");
       }
 
       message.success(
-        editingProvider 
-          ? getMessage('providerUpdateSuccess') 
-          : getMessage('providerAddSuccess')
+        editingProvider
+          ? getMessage("providerUpdateSuccess")
+          : getMessage("providerAddSuccess")
       );
-      
+
       setModalVisible(false);
       fetchProviders();
       eventBus.publish(EVENTS.PROVIDER.UPDATED); // Publish event
     } catch (error) {
-      console.error('Error saving provider:', error);
-      message.error(getMessage('modelOperationFailed', { message: String(error) }));
+      console.error("Error saving provider:", error);
+      message.error(
+        getMessage("modelOperationFailed", { message: String(error) })
+      );
     }
   };
 
@@ -100,19 +123,21 @@ const ProviderManagement: React.FC = () => {
   const handleDelete = async (providerName: string) => {
     try {
       const response = await fetch(`/api/providers/${providerName}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete provider');
+        throw new Error("Failed to delete provider");
       }
 
-      message.success(getMessage('providerDeleteSuccess'));
+      message.success(getMessage("providerDeleteSuccess"));
       fetchProviders();
       eventBus.publish(EVENTS.PROVIDER.UPDATED); // Publish event
     } catch (error) {
-      console.error('Error deleting provider:', error);
-      message.error(getMessage('modelOperationFailed', { message: String(error) }));
+      console.error("Error deleting provider:", error);
+      message.error(
+        getMessage("modelOperationFailed", { message: String(error) })
+      );
     }
   };
 
@@ -130,7 +155,15 @@ const ProviderManagement: React.FC = () => {
     setEditingProvider(null);
     form.resetFields();
     form.setFieldsValue({
-      models: [{ id: '', name: '', input_price: 0, output_price: 0, is_reasoning: false }]
+      models: [
+        {
+          id: "",
+          name: "",
+          input_price: 0,
+          output_price: 0,
+          is_reasoning: false,
+        },
+      ],
     });
     setModalVisible(true);
   };
@@ -138,46 +171,48 @@ const ProviderManagement: React.FC = () => {
   // 表格列定义
   const columns = [
     {
-      title: getMessage('providerName'),
-      dataIndex: 'name',
-      key: 'name',
+      title: getMessage("providerName"),
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: getMessage('providerBaseUrl'),
-      dataIndex: 'base_url',
-      key: 'base_url',
+      title: getMessage("providerBaseUrl"),
+      dataIndex: "base_url",
+      key: "base_url",
       ellipsis: true,
     },
     {
-      title: getMessage('providerModels'),
-      dataIndex: 'models',
-      key: 'models',
-      render: (models: ModelInfo[]) => `${models.length} ${models.length === 1 ? 'model' : 'models'}`,
+      title: getMessage("providerModels"),
+      dataIndex: "models",
+      key: "models",
+      render: (models: ModelInfo[]) =>
+        `${models.length} ${models.length === 1 ? "model" : "models"}`,
     },
     {
-      title: getMessage('more'),
-      key: 'action',
+      title: getMessage("more"),
+      width: 100,
+      key: "action",
       render: (_: any, record: ProviderConfig) => (
         <div className="flex gap-2">
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
-            title={getMessage('editProvider')}
+            title={getMessage("editProvider")}
             className="dark-button"
           />
           <Popconfirm
-            title={getMessage('confirmDeleteProvider')}
+            title={getMessage("confirmDeleteProvider")}
             onConfirm={() => handleDelete(record.name)}
-            okText={getMessage('confirm')}
-            cancelText={getMessage('cancel')}
+            okText={getMessage("confirm")}
+            cancelText={getMessage("cancel")}
             overlayClassName="dark-popconfirm"
           >
             <Button
               type="text"
               danger
               icon={<DeleteOutlined />}
-              title={getMessage('deleteProvider')}
+              title={getMessage("deleteProvider")}
               className="dark-button"
             />
           </Popconfirm>
@@ -189,14 +224,16 @@ const ProviderManagement: React.FC = () => {
   return (
     <div className="provider-management-container p-2 overflow-y-auto h-full bg-gray-900">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl text-white">{getMessage('providerManagement')}</h2>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
+        <h2 className="text-xl text-white">
+          {getMessage("providerManagement")}
+        </h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
           onClick={handleAdd}
           className="dark-button"
         >
-          {getMessage('addProvider')}
+          {getMessage("addProvider")}
         </Button>
       </div>
 
@@ -208,12 +245,18 @@ const ProviderManagement: React.FC = () => {
         pagination={{ pageSize: 10 }}
         className="provider-table dark-table"
         locale={{
-          emptyText: <div className="text-gray-400 py-8">No data</div>
+          emptyText: <div className="text-gray-400 py-8">No data</div>,
         }}
       />
 
       <Modal
-        title={<span className="text-white">{editingProvider ? getMessage('editProvider') : getMessage('addProvider')}</span>}
+        title={
+          <span className="text-white">
+            {editingProvider
+              ? getMessage("editProvider")
+              : getMessage("addProvider")}
+          </span>
+        }
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
@@ -229,23 +272,33 @@ const ProviderManagement: React.FC = () => {
         >
           <Form.Item
             name="name"
-            label={<span className="text-white">{getMessage('providerName')}</span>}
-            rules={[{ required: true, message: 'Please input provider name' }]}
+            label={
+              <span className="text-white">{getMessage("providerName")}</span>
+            }
+            rules={[{ required: true, message: "Please input provider name" }]}
           >
             <Input className="dark-input" />
           </Form.Item>
 
           <Form.Item
             name="base_url"
-            label={<span className="text-white">{getMessage('providerBaseUrl')}</span>}
-            rules={[{ required: true, message: 'Please input base URL' }]}
+            label={
+              <span className="text-white">
+                {getMessage("providerBaseUrl")}
+              </span>
+            }
+            rules={[{ required: true, message: "Please input base URL" }]}
           >
             <Input className="dark-input" />
           </Form.Item>
 
           <Form.Item
             name="model_type"
-            label={<span className="text-white">{getMessage('modelTypeInterface')}</span>}
+            label={
+              <span className="text-white">
+                {getMessage("modelTypeInterface")}
+              </span>
+            }
             initialValue="saas/openai"
           >
             <Select className="dark-select">
@@ -255,7 +308,9 @@ const ProviderManagement: React.FC = () => {
           </Form.Item>
 
           <div className="mb-4">
-            <label className="text-white block mb-2">{getMessage('providerModels')}</label>
+            <label className="text-white block mb-2">
+              {getMessage("providerModels")}
+            </label>
             <Form.List name="models">
               {(fields, { add, remove }) => (
                 <>
@@ -273,25 +328,43 @@ const ProviderManagement: React.FC = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <Form.Item
                           {...restField}
-                          name={[name, 'id']}
+                          name={[name, "id"]}
                           label={<span className="text-white">Model ID</span>}
                           tooltip={{
-                            title: getMessage('modelIdTooltip'),
-                            icon: <QuestionCircleOutlined style={{ color: 'white' }} />
+                            title: getMessage("modelIdTooltip"),
+                            icon: (
+                              <QuestionCircleOutlined
+                                style={{ color: "white" }}
+                              />
+                            ),
                           }}
-                          rules={[{ required: true, message: 'Please input model ID' }]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please input model ID",
+                            },
+                          ]}
                         >
                           <Input className="dark-input" />
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          name={[name, 'name']}
+                          name={[name, "name"]}
                           label={<span className="text-white">Model Name</span>}
                           tooltip={{
-                            title: getMessage('modelNameTooltip'),
-                            icon: <QuestionCircleOutlined style={{ color: 'white' }} />
+                            title: getMessage("modelNameTooltip"),
+                            icon: (
+                              <QuestionCircleOutlined
+                                style={{ color: "white" }}
+                              />
+                            ),
                           }}
-                          rules={[{ required: true, message: 'Please input model name' }]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please input model name",
+                            },
+                          ]}
                         >
                           <Input className="dark-input" />
                         </Form.Item>
@@ -299,25 +372,51 @@ const ProviderManagement: React.FC = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <Form.Item
                           {...restField}
-                          name={[name, 'input_price']}
-                          label={<span className="text-white">{getMessage('modelInputPrice')}</span>}
-                          rules={[{ required: true, message: 'Please input price' }]}
+                          name={[name, "input_price"]}
+                          label={
+                            <span className="text-white">
+                              {getMessage("modelInputPrice")}
+                            </span>
+                          }
+                          rules={[
+                            { required: true, message: "Please input price" },
+                          ]}
                         >
-                          <Input type="number" step="0.1" min="0" className="dark-input" />
+                          <Input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            className="dark-input"
+                          />
                         </Form.Item>
                         <Form.Item
                           {...restField}
-                          name={[name, 'output_price']}
-                          label={<span className="text-white">{getMessage('modelOutputPrice')}</span>}
-                          rules={[{ required: true, message: 'Please input price' }]}
+                          name={[name, "output_price"]}
+                          label={
+                            <span className="text-white">
+                              {getMessage("modelOutputPrice")}
+                            </span>
+                          }
+                          rules={[
+                            { required: true, message: "Please input price" },
+                          ]}
                         >
-                          <Input type="number" step="0.1" min="0" className="dark-input" />
+                          <Input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            className="dark-input"
+                          />
                         </Form.Item>
                       </div>
                       <Form.Item
                         {...restField}
-                        name={[name, 'is_reasoning']}
-                        label={<span className="text-white">{getMessage('modelIsReasoning')}</span>}
+                        name={[name, "is_reasoning"]}
+                        label={
+                          <span className="text-white">
+                            {getMessage("modelIsReasoning")}
+                          </span>
+                        }
                         valuePropName="checked"
                       >
                         <input type="checkbox" className="mr-2" />
@@ -327,7 +426,15 @@ const ProviderManagement: React.FC = () => {
                   <Form.Item>
                     <Button
                       type="dashed"
-                      onClick={() => add({ id: '', name: '', input_price: 0, output_price: 0, is_reasoning: false })}
+                      onClick={() =>
+                        add({
+                          id: "",
+                          name: "",
+                          input_price: 0,
+                          output_price: 0,
+                          is_reasoning: false,
+                        })
+                      }
                       icon={<PlusCircleOutlined />}
                       className="dark-button w-full"
                     >
@@ -340,11 +447,14 @@ const ProviderManagement: React.FC = () => {
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button onClick={() => setModalVisible(false)} className="dark-button">
-              {getMessage('cancel')}
+            <Button
+              onClick={() => setModalVisible(false)}
+              className="dark-button"
+            >
+              {getMessage("cancel")}
             </Button>
             <Button type="primary" htmlType="submit" className="dark-button">
-              {getMessage('save')}
+              {getMessage("save")}
             </Button>
           </div>
         </Form>

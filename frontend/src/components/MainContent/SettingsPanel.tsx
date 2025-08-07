@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Select, message, Divider, Tabs } from 'antd';
-import { getMessage, setLanguage } from '../../lang';
-import type { AutoCoderArgs } from './types';
-import ModelConfig from './ModelConfig';
-import ModelManagement from './ModelManagement';
-import ProviderManagement from './ProviderManagement';
-import CompilerConfig from './CompilerConfig';
-import RagConfig from './RagConfig';
-import BasicSettings from './BasicSettings';
-import AdvancedSettings from './AdvancedSettings';
-import McpServerConfig from './McpServerConfig/McpServerConfig'; // Import the new component
-import MemorySystem from './MemorySystem';
-import './ModelConfig.css';
+import React, { useState, useEffect } from "react";
+import { Select, message, Divider, Tabs } from "antd";
+import { getMessage, setLanguage } from "../../lang";
+import type { AutoCoderArgs } from "./types";
+import ModelConfig from "./ModelConfig";
+import ModelManagement from "./ModelManagement";
+import ProviderManagement from "./ProviderManagement";
+import CompilerConfig from "./CompilerConfig";
+import RagConfig from "./RagConfig";
+import BasicSettings from "./BasicSettings";
+import AdvancedSettings from "./AdvancedSettings";
+import McpServerConfig from "./McpServerConfig/McpServerConfig"; // Import the new component
+import MemorySystem from "./MemorySystem";
+import "./ModelConfig.css";
 
 const { TabPane } = Tabs;
 
@@ -21,7 +21,7 @@ const SettingsPanel: React.FC = () => {
     language: string;
   }>({
     available_keys: [],
-    language: 'zh'
+    language: "zh",
   });
 
   const [loading, setLoading] = useState(false);
@@ -31,14 +31,14 @@ const SettingsPanel: React.FC = () => {
   useEffect(() => {
     const fetchLanguage = async () => {
       try {
-        const response = await fetch('/api/settings/language');
+        const response = await fetch("/api/settings/language");
         if (!response.ok) {
-          throw new Error('Failed to fetch language settings');
+          throw new Error("Failed to fetch language settings");
         }
         const data = await response.json();
-        setConfig(prev => ({ ...prev, language: data.language || 'zh' }));
+        setConfig((prev) => ({ ...prev, language: data.language || "zh" }));
       } catch (error) {
-        console.error('Error fetching language settings:', error);
+        console.error("Error fetching language settings:", error);
       }
     };
     fetchLanguage();
@@ -47,17 +47,17 @@ const SettingsPanel: React.FC = () => {
   // Fetch available configuration keys
   useEffect(() => {
     setLoading(true);
-    fetch('/api/conf/keys')
-      .then(response => response.json())
-      .then(data => {
-        setConfig(prev => ({
+    fetch("/api/conf/keys")
+      .then((response) => response.json())
+      .then((data) => {
+        setConfig((prev) => ({
           ...prev,
-          available_keys: data.keys
+          available_keys: data.keys,
         }));
       })
-      .catch(error => {
-        console.error('Error fetching configuration keys:', error);
-        message.error('Failed to fetch configuration keys');
+      .catch((error) => {
+        console.error("Error fetching configuration keys:", error);
+        message.error("Failed to fetch configuration keys");
       })
       .finally(() => {
         setLoading(false);
@@ -66,45 +66,52 @@ const SettingsPanel: React.FC = () => {
 
   const updateConfig = async (key: string, value: string | boolean) => {
     try {
-      const response = await fetch('/api/conf', {
-        method: 'POST',
+      const response = await fetch("/api/conf", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ [key]: String(value) })
+        body: JSON.stringify({ [key]: String(value) }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update configuration');
+        throw new Error("Failed to update configuration");
       }
 
-      message.success(getMessage('settingsUpdateSuccess'));
+      message.success(getMessage("settingsUpdateSuccess"));
     } catch (error) {
-      console.error('Error updating config:', error);
-      message.error(getMessage('settingsUpdateError'));
+      console.error("Error updating config:", error);
+      message.error(getMessage("settingsUpdateError"));
     }
   };
 
   const updateLanguage = async (value: string) => {
     try {
-      await setLanguage(value as 'en' | 'zh');
-      setConfig(prev => ({ ...prev, language: value }));
-      message.success(getMessage('settingsUpdateSuccess'));
+      await setLanguage(value as "en" | "zh");
+      setConfig((prev) => ({ ...prev, language: value }));
+      message.success(getMessage("settingsUpdateSuccess"));
       setShowRefreshNotice(true);
     } catch (error) {
-      console.error('Error updating language settings:', error);
-      message.error('Failed to update language settings');
+      console.error("Error updating language settings:", error);
+      message.error("Failed to update language settings");
     }
   };
 
   const reloadWindows = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
+
+  const languageOptions = [
+    { value: "en", label: getMessage("English") },
+    { value: "zh", label: getMessage("chinese") },
+  ];
 
   return (
     <div className="settings-container p-2 overflow-y-auto h-full bg-gray-900">
-      <div className="settings-section pb-2">
-        <h3 className="settings-title text-white">{getMessage('languageSettings') || 'Language'}</h3>
+      <div className="settings-section">
+        <h3 className="settings-title text-white">
+          {getMessage("languageSettings") || "Language"}
+        </h3>
         <div className="language-selector">
           {/* <label className="language-label text-gray-300 mb-1">{getMessage('language')}</label> */}
           <Select
@@ -112,14 +119,17 @@ const SettingsPanel: React.FC = () => {
             onChange={updateLanguage}
             className="custom-select dark-select w-32"
             popupClassName="custom-select-dropdown"
-            options={[
-              { value: 'en', label: getMessage('English') },
-              { value: 'zh', label: getMessage('chinese') }
-            ]}
+            options={languageOptions}
           />
           {showRefreshNotice && (
             <div className="refresh-notice text-yellow-400 mt-1">
-              {getMessage('refreshToApplyLanguage')}<span onClick={reloadWindows} className='px-2 underline cursor-pointer'>{getMessage('clickReload')}</span>
+              {getMessage("refreshToApplyLanguage")}
+              <span
+                onClick={reloadWindows}
+                className="px-2 underline cursor-pointer"
+              >
+                {getMessage("clickReload")}
+              </span>
             </div>
           )}
         </div>
@@ -128,40 +138,101 @@ const SettingsPanel: React.FC = () => {
       <Divider className="border-gray-700 my-2" />
 
       <Tabs defaultActiveKey="general" className="settings-tabs">
-        <TabPane tab={<span className="text-gray-300">{getMessage('modelConfiguration')}</span>} key="general">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("modelConfiguration")}
+            </span>
+          }
+          key="general"
+        >
           <ModelConfig
             availableKeys={config.available_keys}
             onModelChange={updateConfig}
           />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('modelManagement')}</span>} key="models">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("modelManagement")}
+            </span>
+          }
+          key="models"
+        >
           <ModelManagement />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('providerManagement')}</span>} key="providers">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("providerManagement")}
+            </span>
+          }
+          key="providers"
+        >
           <ProviderManagement />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('compilerConfiguration') || 'Compiler Configuration'}</span>} key="compilers">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("compilerConfiguration") || "Compiler Configuration"}
+            </span>
+          }
+          key="compilers"
+        >
           <CompilerConfig />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('ragConfiguration') || 'RAG Configuration'}</span>} key="rags">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("ragConfiguration") || "RAG Configuration"}
+            </span>
+          }
+          key="rags"
+        >
           <RagConfig />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('basicSettings')}</span>} key="basic">
+        <TabPane
+          tab={
+            <span className="text-gray-300">{getMessage("basicSettings")}</span>
+          }
+          key="basic"
+        >
           <BasicSettings
             availableKeys={config.available_keys}
             onSettingChange={updateConfig}
           />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('advancedSettings')}</span>} key="advanced">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("advancedSettings")}
+            </span>
+          }
+          key="advanced"
+        >
           <AdvancedSettings
             availableKeys={config.available_keys}
             onSettingChange={updateConfig}
           />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('mcpServerConfiguration') || 'MCP Servers'}</span>} key="mcp">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("mcpServerConfiguration") || "MCP Servers"}
+            </span>
+          }
+          key="mcp"
+        >
           <McpServerConfig />
         </TabPane>
-        <TabPane tab={<span className="text-gray-300">{getMessage('memorySystemTasks') || 'Memory System'}</span>} key="memory">
+        <TabPane
+          tab={
+            <span className="text-gray-300">
+              {getMessage("memorySystemTasks") || "Memory System"}
+            </span>
+          }
+          key="memory"
+        >
           <MemorySystem />
         </TabPane>
       </Tabs>

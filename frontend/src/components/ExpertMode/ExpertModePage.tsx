@@ -319,35 +319,35 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
 
   // 参考原有"更多下拉菜单"的菜单项配置
   const moreMenuItems: DropdownMenuItem[] = [
-    {
-      key: "preview_static",
-      label: getMessage("previewChangesStatic"),
-      icon: (
-        <svg
-          className="w-3 h-3"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-          />
-        </svg>
-      ),
-      disabled: true, // 预览功能已屏蔽
-      onClick: () => {
-        console.log("预览功能已被屏蔽");
-      },
-    },
+    // {
+    //   key: "preview_static",
+    //   label: getMessage("previewChangesStatic"),
+    //   icon: (
+    //     <svg
+    //       className="w-3 h-3"
+    //       fill="none"
+    //       stroke="currentColor"
+    //       viewBox="0 0 24 24"
+    //     >
+    //       <path
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         strokeWidth={2}
+    //         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+    //       />
+    //       <path
+    //         strokeLinecap="round"
+    //         strokeLinejoin="round"
+    //         strokeWidth={2}
+    //         d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+    //       />
+    //     </svg>
+    //   ),
+    //   disabled: true, // 预览功能已屏蔽
+    //   onClick: () => {
+    //     console.log("预览功能已被屏蔽");
+    //   },
+    // },
     {
       key: "clipboard",
       label: getMessage("clipboard"),
@@ -619,7 +619,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                     </div>
                   </div>
                   {/* Static Preview Panel - 预览功能已屏蔽 */}
-                  <div
+                  {/* <div
                     className={`h-full ${
                       activePanel === "preview_static" ? "block" : "hidden"
                     }`}
@@ -652,9 +652,9 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                         <p className="text-sm">该功能正在维护中，请稍后再试</p>
                       </div>
                     </div>
-                    {/* 原始预览组件已屏蔽 */}
-                    {/* <PreviewPanel files={previewFiles} /> */}
-                  </div>
+                 
+                    <PreviewPanel files={previewFiles} />
+                  </div> */}
                   <div
                     className={`h-full ${
                       activePanel === "history" ? "block" : "hidden"
@@ -690,7 +690,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
 
               {/* 输出，终端区域*/}
               <div
-                className={`border-t border-gray-700 flex flex-col overflow-hidden ${
+                className={`border-t border-gray-700 flex flex-col ${
                   isFull ? "fixed left-0 top-0 w-full !h-full z-[9999] p-0" : ""
                 }`}
               >

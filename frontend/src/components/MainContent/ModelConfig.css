@@ -7,9 +7,9 @@
 }
 
 .settings-section {
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   border-bottom: 1px solid #1e293b;
-  padding-bottom: 1rem;
+  /* padding-bottom: 1rem; */
 }
 
 .settings-section:last-child {
@@ -25,7 +25,7 @@
 
 /* Language selector styles */
 .language-selector {
-  margin-bottom: 1rem;
+  margin-bottom: 8px;
   max-width: 100%;
 }
 
@@ -76,7 +76,7 @@
   .model-management-container {
     padding: 12px;
   }
-  
+
   .model-table .ant-table {
     font-size: 13px;
   }
@@ -88,5 +88,10 @@
 }
 
 .api-key-missing:hover {
-  background-color: rgba(255, 0, 0, 0.3) !important; /* 鼠标悬停时稍微加深颜色 */
-} 
+  background-color: rgba(
+    255,
+    0,
+    0,
+    0.3
+  ) !important; /* 鼠标悬停时稍微加深颜色 */
+}

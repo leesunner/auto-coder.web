@@ -23,6 +23,7 @@ import {
   AgenticEditAskFollowupQuestionTool,
   AgenticEditExecuteCommandTool,
   AgenticEditListCodeDefinitionNamesTool,
+  AgenticTodoWriteTool,
 } from "./MessageTypes";
 
 // Direct imports for message type components
@@ -120,6 +121,10 @@ const MessageItem = React.memo(
 
           if (content.tool_name === "AttemptCompletionTool") {
             return <AgenticEditAttemptCompletionTool message={message} />;
+          }
+
+          if (content.tool_name === "TodoWriteTool") {
+            return <AgenticTodoWriteTool message={message} />;
           }
         }
         if (message.metadata?.path === "/agent/edit/tool/result") {
