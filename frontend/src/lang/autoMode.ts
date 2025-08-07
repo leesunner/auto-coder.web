@@ -238,15 +238,15 @@ export const autoModeMessages: { [key: string]: Message } = {
     zh: "AitoCoder 想要搜索与此模式匹配的文件",
   },
   agenticTodoWriteToolTitle: {
-    en: "AitoCoder listed the todo list",
-    zh: "AitoCoder 列出了待办列表",
+    en: "AitoCoder todo",
+    zh: "AitoCoder 待办",
   },
   todoTaskPending: {
     en: "Pending",
     zh: "待处理",
   },
   todoTaskInProgress: {
-    en: "In Progress", 
+    en: "In Progress",
     zh: "进行中",
   },
   todoTaskCompleted: {
@@ -258,7 +258,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     zh: "高",
   },
   todoTaskMedium: {
-    en: "Medium", 
+    en: "Medium",
     zh: "中",
   },
   todoTaskLow: {
@@ -274,7 +274,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     zh: "创建时间",
   },
   todoTaskUpdatedAt: {
-    en: "Updated", 
+    en: "Updated",
     zh: "更新时间",
   },
 

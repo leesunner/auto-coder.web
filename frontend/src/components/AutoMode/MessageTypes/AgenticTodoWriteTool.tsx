@@ -66,14 +66,17 @@ interface ParsedTask {
 }
 
 // 解析content字段中的<task>标签
-function parseTasksFromContent(content: string, priority: "high" | "medium" | "low"): ParsedTask[] {
+function parseTasksFromContent(
+  content: string,
+  priority: "high" | "medium" | "low"
+): ParsedTask[] {
   const tasks: ParsedTask[] = [];
-  
+
   // 匹配<task>内容</task>模式，同时处理HTML实体编码
   const taskRegex = /<task>(.*?)<\/task>/g;
   let match;
   let index = 0;
-  
+
   while ((match = taskRegex.exec(content)) !== null) {
     const taskContent = match[1].trim();
     if (taskContent) {
@@ -81,27 +84,31 @@ function parseTasksFromContent(content: string, priority: "high" | "medium" | "l
         id: `task_${index++}`,
         content: taskContent,
         status: "pending",
-        priority: priority
+        priority: priority,
       });
     }
   }
-  
+
   // 如果没有找到<task>标签，尝试按行分割
   if (tasks.length === 0 && content.trim()) {
-    const lines = content.split('\n').filter(line => line.trim());
+    const lines = content.split("\n").filter((line) => line.trim());
     lines.forEach((line, index) => {
       const cleanLine = line.trim();
-      if (cleanLine && !cleanLine.startsWith('<') && !cleanLine.startsWith('<')) {
+      if (
+        cleanLine &&
+        !cleanLine.startsWith("<") &&
+        !cleanLine.startsWith("<")
+      ) {
         tasks.push({
           id: `task_${index}`,
           content: cleanLine,
           status: "pending",
-          priority: priority
+          priority: priority,
         });
       }
     });
   }
-  
+
   return tasks;
 }
 
@@ -127,39 +134,47 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       parsedTasks = parseTasksFromContent(todoData.content, todoData.priority);
     } else if (todoData.action === "add_task" && todoData.content) {
       // 单个新任务
-      parsedTasks = [{
-        id: `task_${Date.now()}`,
-        content: todoData.content,
-        status: "pending",
-        priority: todoData.priority,
-        notes: todoData.notes || undefined
-      }];
+      parsedTasks = [
+        {
+          id: `task_${Date.now()}`,
+          content: todoData.content,
+          status: "pending",
+          priority: todoData.priority,
+          notes: todoData.notes || undefined,
+        },
+      ];
     } else if (todoData.action === "mark_progress" && todoData.task_id) {
       // 标记进行中的任务
-      parsedTasks = [{
-        id: todoData.task_id,
-        content: `任务 ${todoData.task_id}`,
-        status: "in_progress",
-        priority: "medium"
-      }];
+      parsedTasks = [
+        {
+          id: todoData.task_id,
+          content: `任务 ${todoData.task_id}`,
+          status: "in_progress",
+          priority: "medium",
+        },
+      ];
     } else if (todoData.action === "mark_completed" && todoData.task_id) {
       // 标记完成的任务
-      parsedTasks = [{
-        id: todoData.task_id,
-        content: `任务 ${todoData.task_id}`,
-        status: "completed",
-        priority: "medium",
-        notes: todoData.notes || undefined
-      }];
+      parsedTasks = [
+        {
+          id: todoData.task_id,
+          content: `任务 ${todoData.task_id}`,
+          status: "completed",
+          priority: "medium",
+          notes: todoData.notes || undefined,
+        },
+      ];
     } else if (todoData.action === "update" && todoData.task_id) {
       // 更新任务
-      parsedTasks = [{
-        id: todoData.task_id,
-        content: todoData.content || `任务 ${todoData.task_id}`,
-        status: todoData.status || "pending",
-        priority: todoData.priority || "medium",
-        notes: todoData.notes || undefined
-      }];
+      parsedTasks = [
+        {
+          id: todoData.task_id,
+          content: todoData.content || `任务 ${todoData.task_id}`,
+          status: todoData.status || "pending",
+          priority: todoData.priority || "medium",
+          notes: todoData.notes || undefined,
+        },
+      ];
     }
   } catch (e) {
     console.error("Failed to parse todo content:", e);
@@ -230,9 +245,9 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
       case "add_task":
         return "添加了新任务";
       case "mark_progress":
-        return "标记任务为进行中";
+        return "任务为进行中";
       case "mark_completed":
-        return "标记任务为已完成";
+        return "任务为已完成";
       case "update":
         return "更新了任务";
       default:
@@ -243,68 +258,74 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
   // 计算任务统计
   const taskStats = {
     total: parsedTasks.length,
-    pending: parsedTasks.filter(task => task.status === "pending").length,
-    in_progress: parsedTasks.filter(task => task.status === "in_progress").length,
-    completed: parsedTasks.filter(task => task.status === "completed").length
+    pending: parsedTasks.filter((task) => task.status === "pending").length,
+    in_progress: parsedTasks.filter((task) => task.status === "in_progress")
+      .length,
+    completed: parsedTasks.filter((task) => task.status === "completed").length,
   };
 
   return (
     <div className="message-font">
       <div className="message-title flex items-center">
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="message-toggle-button text-gray-400"
-        >
-          {isCollapsed ? (
-            <svg
-              className="message-toggle-icon"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ) : (
-            <svg
-              className="message-toggle-icon"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          )}
-        </button>
-
-        <span className="message-title-icon">
-          <svg
-            className="w-4 h-4 text-purple-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="message-title flex items-center flex-1">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="message-toggle-button text-gray-400"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-            />
-          </svg>
-        </span>
+            {isCollapsed ? (
+              <svg
+                className="message-toggle-icon"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="message-toggle-icon"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </button>
 
-        <span className="message-title-text ml-1 text-purple-400 font-semibold">
-          {getMessage("agenticTodoWriteToolTitle")} - {getActionText(action)}
-        </span>
+          <span className="message-title-icon">
+            <svg
+              className="w-4 h-4 text-purple-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+              />
+            </svg>
+          </span>
 
-        {taskStats.total > 0 && (
-          <span className="text-xs px-2 py-0.5 ml-2 rounded-full bg-purple-600/30 text-purple-400">
-            {taskStats.total} 项任务
+          <span className="message-title-text ml-1 text-purple-400 font-semibold">
+            {getMessage("agenticTodoWriteToolTitle")} - {getActionText(action)}
+          </span>
+        </div>
+        {todoData?.priority && (
+          <span
+            className={`flex-shrink-0 text-xs px-2 py-1 rounded-full ${getPriorityColor(
+              todoData.priority
+            )}`}
+          >
+            {getPriorityText(todoData.priority)}
           </span>
         )}
       </div>
@@ -316,33 +337,16 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
             总计: <span className="text-white">{taskStats.total}</span>
           </span>
           <span className="text-gray-400">
-            待处理:{" "}
-            <span className="text-gray-300">{taskStats.pending}</span>
+            待处理: <span className="text-gray-300">{taskStats.pending}</span>
           </span>
           <span className="text-yellow-400">
             进行中:{" "}
-            <span className="text-yellow-300">
-              {taskStats.in_progress}
-            </span>
+            <span className="text-yellow-300">{taskStats.in_progress}</span>
           </span>
           <span className="text-green-400">
             已完成:{" "}
             <span className="text-green-300">{taskStats.completed}</span>
           </span>
-        </div>
-      )}
-
-      {/* 操作详情 */}
-      {!isCollapsed && todoData && (
-        <div className="mt-2 text-xs text-gray-400">
-          <span>操作类型: </span>
-          <span className="text-purple-300">{action}</span>
-          {todoData.task_id && (
-            <>
-              <span className="ml-4">任务ID: </span>
-              <span className="text-gray-300">{todoData.task_id}</span>
-            </>
-          )}
         </div>
       )}
 
@@ -352,10 +356,10 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
           {parsedTasks.map((task, index) => (
             <div
               key={task.id || index}
-              className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 hover:bg-gray-800/70 transition-colors"
+              className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-1 hover:bg-gray-800/70 transition-colors"
             >
               {/* 任务标题和状态 */}
-              <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <p className="text-gray-200 text-sm font-medium leading-relaxed">
                     {task.content}
@@ -368,13 +372,6 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
                     )}`}
                   >
                     {getStatusText(task.status)}
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
-                      task.priority
-                    )}`}
-                  >
-                    {getPriorityText(task.priority)}
                   </span>
                 </div>
               </div>
@@ -429,7 +426,15 @@ const AgenticTodoWriteTool: React.FC<AgenticTodoWriteToolProps> = ({
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 0 012 2"
             />
           </svg>
-          <p className="text-sm">{action === "create" ? "创建待办列表" : action === "mark_progress" ? "标记任务进行中" : action === "mark_completed" ? "标记任务已完成" : "待办操作"}</p>
+          <p className="text-sm">
+            {action === "create"
+              ? "创建待办列表"
+              : action === "mark_progress"
+              ? "待办任务进行中"
+              : action === "mark_completed"
+              ? "待办任务已完成"
+              : "待办操作"}
+          </p>
         </div>
       )}
     </div>
