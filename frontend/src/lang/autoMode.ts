@@ -339,7 +339,6 @@ export const autoModeMessages: { [key: string]: Message } = {
   },
 
   // 对话框
-=======
   askUserDialogTitle: {
     en: "User Input Required",
     zh: "需要用户输入",
