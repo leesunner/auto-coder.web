@@ -211,7 +211,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       setChatLists((prev) => [newChatName, ...prev]);
 
       // 保存新的空聊天列表
-      await chatListService.saveChatList(newChatName, [], panelId);
+      await saveChatListHandler({ name: newChatName, messages: [], panelId });
 
       AntdMessage.success(getMessage("newChatCreated"));
       setIsNewChatModalVisible(false);
