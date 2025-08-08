@@ -61,6 +61,32 @@ import {
   StopGenerationEventData,
 } from "../../services/event_bus_data";
 
+const saveChatListHandler = (() => {
+  let curTime = Date.now();
+  return async ({
+    chatListService,
+    name,
+    messages,
+    panelId,
+    isQuickSave,
+    metadata,
+  }: any) => {
+    if (!isQuickSave && Date.now() - curTime < 100) return;
+    try {
+      const res = await chatListService.saveChatList(
+        name,
+        messages,
+        panelId,
+        metadata
+      );
+      return res;
+    } catch (error) {
+    } finally {
+      curTime = Date.now();
+    }
+  };
+})();
+
 const ChatPanel: React.FC<ChatPanelProps> = ({
   setPreviewFiles,
   setRequestId,
@@ -485,7 +511,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const saveChatList = async (
     name: string,
     newMessages: AutoModeMessage[] = [],
-    mPanelId: string = panelId
+    mPanelId: string = panelId,
+    isQuickSave = true
   ) => {
     console.log("save chat list:", name);
     console.log("messages:", newMessages);
@@ -506,12 +533,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       cacheMisses: accumulatedStats.cacheMisses,
     };
 
-    const success: boolean = await chatListService.saveChatList(
+    const success: boolean = await saveChatListHandler({
+      chatListService,
       name,
-      newMessages,
-      mPanelId,
-      metadata
-    );
+      messages: newMessages,
+      panelId: mPanelId,
+      metadata,
+      isQuickSave,
+    });
     if (success) {
       setShowChatListInput(false);
       fetchChatLists();
@@ -724,22 +753,17 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 添加一个 useEffect 来处理消息保存，当 messages 或 shouldSaveMessages 变化时触发
   useEffect(() => {
+    // 只问还没答得时候
+    if (messages.length <= 1) return;
     // 仅当需要保存且有消息且有聊天名称时保存
-    if (shouldSaveMessages && chatListName && messages.length > 0) {
-      chatListService
-        .saveChatList(chatListName, messages, panelId)
-        .then((success: boolean) => {
-          if (success) {
-            console.log("Chat list saved with latest messages:", chatListName);
-          }
-          // 重置保存标记
-          setShouldSaveMessages(false);
-        })
-        .catch((error: any) => {
-          console.error("Error saving chat list:", error);
-          // 重置保存标记
-          setShouldSaveMessages(false);
-        });
+    if (shouldSaveMessages && chatListName) {
+      saveChatListHandler({
+        name: chatListName,
+        messages,
+        panelId,
+        isQuickSave: false,
+        chatListService,
+      });
     }
   }, [messages, shouldSaveMessages, chatListName, panelId]);
 
