@@ -371,7 +371,7 @@ export const autoModeMessages: { [key: string]: Message } = {
   },
 
   askAgain: {
-    en: "Ask Again",
+    en: "Ask Again from here",
     zh: "重新提问",
   },
 
