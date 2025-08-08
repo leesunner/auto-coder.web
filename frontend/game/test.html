@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克大战 - 测试页面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .test-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .test-btn:hover {
+            background: #45a049;
+        }
+        
+        .test-btn.danger {
+            background: #f44336;
+        }
+        
+        .test-btn.danger:hover {
+            background: #da190b;
+        }
+        
+        .test-btn.warning {
+            background: #ff9800;
+        }
+        
+        .test-btn.warning:hover {
+            background: #e68900;
+        }
+        
+        .test-output {
+            background: #1a1a1a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .game-canvas {
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            background: #000;
+            margin: 20px 0;
+        }
+        
+        .controls-info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .controls-info h3 {
+            margin-top: 0;
+            color: #FFD700;
+        }
+        
+        .control-item {
+            margin: 5px 0;
+        }
+        
+        .key {
+            background: #555;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .status-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .status-item {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            display: block;
+        }
+        
+        .status-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎮 坦克大战游戏测试页面</h1>
+        
+        <!-- 游戏控制说明 -->
+        <div class="controls-info">
+            <h3>🎯 游戏控制</h3>
+            <div class="control-item"><span class="key">WASD</span> 或 <span class="key">方向键</span> - 移动坦克</div>
+            <div class="control-item"><span class="key">空格</span> - 射击</div>
+            <div class="control-item"><span class="key">ESC</span> - 暂停/恢复游戏</div>
+            <div class="control-item"><span class="key">F3</span> - 切换调试模式</div>
+            <div class="control-item"><span class="key">Enter</span> - 开始游戏</div>
+        </div>
+        
+        <!-- 游戏状态显示 -->
+        <div class="status-display">
+            <div class="status-item">
+                <span class="status-value" id="fpsDisplay">0</span>
+                <div class="status-label">FPS</div>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="livesDisplay">3</span>
+                <div class="status-label">生命值</div>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="scoreDisplay">0</span>
+                <div class="status-label">得分</div>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="levelDisplay">1</span>
+                <div class="status-label">关卡</div>
+            </div>
+            <div class="status-item">
+                <span class="status-value" id="enemiesDisplay">0</span>
+                <div class="status-label">敌人数量</div>
+            </div>
+        </div>
+        
+        <!-- 游戏画布 -->
+        <canvas id="gameCanvas" class="game-canvas" width="800" height="600"></canvas>
+        
+        <!-- 游戏测试控制 -->
+        <div class="test-section">
+            <h2>🎮 游戏控制测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testStartGame()">开始游戏</button>
+                <button class="test-btn warning" onclick="testPauseGame()">暂停游戏</button>
+                <button class="test-btn warning" onclick="testResumeGame()">恢复游戏</button>
+                <button class="test-btn danger" onclick="testRestartGame()">重启游戏</button>
+                <button class="test-btn danger" onclick="testStopGame()">停止游戏</button>
+            </div>
+            <div class="test-output" id="gameControlOutput"></div>
+        </div>
+        
+        <!-- 实体测试 -->
+        <div class="test-section">
+            <h2>🚀 游戏实体测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testSpawnEnemy()">生成敌人</button>
+                <button class="test-btn" onclick="testPlayerShoot()">玩家射击</button>
+                <button class="test-btn" onclick="testCreateExplosion()">创建爆炸</button>
+                <button class="test-btn" onclick="testSpawnPowerUp()">生成道具</button>
+                <button class="test-btn warning" onclick="testClearEntities()">清除所有实体</button>
+            </div>
+            <div class="test-output" id="entityTestOutput"></div>
+        </div>
+        
+        <!-- 性能测试 -->
+        <div class="test-section">
+            <h2>⚡ 性能测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testPerformance()">性能测试</button>
+                <button class="test-btn" onclick="testMemoryUsage()">内存使用测试</button>
+                <button class="test-btn" onclick="testStressTest()">压力测试</button>
+                <button class="test-btn warning" onclick="testToggleDebug()">切换调试模式</button>
+            </div>
+            <div class="test-output" id="performanceOutput"></div>
+        </div>
+        
+        <!-- 碰撞检测测试 -->
+        <div class="test-section">
+            <h2>💥 碰撞检测测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testBulletCollision()">子弹碰撞测试</button>
+                <button class="test-btn" onclick="testTankCollision()">坦克碰撞测试</button>
+                <button class="test-btn" onclick="testObstacleCollision()">障碍物碰撞测试</button>
+            </div>
+            <div class="test-output" id="collisionOutput"></div>
+        </div>
+        
+        <!-- 音效测试 -->
+        <div class="test-section">
+            <h2>🔊 音效测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testPlayShootSound()">射击音效</button>
+                <button class="test-btn" onclick="testPlayExplosionSound()">爆炸音效</button>
+                <button class="test-btn" onclick="testPlayBackgroundMusic()">背景音乐</button>
+                <button class="test-btn warning" onclick="testStopAllSounds()">停止所有音效</button>
+            </div>
+            <div class="test-output" id="audioOutput"></div>
+        </div>
+    </div>
+    
+    <!-- 加载游戏脚本 -->
+    <script type="module">
+        import { Game } from './src/core/Game.js';
+        import { GameStateManager } from './src/states/GameStateManager.js';
+        import { UIManager } from './src/states/UIManager.js';
+        import { GameController } from './src/core/GameController.js';
+        import { InputManager } from './src/core/InputManager.js';
+        import { AudioManager } from './src/core/AudioManager.js';
+        
+        // 全局变量
+        window.game = null;
+        window.gameStateManager = null;
+        window.gameController = null;
+        window.audioManager = null;
+        window.inputManager = null;
+        
+        // 初始化游戏
+        async function initGame() {
+            try {
+                log('gameControlOutput', '初始化游戏系统...');
+                
+                // 初始化管理器
+                window.audioManager = new AudioManager();
+                await window.audioManager.init();
+                
+                window.inputManager = new InputManager();
+                window.inputManager.init();
+                
+                window.gameStateManager = new GameStateManager();
+                const uiManager = new UIManager(window.gameStateManager);
+                window.gameController = new GameController(window.gameStateManager, window.audioManager);
+                
+                // 初始化游戏
+                const canvas = document.getElementById('gameCanvas');
+                window.game = new Game(canvas, window.inputManager, window.audioManager, window.gameStateManager, uiManager, window.gameController);
+                await window.game.init();
+                
+                // 设置键盘监听
+                setupKeyboardListeners();
+                
+                // 开始状态更新
+                startStatusUpdates();
+                
+                log('gameControlOutput', '✅ 游戏系统初始化完成');
+                
+            } catch (error) {
+                log('gameControlOutput', `❌ 初始化失败: ${error.message}`);
+                console.error('游戏初始化失败:', error);
+            }
+        }
+        
+        // 设置键盘监听
+        function setupKeyboardListeners() {
+            const pressedKeys = new Set();
+            
+            document.addEventListener('keydown', (event) => {
+                const key = event.code || event.key;
+                
+                if (!pressedKeys.has(key)) {
+                    pressedKeys.add(key);
+                    if (window.game) {
+                        window.game.handleKeyInput(key, true);
+                    }
+                }
+                
+                // 防止某些按键的默认行为
+                if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                    event.preventDefault();
+                }
+            });
+            
+            document.addEventListener('keyup', (event) => {
+                const key = event.code || event.key;
+                pressedKeys.delete(key);
+                if (window.game) {
+                    window.game.handleKeyInput(key, false);
+                }
+            });
+        }
+        
+        // 开始状态更新
+        function startStatusUpdates() {
+            setInterval(() => {
+                updateGameStatus();
+            }, 100); // 每100ms更新一次状态
+        }
+        
+        // 更新游戏状态显示
+        function updateGameStatus() {
+            if (!window.game || !window.gameStateManager || !window.gameController) return;
+            
+            try {
+                const gameStatus = window.game.getStatus();
+                const controllerStatus = window.gameController.getStatus();
+                const gameData = window.gameStateManager.gameData;
+                
+                document.getElementById('fpsDisplay').textContent = controllerStatus.fps || 0;
+                document.getElementById('livesDisplay').textContent = gameData.lives || 0;
+                document.getElementById('scoreDisplay').textContent = gameData.score || 0;
+                document.getElementById('levelDisplay').textContent = gameData.level || 1;
+                document.getElementById('enemiesDisplay').textContent = controllerStatus.enemyCount || 0;
+                
+            } catch (error) {
+                console.warn('状态更新失败:', error);
+            }
+        }
+        
+        // 日志输出函数
+        function log(outputId, message) {
+            const output = document.getElementById(outputId);
+            if (output) {
+                const timestamp = new Date().toLocaleTimeString();
+                output.textContent += `[${timestamp}] ${message}\n`;
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+        
+        // 暴露测试函数到全局作用域
+        window.log = log;
+        window.initGame = initGame;
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initGame);
+        
+        // 测试函数
+        window.testStartGame = function() {
+            try {
+                if (window.game) {
+                    window.game.startNewGame();
+                    log('gameControlOutput', '✅ 游戏已开始');
+                } else {
+                    log('gameControlOutput', '❌ 游戏未初始化');
+                }
+            } catch (error) {
+                log('gameControlOutput', `❌ 开始游戏失败: ${error.message}`);
+            }
+        };
+        
+        window.testPauseGame = function() {
+            try {
+                if (window.game) {
+                    window.game.pauseGame();
+                    log('gameControlOutput', '⏸️ 游戏已暂停');
+                } else {
+                    log('gameControlOutput', '❌ 游戏未初始化');
+                }
+            } catch (error) {
+                log('gameControlOutput', `❌ 暂停游戏失败: ${error.message}`);
+            }
+        };
+        
+        window.testResumeGame = function() {
+            try {
+                if (window.game) {
+                    window.game.resumeGame();
+                    log('gameControlOutput', '▶️ 游戏已恢复');
+                } else {
+                    log('gameControlOutput', '❌ 游戏未初始化');
+                }
+            } catch (error) {
+                log('gameControlOutput', `❌ 恢复游戏失败: ${error.message}`);
+            }
+        };
+        
+        window.testRestartGame = function() {
+            try {
+                if (window.game) {
+                    window.game.restartGame();
+                    log('gameControlOutput', '🔄 游戏已重启');
+                } else {
+                    log('gameControlOutput', '❌ 游戏未初始化');
+                }
+            } catch (error) {
+                log('gameControlOutput', `❌ 重启游戏失败: ${error.message}`);
+            }
+        };
+        
+        window.testStopGame = function() {
+            try {
+                if (window.game) {
+                    window.game.stop();
+                    log('gameControlOutput', '⏹️ 游戏已停止');
+                } else {
+                    log('gameControlOutput', '❌ 游戏未初始化');
+                }
+            } catch (error) {
+                log('gameControlOutput', `❌ 停止游戏失败: ${error.message}`);
+            }
+        };
+        
+        window.testSpawnEnemy = function() {
+            try {
+                if (window.gameController) {
+                    const enemy = window.gameController.createEnemyTank('basic');
+                    if (enemy) {
+                        log('entityTestOutput', '✅ 敌人坦克已生成');
+                    } else {
+                        log('entityTestOutput', '❌ 敌人坦克生成失败');
+                    }
+                } else {
+                    log('entityTestOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('entityTestOutput', `❌ 生成敌人失败: ${error.message}`);
+            }
+        };
+        
+        window.testPlayerShoot = function() {
+            try {
+                if (window.gameController && window.gameController.playerTank) {
+                    window.gameController.playerTank.shoot();
+                    log('entityTestOutput', '🔫 玩家射击');
+                } else {
+                    log('entityTestOutput', '❌ 玩家坦克不存在');
+                }
+            } catch (error) {
+                log('entityTestOutput', `❌ 玩家射击失败: ${error.message}`);
+            }
+        };
+        
+        window.testCreateExplosion = function() {
+            try {
+                if (window.gameController) {
+                    window.gameController.addExplosion(400, 300, 'large');
+                    log('entityTestOutput', '💥 爆炸效果已创建');
+                } else {
+                    log('entityTestOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('entityTestOutput', `❌ 创建爆炸失败: ${error.message}`);
+            }
+        };
+        
+        window.testSpawnPowerUp = function() {
+            try {
+                if (window.gameController) {
+                    window.gameController.createPowerUp(Math.random() * 700 + 50, Math.random() * 500 + 50);
+                    log('entityTestOutput', '⭐ 道具已生成');
+                } else {
+                    log('entityTestOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('entityTestOutput', `❌ 生成道具失败: ${error.message}`);
+            }
+        };
+        
+        window.testClearEntities = function() {
+            try {
+                if (window.gameController) {
+                    window.gameController.enemies = [];
+                    window.gameController.bullets = [];
+                    window.gameController.explosions = [];
+                    window.gameController.powerUps = [];
+                    log('entityTestOutput', '🧹 所有实体已清除');
+                } else {
+                    log('entityTestOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('entityTestOutput', `❌ 清除实体失败: ${error.message}`);
+            }
+        };
+        
+        window.testPerformance = function() {
+            try {
+                const startTime = performance.now();
+                
+                // 模拟性能测试
+                for (let i = 0; i < 10000; i++) {
+                    Math.random() * Math.random();
+                }
+                
+                const endTime = performance.now();
+                const duration = endTime - startTime;
+                
+                log('performanceOutput', `⚡ 性能测试完成: ${duration.toFixed(2)}ms`);
+                
+                if (window.gameController) {
+                    const status = window.gameController.getStatus();
+                    log('performanceOutput', `FPS: ${status.fps}, 实体数量: ${status.enemyCount + status.bulletCount}`);
+                }
+                
+            } catch (error) {
+                log('performanceOutput', `❌ 性能测试失败: ${error.message}`);
+            }
+        };
+        
+        window.testMemoryUsage = function() {
+            try {
+                if (performance.memory) {
+                    const memory = performance.memory;
+                    const used = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+                    const total = (memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
+                    const limit = (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2);
+                    
+                    log('performanceOutput', `💾 内存使用: ${used}MB / ${total}MB (限制: ${limit}MB)`);
+                } else {
+                    log('performanceOutput', '❌ 浏览器不支持内存监控');
+                }
+            } catch (error) {
+                log('performanceOutput', `❌ 内存测试失败: ${error.message}`);
+            }
+        };
+        
+        window.testStressTest = function() {
+            try {
+                if (window.gameController) {
+                    // 生成大量敌人进行压力测试
+                    for (let i = 0; i < 20; i++) {
+                        window.gameController.createEnemyTank('basic');
+                    }
+                    log('performanceOutput', '🔥 压力测试: 已生成20个敌人');
+                } else {
+                    log('performanceOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('performanceOutput', `❌ 压力测试失败: ${error.message}`);
+            }
+        };
+        
+        window.testToggleDebug = function() {
+            try {
+                if (window.gameController) {
+                    window.gameController.debugMode = !window.gameController.debugMode;
+                    log('performanceOutput', `🐛 调试模式: ${window.gameController.debugMode ? '开启' : '关闭'}`);
+                } else {
+                    log('performanceOutput', '❌ 游戏控制器未初始化');
+                }
+            } catch (error) {
+                log('performanceOutput', `❌ 切换调试模式失败: ${error.message}`);
+            }
+        };
+        
+        window.testBulletCollision = function() {
+            log('collisionOutput', '🎯 子弹碰撞测试 - 请在游戏中射击观察碰撞效果');
+        };
+        
+        window.testTankCollision = function() {
+            log('collisionOutput', '🚗 坦克碰撞测试 - 请移动坦克撞击障碍物或敌人');
+        };
+        
+        window.testObstacleCollision = function() {
+            log('collisionOutput', '🧱 障碍物碰撞测试 - 请射击可破坏的障碍物');
+        };
+        
+        window.testPlayShootSound = function() {
+            try {
+                if (window.audioManager) {
+                    window.audioManager.playSound('shoot');
+                    log('audioOutput', '🔫 射击音效已播放');
+                } else {
+                    log('audioOutput', '❌ 音频管理器未初始化');
+                }
+            } catch (error) {
+                log('audioOutput', `❌ 播放射击音效失败: ${error.message}`);
+            }
+        };
+        
+        window.testPlayExplosionSound = function() {
+            try {
+                if (window.audioManager) {
+                    window.audioManager.playSound('explosion');
+                    log('audioOutput', '💥 爆炸音效已播放');
+                } else {
+                    log('audioOutput', '❌ 音频管理器未初始化');
+                }
+            } catch (error) {
+                log('audioOutput', `❌ 播放爆炸音效失败: ${error.message}`);
+            }
+        };
+        
+        window.testPlayBackgroundMusic = function() {
+            try {
+                if (window.audioManager) {
+                    window.audioManager.playMusic('background');
+                    log('audioOutput', '🎵 背景音乐已播放');
+                } else {
+                    log('audioOutput', '❌ 音频管理器未初始化');
+                }
+            } catch (error) {
+                log('audioOutput', `❌ 播放背景音乐失败: ${error.message}`);
+            }
+        };
+        
+        window.testStopAllSounds = function() {
+            try {
+                if (window.audioManager) {
+                    window.audioManager.stopMusic();
+                    log('audioOutput', '🔇 所有音效已停止');
+                } else {
+                    log('audioOutput', '❌ 音频管理器未初始化');
+                }
+            } catch (error) {
+                log('audioOutput', `❌ 停止音效失败: ${error.message}`);
+            }
+        };
+        
+    </script>
+</body>
+</html>

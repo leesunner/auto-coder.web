@@ -8,6 +8,9 @@
 import { Game } from './core/Game.js';
 import { InputManager } from './core/InputManager.js';
 import { AudioManager } from './core/AudioManager.js';
+import { GameController } from './core/GameController.js';
+import { GameStateManager } from './states/GameStateManager.js';
+import { UIManager } from './states/UIManager.js';
 
 /**
  * 游戏应用类
@@ -18,6 +21,9 @@ class GameApp {
         this.game = null;
         this.inputManager = null;
         this.audioManager = null;
+        this.gameStateManager = null;
+        this.uiManager = null;
+        this.gameController = null;
         this.isInitialized = false;
         
         // 绑定方法上下文
@@ -43,19 +49,31 @@ class GameApp {
             await this.audioManager.init();
             
             // 初始化输入管理器
-            this.updateLoadingProgress(40, '初始化输入系统...');
+            this.updateLoadingProgress(30, '初始化输入系统...');
             this.inputManager = new InputManager();
             this.inputManager.init();
             
+            // 初始化游戏状态管理器
+            this.updateLoadingProgress(40, '初始化状态管理...');
+            this.gameStateManager = new GameStateManager();
+            
+            // 初始化UI管理器
+            this.updateLoadingProgress(50, '初始化UI系统...');
+            this.uiManager = new UIManager(this.gameStateManager);
+            
+            // 初始化游戏控制器
+            this.updateLoadingProgress(60, '初始化游戏逻辑...');
+            this.gameController = new GameController(this.gameStateManager, this.audioManager);
+            
             // 获取游戏画布
-            this.updateLoadingProgress(60, '初始化游戏引擎...');
+            this.updateLoadingProgress(70, '初始化游戏引擎...');
             const canvas = document.getElementById('gameCanvas');
             if (!canvas) {
                 throw new Error('无法找到游戏画布元素');
             }
             
             // 初始化游戏核心
-            this.game = new Game(canvas, this.inputManager, this.audioManager);
+            this.game = new Game(canvas, this.inputManager, this.audioManager, this.gameStateManager, this.uiManager, this.gameController);
             await this.game.init();
             
             // 设置事件监听器
