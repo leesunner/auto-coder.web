@@ -98,6 +98,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   panelId = "",
   isActive = true,
 }) => {
+  console.log("projectName--", projectName);
   // 使用useRef存储服务实例，确保在组件重渲染时保持同一个实例
   const chatServiceRef = useRef<ChatService | null>(null);
   const codingServiceRef = useRef<CodingService | null>(null);

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>坦克大战 - 测试页面</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .game-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #333;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #444;
+            border-radius: 5px;
+        }
+        .error {
+            background: #660000;
+            color: #ff6666;
+        }
+        .success {
+            background: #006600;
+            color: #66ff66;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #555;
+            color: #fff;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #666;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        #gameCanvas {
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 坦克大战 - 增强版测试</h1>
+        
+        <div class="info">
+            <h3>游戏特性测试</h3>
+            <p><strong>面向对象设计:</strong> ✅ 使用ES6 Classes和现代JavaScript</p>
+            <p><strong>模块化架构:</strong> ✅ 清晰的文件结构和依赖关系</p>
+            <p><strong>性能优化:</strong> ✅ 自动性能监控和优化</p>
+            <p><strong>调试功能:</strong> ✅ 内置调试控制台 (F12打开)</p>
+            <p><strong>智能AI:</strong> ✅ 多种AI行为模式</p>
+            <p><strong>关卡系统:</strong> ✅ 渐进式难度设计</p>
+        </div>
+
+        <div class="info">
+            <h3>操作说明</h3>
+            <p><strong>玩家1:</strong> 方向键移动，空格键射击</p>
+            <p><strong>玩家2:</strong> WASD移动，F键射击</p>
+            <p><strong>调试:</strong> F12或Ctrl+`打开调试控制台</p>
+            <p><strong>暂停:</strong> P键暂停/恢复游戏</p>
+        </div>
+
+        <div id="systemStatus" class="status">
+            <h3>系统检查</h3>
+            <div id="statusContent">正在检查系统兼容性...</div>
+        </div>
+
+        <div class="game-container">
+            <div id="gameContainer">
+                <!-- 游戏画布将在这里创建 -->
+            </div>
+            <div>
+                <button onclick="startGame()">开始游戏</button>
+                <button onclick="pauseGame()">暂停游戏</button>
+                <button onclick="resetGame()">重置游戏</button>
+                <button onclick="toggleDebug()">调试控制台</button>
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>性能监控</h3>
+            <div id="performanceInfo">
+                <p>FPS: <span id="fpsDisplay">--</span></p>
+                <p>实体数量: <span id="entityCount">--</span></p>
+                <p>内存使用: <span id="memoryUsage">--</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载游戏脚本 -->
+    <script type="module">
+        // 系统兼容性检查
+        function checkCompatibility() {
+            const statusDiv = document.getElementById('statusContent');
+            const checks = [];
+
+            // Canvas支持
+            const canvas = document.createElement('canvas');
+            checks.push({
+                name: 'Canvas 2D API',
+                status: !!canvas.getContext,
+                required: true
+            });
+
+            // Web Audio API
+            checks.push({
+                name: 'Web Audio API',
+                status: !!(window.AudioContext || window.webkitAudioContext),
+                required: true
+            });
+
+            // ES6支持
+            let es6Support = false;
+            try {
+                eval('class Test {}');
+                es6Support = true;
+            } catch (e) {
+                es6Support = false;
+            }
+            checks.push({
+                name: 'ES6 Classes',
+                status: es6Support,
+                required: true
+            });
+
+            // 模块支持
+            checks.push({
+                name: 'ES6 Modules',
+                status: 'noModule' in document.createElement('script'),
+                required: true
+            });
+
+            // requestAnimationFrame
+            checks.push({
+                name: 'requestAnimationFrame',
+                status: !!window.requestAnimationFrame,
+                required: true
+            });
+
+            // Performance API
+            checks.push({
+                name: 'Performance API',
+                status: !!window.performance,
+                required: false
+            });
+
+            // 生成状态报告
+            let html = '';
+            let allRequired = true;
+
+            checks.forEach(check => {
+                const icon = check.status ? '✅' : '❌';
+                const className = check.status ? 'success' : (check.required ? 'error' : 'warning');
+                html += `<div class="${className}">${icon} ${check.name}: ${check.status ? '支持' : '不支持'}</div>`;
+                
+                if (check.required && !check.status) {
+                    allRequired = false;
+                }
+            });
+
+            if (allRequired) {
+                html += '<div class="success">✅ 系统兼容性检查通过，可以运行游戏！</div>';
+            } else {
+                html += '<div class="error">❌ 系统不兼容，请升级浏览器！</div>';
+            }
+
+            statusDiv.innerHTML = html;
+            return allRequired;
+        }
+
+        // 性能监控
+        function updatePerformanceInfo() {
+            if (window.TankGameLauncher) {
+                const game = window.TankGameLauncher.getGame();
+                const optimizer = window.TankGameLauncher.getPerformanceOptimizer();
+                
+                if (optimizer) {
+                    const report = optimizer.getPerformanceReport();
+                    document.getElementById('fpsDisplay').textContent = Math.round(report.metrics.fps);
+                    document.getElementById('entityCount').textContent = report.metrics.entities;
+                    document.getElementById('memoryUsage').textContent = report.metrics.memoryUsage + 'MB';
+                }
+            }
+        }
+
+        // 全局函数
+        window.startGame = function() {
+            if (window.TankGameLauncher) {
+                window.TankGameLauncher.startGame();
+            } else {
+                alert('游戏未加载，请刷新页面重试');
+            }
+        };
+
+        window.pauseGame = function() {
+            if (window.TankGameLauncher) {
+                const game = window.TankGameLauncher.getGame();
+                if (game) {
+                    if (game.isPaused) {
+                        game.resumeGame();
+                    } else {
+                        game.pauseGame();
+                    }
+                }
+            }
+        };
+
+        window.resetGame = function() {
+            if (window.TankGameLauncher) {
+                const game = window.TankGameLauncher.getGame();
+                if (game) {
+                    game.resetGame();
+                }
+            }
+        };
+
+        window.toggleDebug = function() {
+            if (window.TankGameLauncher) {
+                const debug = window.TankGameLauncher.getDebugConsole();
+                if (debug) {
+                    debug.toggle();
+                }
+            }
+        };
+
+        // 初始化
+        checkCompatibility();
+        
+        // 定期更新性能信息
+        setInterval(updatePerformanceInfo, 1000);
+
+        // 尝试加载游戏
+        try {
+            import('./src/main.js').then(() => {
+                console.log('游戏模块加载成功');
+            }).catch(error => {
+                console.error('游戏模块加载失败:', error);
+                document.getElementById('statusContent').innerHTML += 
+                    '<div class="error">❌ 游戏模块加载失败: ' + error.message + '</div>';
+            });
+        } catch (error) {
+            console.error('模块导入失败:', error);
+        }
+    </script>
+</body>
+</html>
