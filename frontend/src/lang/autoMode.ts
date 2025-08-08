@@ -370,6 +370,11 @@ export const autoModeMessages: { [key: string]: Message } = {
     zh: "从此处刷新",
   },
 
+  askAgain: {
+    en: "Ask Again",
+    zh: "重新提问",
+  },
+
   // ExpertMode 面板相关
   codeViewer: {
     en: "Code Editor",

@@ -845,7 +845,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 处理从特定消息重新开始对话
   const handleRefreshFromMessage = useCallback(
-    (data: { messageId: string; messageContent: string; panelId?: string }) => {
+    (data: {
+      messageId: string;
+      messageContent: string;
+      askAgain?: boolean;
+      panelId?: string;
+    }) => {
       // 检查事件是否与当前面板相关
       if (data.panelId && data.panelId !== panelId) {
         return; // 如果事件不属于当前面板，直接返回
@@ -858,10 +863,19 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           (msg) => msg.id === data.messageId
         );
         if (messagePosition === -1) return prevMessages; // 如果找不到消息，不做任何改变
+        const lastIndex = data.askAgain ? messagePosition : messagePosition + 1;
 
+        const newList = prevMessages.slice(0, lastIndex);
         // 只保留到该消息的所有消息（包括该消息）
-        return prevMessages.slice(0, messagePosition);
+        messagesRef.current = newList;
+        return newList;
       });
+
+      //如果是重新询问，直接发送消息
+      if (data.askAgain) {
+        handleSendMessage(data.messageContent);
+        return;
+      }
 
       // 设置编辑器内容为该消息的内容，准备重新发送
       if (editorRef.current) {
@@ -871,8 +885,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         setTimeout(() => {
           if (editorRef.current) {
             editorRef.current.focus();
-            // 可选：自动提交消息
-            // handleSendMessage();
           }
         }, 100);
       }
@@ -880,7 +892,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       // 滚动到底部
       setTimeout(() => {
         scrollToBottom();
-      }, 200);
+      }, 150);
     },
     [panelId]
   );
@@ -912,17 +924,20 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     [handleTaskCompletion, updateMessage]
   );
 
-  // 在组件挂载时设置事件监听器
   useEffect(() => {
-    setupMessageListener(chatService);
-    setupMessageListener(codingService);
-    setupMessageListener(agenticEditService);
-
     // 订阅刷新消息事件
     const unsubscribeRefresh = eventBus.subscribe(
       EVENTS.CHAT.REFRESH_FROM_MESSAGE,
       handleRefreshFromMessage
     );
+    return unsubscribeRefresh;
+  }, [handleRefreshFromMessage]);
+
+  // 在组件挂载时设置事件监听器
+  useEffect(() => {
+    setupMessageListener(chatService);
+    setupMessageListener(codingService);
+    setupMessageListener(agenticEditService);
 
     // 订阅NEW_MESSAGE事件，处理字符串类型的消息
     const unsubscribeNewMessage = eventBus.subscribe(
@@ -1078,7 +1093,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       chatService.removeAllListeners();
       codingService.removeAllListeners();
       agenticEditService.removeAllListeners();
-      unsubscribeRefresh();
       unsubscribeNewMessage();
       unsubscribeRagEnabled();
       unsubscribeNewChat();
@@ -1087,7 +1101,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       unsubscribeSendMessage();
       unsubscribeStopGeneration();
     };
-  }, [setupMessageListener, handleRefreshFromMessage, panelId]);
+  }, [setupMessageListener, panelId]);
 
   // 新消息到达时自动滚动到底部
   // useEffect(() => {
@@ -1557,40 +1571,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   // 在组件挂载时加载文件组列表
   useEffect(() => {
     fetchFileGroups();
-
-    // 监听Chat面板刷新消息事件
-    const handleRefreshFromMessage = (data: {
-      messageId: string;
-      messageContent: string;
-    }) => {
-      const { messageId, messageContent } = data;
-      // 查找消息索引
-      const msgIndex = messages.findIndex((m) => m.id === messageId);
-      console.log("刷新消息index：", msgIndex);
-      if (msgIndex >= 0) {
-        // 保留点击的消息及之前的所有消息
-        const updatedMessages = messages.slice(0, msgIndex + 1);
-        setMessages(updatedMessages);
-
-        // 将最后一条用户消息的内容设置为编辑器内容
-        const lastUserMsg = [...updatedMessages]
-          .reverse()
-          .find((m) => m.isUser);
-        if (lastUserMsg) {
-          setEditorContent(lastUserMsg.content);
-        }
-      }
-    };
-
-    // 订阅刷新事件
-    const unsubscribe = eventBus.subscribe(
-      EVENTS.CHAT.REFRESH_FROM_MESSAGE,
-      handleRefreshFromMessage
-    );
-
-    return () => {
-      unsubscribe();
-    };
   }, [messages]);
 
   // 重置对话
