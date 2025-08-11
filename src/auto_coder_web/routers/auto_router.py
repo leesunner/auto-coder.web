@@ -8,24 +8,34 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 from auto_coder_web.auto_coder_runner_wrapper import AutoCoderRunnerWrapper
-from autocoder.events.event_manager_singleton import get_event_manager,gengerate_event_file_path,get_event_file_path
+from autocoder.events.event_manager_singleton import (
+    get_event_manager,
+    gengerate_event_file_path,
+    get_event_file_path,
+)
 from autocoder.events import event_content as EventContentCreator
 from autocoder.events.event_types import EventType
-from autocoder.common.global_cancel import global_cancel, CancelRequestedException 
+from autocoder.common.global_cancel import global_cancel, CancelRequestedException
 from autocoder.common.file_checkpoint.manager import FileChangeManager
+
+# from chat_conversations_router import chat_conversations_router
 from loguru import logger
+
+from auto_coder_web.common_router.chat_conversations_manager import get_conversation_id
 
 router = APIRouter()
 
 # 创建线程池
 cancel_thread_pool = ThreadPoolExecutor(max_workers=5)
 
+
 class AutoCommandRequest(BaseModel):
     command: str
     panel_id: Optional[str] = None
 
+
 class EventPollRequest(BaseModel):
-    event_file_id:str    
+    event_file_id: str
 
 
 class UserResponseRequest(BaseModel):
@@ -60,31 +70,30 @@ def ensure_task_dir(project_path: str) -> str:
     return task_dir
 
 
-
-
 @router.post("/api/auto-command")
-async def auto_command(request: AutoCommandRequest, project_path: str = Depends(get_project_path)):
+async def auto_command(
+    request: AutoCommandRequest, project_path: str = Depends(get_project_path)
+):
     """
     执行auto_command命令
 
     通过AutoCoderRunnerWrapper调用auto_command_wrapper方法，执行指定的命令
     在单独的线程中运行，并返回一个唯一的UUID
-    """ 
-    event_file,file_id = gengerate_event_file_path()       
+    """
+    event_file, file_id = gengerate_event_file_path()
+
     # 定义在线程中运行的函数
-    def run_command_in_thread():        
+    def run_command_in_thread():
         try:
             # 创建AutoCoderRunnerWrapper实例，使用从应用上下文获取的项目路径
             wrapper = AutoCoderRunnerWrapper(project_path)
-            wrapper.configure_wrapper(f"event_file:{event_file}")   
-            global_cancel.register_token(event_file)         
+            wrapper.configure_wrapper(f"event_file:{event_file}")
+            global_cancel.register_token(event_file)
             prompt_text = request.command
 
             # 调用auto_command_wrapper方法
-            logger.info(f"Executing auto command {file_id} with prompt: {prompt_text}")          
-            wrapper.auto_command_wrapper(prompt_text, {
-                "event_file_id": file_id
-            })            
+            logger.info(f"Executing auto command {file_id} with prompt: {prompt_text}")
+            wrapper.auto_command_wrapper(prompt_text, {"event_file_id": file_id})
             # get_event_manager(event_file).write_completion(
             #     EventContentCreator.create_completion(
             #         "200", "completed", result).to_dict()
@@ -94,39 +103,43 @@ async def auto_command(request: AutoCommandRequest, project_path: str = Depends(
             logger.error(f"Error executing auto command {file_id}: {str(e)}")
             logger.exception(e)
             get_event_manager(event_file).write_error(
-                EventContentCreator.create_error(error_code="500", error_message=str(e), details={}).to_dict()
+                EventContentCreator.create_error(
+                    error_code="500", error_message=str(e), details={}
+                ).to_dict()
             )
-    
+
     # 创建并启动线程
     thread = Thread(target=run_command_in_thread)
     thread.daemon = True  # 设置为守护线程，这样当主程序退出时，线程也会退出
     thread.start()
-    
+
     logger.info(f"Started command {file_id} in background thread")
-    return {"event_file_id": file_id}
+    return {"event_file_id": file_id, "conversation_id": get_conversation_id()}
 
 
 @router.get("/api/auto-command/events")
-async def poll_auto_command_events(event_file_id: str, project_path: str = Depends(get_project_path)):
+async def poll_auto_command_events(
+    event_file_id: str, project_path: str = Depends(get_project_path)
+):
     async def event_stream():
-        event_file = get_event_file_path(event_file_id,project_path)
-        event_manager = get_event_manager(event_file)           
-        while True:                                 
-            try:                
-                events = await asyncio.to_thread(event_manager.read_events, block=False)                
-                
+        event_file = get_event_file_path(event_file_id, project_path)
+        event_manager = get_event_manager(event_file)
+        while True:
+            try:
+                events = await asyncio.to_thread(event_manager.read_events, block=False)
+
                 if not events:
                     await asyncio.sleep(0.1)  # 减少休眠时间，更频繁地检查
-                    continue    
-                
-                current_event = None                
+                    continue
+
+                current_event = None
                 for event in events:
                     current_event = event
                     # Convert event to JSON string
                     event_json = event.to_json()
                     # Format as SSE
-                    yield f"data: {event_json}\n\n"                    
-                    
+                    yield f"data: {event_json}\n\n"
+
                 # 防止current_event为None导致的错误
                 if current_event is not None:
                     if current_event.event_type == EventType.ERROR:
@@ -138,7 +151,7 @@ async def poll_auto_command_events(event_file_id: str, project_path: str = Depen
                         break
             except Exception as e:
                 logger.error(f"Error in SSE stream: {str(e)}")
-                yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"                
+                yield f'data: {{"error": "{str(e)}"}}\n\n'
                 break
 
     return StreamingResponse(
@@ -155,7 +168,9 @@ async def poll_auto_command_events(event_file_id: str, project_path: str = Depen
 
 
 @router.post("/api/auto-command/response")
-async def response_user(request: UserResponseRequest, project_path: str = Depends(get_project_path)):
+async def response_user(
+    request: UserResponseRequest, project_path: str = Depends(get_project_path)
+):
     """
     响应用户询问
 
@@ -171,30 +186,36 @@ async def response_user(request: UserResponseRequest, project_path: str = Depend
     try:
         # 获取事件管理器
         logger.info(f"Sending user response to event_file_id: {request.event_file_id}")
-        event_file = get_event_file_path(file_id=request.event_file_id,project_path=project_path)
+        event_file = get_event_file_path(
+            file_id=request.event_file_id, project_path=project_path
+        )
         logger.info(f"Event file from event_file_id: {event_file}")
         event_manager = get_event_manager(event_file)
 
         # 调用respond_to_user方法发送用户响应
         logger.info(f"Responding to user with event ID: {request.event_id}")
         response_event = event_manager.respond_to_user(
-            request.event_id, request.response)
+            request.event_id, request.response
+        )
 
         # 返回成功响应
         return {
             "status": "success",
             "message": "Response sent successfully",
-            "event_id": response_event.event_id
+            "event_id": response_event.event_id,
         }
     except Exception as e:
         logger.error(f"Error sending user response: {str(e)}")
         logger.exception(e)
         raise HTTPException(
-            status_code=500, detail=f"Failed to send user response: {str(e)}")
+            status_code=500, detail=f"Failed to send user response: {str(e)}"
+        )
 
 
 @router.post("/api/auto-command/save-history")
-async def save_task_history(request: TaskHistoryRequest, project_path: str = Depends(get_project_path)):
+async def save_task_history(
+    request: TaskHistoryRequest, project_path: str = Depends(get_project_path)
+):
     """
     保存任务历史
 
@@ -211,20 +232,21 @@ async def save_task_history(request: TaskHistoryRequest, project_path: str = Dep
         task_dir = ensure_task_dir(project_path)
         task_file = os.path.join(task_dir, f"{request.event_file_id}.json")
         task_data = request.model_dump()
-        
+
         # 写入文件
-        with open(task_file, 'w', encoding='utf-8') as f:
+        with open(task_file, "w", encoding="utf-8") as f:
             json.dump(task_data, f, ensure_ascii=False, indent=2)
-        
+
         return {
             "status": "success",
             "message": "Task history saved successfully",
-            "task_id": request.event_file_id
+            "task_id": request.event_file_id,
         }
     except Exception as e:
         logger.error(f"Error saving task history: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to save task history: {str(e)}")
+            status_code=500, detail=f"Failed to save task history: {str(e)}"
+        )
 
 
 @router.get("/api/auto-command/history")
@@ -243,13 +265,13 @@ async def get_task_history(project_path: str = Depends(get_project_path)):
     try:
         task_dir = ensure_task_dir(project_path)
         task_files = []
-        
+
         # 扫描目录下所有json文件
         for filename in os.listdir(task_dir):
-            if filename.endswith('.json'):
+            if filename.endswith(".json"):
                 file_path = os.path.join(task_dir, filename)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         task_data = json.load(f)
                         # 只添加文件名作为ID (不含扩展名)
                         task_id = os.path.splitext(filename)[0]
@@ -258,15 +280,16 @@ async def get_task_history(project_path: str = Depends(get_project_path)):
                         task_files.append(task_data)
                 except Exception as e:
                     logger.error(f"Error reading task file {filename}: {str(e)}")
-        
+
         # 按时间戳排序，最新的在前
         task_files.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
-        
+
         return {"tasks": task_files}
     except Exception as e:
         logger.error(f"Error getting task history: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to get task history: {str(e)}")
+            status_code=500, detail=f"Failed to get task history: {str(e)}"
+        )
 
 
 @router.get("/api/auto-command/history/{task_id}")
@@ -284,93 +307,99 @@ async def get_task_detail(task_id: str, project_path: str = Depends(get_project_
     try:
         task_dir = ensure_task_dir(project_path)
         task_file = os.path.join(task_dir, f"{task_id}.json")
-        
+
         if not os.path.exists(task_file):
             raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
-        
-        with open(task_file, 'r', encoding='utf-8') as f:
+
+        with open(task_file, "r", encoding="utf-8") as f:
             task_data = json.load(f)
-        
+
         return task_data
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting task detail for {task_id}: {str(e)}")
         raise HTTPException(
-            status_code=500, detail=f"Failed to get task detail: {str(e)}")
+            status_code=500, detail=f"Failed to get task detail: {str(e)}"
+        )
 
 
 @router.post("/api/auto-command/cancel")
-async def cancel_task(request: CancelTaskRequest, project_path: str = Depends(get_project_path)):
+async def cancel_task(
+    request: CancelTaskRequest, project_path: str = Depends(get_project_path)
+):
     """
     取消正在运行的任务
-    
+
     Args:
         request: 包含event_file_id的请求对象
         project_path: 项目路径
-        
+
     Returns:
         取消操作的结果
     """
+
     # 定义在线程中执行的取消任务函数
     def cancel_task_thread(event_file_id: str, project_path: str):
-        try:                        
+        try:
             # 获取事件文件路径和事件管理器
-            event_file = get_event_file_path(file_id=event_file_id, project_path=project_path)
+            event_file = get_event_file_path(
+                file_id=event_file_id, project_path=project_path
+            )
             logger.info(f"event_file path {event_file}")
             global_cancel.set(token=event_file)
             event_manager = get_event_manager(event_file)
-            file_change_manager = FileChangeManager(project_dir=project_path,
-            backup_dir=os.path.join(project_path,".auto-coder","checkpoint"),
-            store_dir=os.path.join(project_path,".auto-coder","checkpoint_store"),
-            max_history=50)
+            file_change_manager = FileChangeManager(
+                project_dir=project_path,
+                backup_dir=os.path.join(project_path, ".auto-coder", "checkpoint"),
+                store_dir=os.path.join(project_path, ".auto-coder", "checkpoint_store"),
+                max_history=50,
+            )
             undo_result = file_change_manager.undo_change_group(group_id=event_file)
             if not undo_result.success:
                 logger.error(f"Error in undo change group: {undo_result.errors}")
                 raise Exception(f"Error in undo change group: {undo_result.errors}")
             else:
-                logger.info(f"Undo change group {event_file} successfully {undo_result.restored_files}")
-            
+                logger.info(
+                    f"Undo change group {event_file} successfully {undo_result.restored_files}"
+                )
+
             # 向事件流写入取消事件
             event_manager.write_error(
                 EventContentCreator.create_error(
-                    error_code="USER_CANCELLED", 
+                    error_code="USER_CANCELLED",
                     error_message="Task was cancelled by the user",
-                    details={"message": "Task was cancelled by the user"}
+                    details={"message": "Task was cancelled by the user"},
                 ).to_dict()
             )
-            
+
             logger.info(f"Task {event_file_id} cancelled by user")
             return True
         except Exception as e:
             logger.error(f"Error in cancel thread for task {event_file_id}: {str(e)}")
             return False
-    
+
     try:
         # 在线程池中执行取消操作并获取 Future 对象
         future = cancel_thread_pool.submit(
-            cancel_task_thread, 
-            request.event_file_id, 
-            project_path
+            cancel_task_thread, request.event_file_id, project_path
         )
-        
+
         # 使用 asyncio 来等待线程完成
         result = await asyncio.to_thread(future.result)
-        
+
         if result:
             # 线程成功完成
             return {
                 "status": "success",
                 "message": "Task successfully cancelled",
-                "event_file_id": request.event_file_id
+                "event_file_id": request.event_file_id,
             }
         else:
             # 线程返回了 False，表示出现了错误
             raise HTTPException(
-                status_code=500, 
-                detail=f"Failed to cancel task {request.event_file_id}"
+                status_code=500, detail=f"Failed to cancel task {request.event_file_id}"
             )
     except Exception as e:
         logger.error(f"Error cancelling task: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to cancel task: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to cancel task: {str(e)}")

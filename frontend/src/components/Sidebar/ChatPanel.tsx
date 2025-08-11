@@ -98,7 +98,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   panelId = "",
   isActive = true,
 }) => {
-  console.log("projectName--", projectName);
   // 使用useRef存储服务实例，确保在组件重渲染时保持同一个实例
   const chatServiceRef = useRef<ChatService | null>(null);
   const codingServiceRef = useRef<CodingService | null>(null);
@@ -210,9 +209,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       // 清空当前对话内容
       setMessages([]);
       setChatLists((prev) => [newChatName, ...prev]);
-
-      // 保存新的空聊天列表
-      await saveChatListHandler({ name: newChatName, messages: [], panelId });
+      await chatListService.createNewChat({ name: newChatName, panelId });
 
       AntdMessage.success(getMessage("newChatCreated"));
       setIsNewChatModalVisible(false);
@@ -233,7 +230,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       // 清空当前对话内容
       setMessages([]);
 
-      const newChatName = await chatListService.createNewChat(panelId);
+      const newChatName = await chatListService.createNewChat({ panelId });
       if (newChatName) {
         // 设置新的对话名称
         setChatListName(newChatName);
@@ -453,8 +450,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   }, []);
 
   useEffect(() => {
-    getCurrentSessionName();
-    fetchChatLists();
+    const fn = async () => {
+      if (!panelId) return;
+      await fetchChatLists();
+      setTimeout(() => {
+        getCurrentSessionName();
+      }, 50);
+    };
+    fn();
   }, [panelId]);
 
   const fetchChatLists = async () => {
@@ -488,6 +491,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             ? sessionInfo
             : sessionInfo.sessionName;
         if (sessionName) {
+          console.log("Current session name------------:", sessionName);
           setChatListName(sessionName);
           // 如果会话名称有效，加载该会话的消息
           if (!chatLists.includes(sessionName)) {
@@ -1262,6 +1266,23 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           endChatRunning();
           return;
         }
+      }
+      console.log(
+        "------------------>: ",
+        chatListNameRef.current,
+        messagesRef.current.length === 0,
+        messages.length === 0
+      );
+      // 没有消息的时候创建一个会话
+      if (
+        chatListNameRef.current &&
+        messagesRef.current.length === 0 &&
+        messages.length === 0
+      ) {
+        await chatListService.createConversation({
+          name: chatListNameRef.current,
+          description: processedText,
+        });
       }
 
       // 根据当前模式使用适当的服务

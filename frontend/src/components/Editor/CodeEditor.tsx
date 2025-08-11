@@ -65,27 +65,48 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [fileTabs, activeFile]);
 
   useEffect(() => {
+    const handleTabsLoaded = (file: string) => {
+      if (!file) return;
+      setTimeout(() => {
+        setActiveFile(file);
+        loadFileContent(file);
+      }, 50);
+    };
     // 加载保存的标签页状态
-    loadTabsFromBackend().then((savedTabs) => {
+    loadTabsFromBackend().then((savedTabData) => {
+      const { activeTabPath, tabs } = savedTabData || {};
       if (initialFiles && initialFiles.length > 0) {
         // 如果有初始文件，优先处理它们
         setSelectedFiles(initialFiles);
-        initialFiles.forEach((file) => {
-          loadFileContent(file.path);
-        });
-        if (initialFiles.length > 0) {
-          setActiveFile(initialFiles[0].path);
-        }
-      } else if (savedTabs && savedTabs.tabs.length > 0) {
-        // 否则，加载保存的标签页
-        savedTabs.tabs.forEach((tab) => {
-          loadFileContent(tab.path);
-        });
-        if (savedTabs.activeTabPath) {
-          setActiveFile(savedTabs.activeTabPath);
-        } else if (savedTabs.tabs.length > 0) {
-          setActiveFile(savedTabs.tabs[0].path);
-        }
+        const file =
+          activeTabPath &&
+          initialFiles.find(({ path }) => path === activeTabPath)
+            ? activeTabPath
+            : initialFiles[0]?.path;
+        setFileTabs(
+          initialFiles.map((_item) => ({
+            key: _item.path as string,
+            path: _item.path as string,
+            label: _item.label as string,
+            content: "",
+          }))
+        );
+        handleTabsLoaded(file);
+        return;
+      }
+
+      if (tabs && tabs.length > 0) {
+        const file = activeTabPath || tabs[0]?.path;
+        setFileTabs(
+          tabs.map((_item) => ({
+            key: _item.path as string,
+            path: _item.path as string,
+            label: _item.label as string,
+            content: "",
+            isActive: _item.isActive,
+          }))
+        );
+        handleTabsLoaded(file);
       }
     });
   }, [initialFiles]);
@@ -334,6 +355,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     // 更新后端活跃标签
     try {
       await axios.put("/api/editor/active-tab", { path: key });
+      loadFileContent(key);
     } catch (error) {
       console.error(getMessage("codeEditor.updateActiveTabFailed"), error);
     }

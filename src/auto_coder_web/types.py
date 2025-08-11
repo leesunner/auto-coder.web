@@ -26,13 +26,19 @@ class CompletionResponse(BaseModel):
 
 class ChatMetadata(BaseModel):
     token_usage: Optional[int] = None  # token 消耗
-    cost: Optional[float] = None       # 费用
+    cost: Optional[float] = None  # 费用
     window_size: Optional[int] = None  # 窗口大小
+
 
 class ChatList(BaseModel):
     name: str
     messages: List[Dict[str, Any]]
     metadata: Optional[ChatMetadata] = None  # 新增 metadata 字段
+    conversation_id: Optional[str] = None
+    
+class ChatCreateConversation(BaseModel):
+    name: str
+    description: str
 
 
 class HistoryQuery(BaseModel):
@@ -49,9 +55,9 @@ class ValidationResponse(BaseModel):
 class QueryWithFileNumber(BaseModel):
     query: str
     timestamp: Optional[str] = None
-    file_number: int  
-    response: Optional[str] = None  
-    urls: Optional[List[str]] = None 
+    file_number: int
+    response: Optional[str] = None
+    urls: Optional[List[str]] = None
 
 
 class ValidationResponseWithFileNumbers(BaseModel):
@@ -67,12 +73,12 @@ class FileContentResponse(BaseModel):
 
 
 class FileChange(BaseModel):
-    path: str  
-    change_type: str   # "added" 或 "modified"
+    path: str
+    change_type: str  # "added" 或 "modified"
 
 
 class CommitDiffResponse(BaseModel):
     success: bool
     message: str = ""
     diff: Optional[str] = None
-    file_changes: Optional[List[FileChange]] = None 
+    file_changes: Optional[List[FileChange]] = None

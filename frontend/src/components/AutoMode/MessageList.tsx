@@ -76,7 +76,7 @@ const MessageItem = React.memo(
       if (message.isUser) {
         return <UserMessage message={message} />;
       }
-      console.log("message.metadata?.path----", message.metadata?.path);
+
       if (message.metadata?.path?.startsWith("/agent/")) {
         if (
           message.metadata?.path === "/agent/edit" ||
