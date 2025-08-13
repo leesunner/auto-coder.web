@@ -73,6 +73,48 @@ class AutoCommandService extends EventEmitter {
     }
   }
 
+  /**
+   * 设置当前会话名称
+   * @param name 会话名称
+   * @param panelId 面板ID，可选
+   * @returns 是否设置成功
+   */
+  async setCurrentSessionName(
+    name: string,
+    panelId?: string = ""
+  ): Promise<boolean> {
+    if (!name.trim()) {
+      return false;
+    }
+
+    try {
+      const response = await fetch("/api/chat-session/name", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          session_name: name,
+          panel_id: panelId || "",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to set current session name");
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error setting current session name:", error);
+      this.emit("error", "设置当前会话名称失败");
+      return false;
+    }
+  }
+  /**
+   * 创建并设置会话
+   * @param data 会话数据
+   * @returns 会话ID
+   */
   async createConversation(data: { name?: string; description: string }) {
     if (!data.name) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, "-");

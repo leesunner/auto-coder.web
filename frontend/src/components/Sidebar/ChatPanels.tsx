@@ -4,22 +4,7 @@ import { FileMetadata } from "../../types/file_meta";
 import { getMessage } from "../../lang";
 import axios from "axios";
 import HotkeyManager from "../../utils/HotkeyManager";
-
-export const DEFAULT_TABS: ChatTabConfig[] = [
-  { id: "main", name: getMessage("mainChat") || "主线面板" },
-  { id: "secondary", name: getMessage("secondaryChat") || "支线面板" },
-];
-
-// 定义单个聊天面板的配置接口
-interface ChatTabConfig {
-  id: string;
-  name: string;
-}
-
-interface ChatPanelsConfig {
-  tabs: ChatTabConfig[];
-  activeTabId: string;
-}
+import { useChatContext, type ChatPanelsConfig } from "@/contexts/ChatContext";
 
 interface ChatPanelsProps {
   setPreviewFiles: (files: { path: string; content: string }[]) => void;
@@ -40,11 +25,11 @@ const ChatPanels: React.FC<ChatPanelsProps> = ({
   projectName,
   setSelectedFiles,
 }) => {
+  // 使用 ChatContext 获取聊天标签页配置
+  const { tabs, setTabs, activeTabId, setActiveTabId } = useChatContext();
   // 记录已经渲染过的 tabs
   const [renderedTabs, setRenderedTabs] = useState<Set<string>>(new Set());
-  // 默认聊天标签页配置
-  const [tabs, setTabs] = useState<ChatTabConfig[]>(DEFAULT_TABS);
-  const [activeTabId, setActiveTabId] = useState<string>(DEFAULT_TABS[0].id);
+
   const [isAddingTab, setIsAddingTab] = useState<boolean>(false);
   const [newTabName, setNewTabName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);

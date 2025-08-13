@@ -67,10 +67,6 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
   onSwitchToAutoMode,
   setSelectedFiles,
 }) => {
-  // 使用 ChatContext 获取聊天列表数据
-  const { chatLists, setChatLists, chatListName, setChatListName } =
-    useChatContext();
-
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [isFull, setFull] = useState(false);
 

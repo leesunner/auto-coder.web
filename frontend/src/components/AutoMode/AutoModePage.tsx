@@ -13,7 +13,6 @@ import { ChatPanel } from "./index";
 import InputPanel from "./InputPanel";
 import AskUserDialog from "./AskUserDialog"; // Import the new component
 import { autoCommandService } from "../../services/autoCommandService";
-import { DEFAULT_TABS } from "@/components/Sidebar/ChatPanels";
 import { useChatContext } from "../../contexts/ChatContext";
 import { formatterMessageMetadata } from "@/utils/formatUtils";
 // Lazy load CommitListPanel and CurrentChangePanel
@@ -38,6 +37,9 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
   isAutoMode,
   className,
 }) => {
+  // 使用 ChatContext 获取聊天标签页配置
+  const { activeTabId } = useChatContext();
+  console.log("activeTabId----->", activeTabId);
   // 状态管理
   const [autoSearchTerm, setAutoSearchTerm] = useState(""); // 搜索/命令输入框的状态
   const [lastSubmittedQuery, setLastSubmittedQuery] = useState(""); // 最后提交的查询
@@ -313,6 +315,10 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
             name: messageName.current,
             description: contentToSubmit,
           });
+          await autoCommandService.setCurrentSessionName(
+            messageName.current,
+            activeTabId
+          );
         }
 
         // 执行命令并获取事件文件ID
@@ -365,6 +371,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
     // 更新消息名字
     if (task.name) {
       messageName.current = task.name;
+      await autoCommandService.setCurrentSessionName(task.name, activeTabId);
     }
     //TODO 可能还要更新会话名
     // 确保消息区域可见

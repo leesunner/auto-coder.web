@@ -234,7 +234,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               <div className="flex items-center">
                 <span>{getMessage("apiCost")}: </span>
                 <span className="text-white ml-1">
-                  ${accumulatedStats.totalCost.toFixed(5)}
+                  ￥{accumulatedStats.totalCost.toFixed(5)}
                 </span>
               </div>
             </div>
@@ -245,7 +245,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             {/* 假设已有保存按钮 */}
             <button
               className="p-1 rounded hover:bg-gray-700 text-gray-300"
-              title={getMessage('saveSession')}
+              title={getMessage("saveSession")}
             >
               💾
             </button>
@@ -286,7 +286,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                     .replace(/[:.]/g, "-")}.png`;
                   link.click();
                 } catch (error) {
-                  console.error(getMessage('exportImageFailed'), error);
+                  console.error(getMessage("exportImageFailed"), error);
                 } finally {
                   // 恢复原始样式
                   container.style.height = originalHeight;
@@ -295,7 +295,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                 }
               }}
               className="p-1 rounded hover:bg-gray-700 text-gray-300"
-              title={getMessage('exportCompleteImage')}
+              title={getMessage("exportCompleteImage")}
             >
               ⬇️
             </button>
@@ -321,7 +321,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             }}
             className="sticky bottom-24 right-4 z-10 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 shadow-lg flex items-center justify-center"
             style={{ width: "36px", height: "36px" }}
-            aria-label={getMessage('scrollToBottom')}
+            aria-label={getMessage("scrollToBottom")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

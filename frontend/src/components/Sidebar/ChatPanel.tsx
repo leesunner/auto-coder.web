@@ -1816,7 +1816,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
                   <div className="flex items-center">
                     <span>{getMessage("apiCost")}: </span>
                     <span className="text-white ml-0.5">
-                      ${accumulatedStats.totalCost.toFixed(5)}
+                      ￥{accumulatedStats.totalCost.toFixed(5)}
                     </span>
                   </div>
                   <div className="flex items-center">
