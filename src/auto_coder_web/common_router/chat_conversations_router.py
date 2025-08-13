@@ -1,5 +1,6 @@
 from auto_coder_web.common_router.chat_conversations_manager import (
     create_and_set_conversation,
+    set_current_conversation,
 )
 
 from fastapi import APIRouter, HTTPException, Request, Depends
@@ -7,6 +8,12 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from auto_coder_web.types import ChatCreateConversation
 
 from loguru import logger
+
+from pydantic import BaseModel
+
+
+class ConversationData(BaseModel):
+    conversation_id: str
 
 
 async def get_project_path(request: Request) -> str:
@@ -24,6 +31,9 @@ async def create_and_set_conversation_endpoint(
     chat_create_data: ChatCreateConversation,
     # project_path: str = Depends(get_project_path),
 ):
+    """
+    创建会话id，并设置为当前会话id
+    """
     try:
         logger.info(f"Creating conversation: {chat_create_data.name}")
 
@@ -40,4 +50,20 @@ async def create_and_set_conversation_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error creating conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/chat/set-conversations")
+async def update_current_conversation_id(data: ConversationData):
+    """
+    更新当前会话id
+    """
+    try:
+        set_current_conversation(data.conversation_id)
+        return {"status": "success", "message": "设置成功"}
+    except ValueError as e:
+        logger.error(f"Invalid data for conversation set: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error set conversation: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -31,11 +31,16 @@ class ChatMetadata(BaseModel):
 
 
 class ChatList(BaseModel):
+    query: str
+    event_file_id: str
+    status: str
+    timestamp: int
     name: str
     messages: List[Dict[str, Any]]
-    metadata: Optional[ChatMetadata] = None  # 新增 metadata 字段
+    metadata: Optional[Dict[str, Any]] = None  # 新增 metadata 字段
     conversation_id: Optional[str] = None
-    
+
+
 class ChatCreateConversation(BaseModel):
     name: str
     description: str

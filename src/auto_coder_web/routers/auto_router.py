@@ -47,9 +47,12 @@ class UserResponseRequest(BaseModel):
 class TaskHistoryRequest(BaseModel):
     query: str
     event_file_id: str
-    messages: List[Dict[str, Any]]
     status: str
     timestamp: int
+    name: str
+    messages: List[Dict[str, Any]]
+    metadata: Optional[Dict[str, Any]] = None  # 新增 metadata 字段
+    conversation_id: Optional[str] = None
 
 
 class CancelTaskRequest(BaseModel):
@@ -65,7 +68,8 @@ async def get_project_path(request: Request) -> str:
 
 def ensure_task_dir(project_path: str) -> str:
     """确保任务历史目录存在"""
-    task_dir = os.path.join(project_path, ".auto-coder", "auto-coder.web", "tasks")
+    # task_dir = os.path.join(project_path, ".auto-coder", "auto-coder.web", "tasks")
+    task_dir = os.path.join(project_path, ".auto-coder", "auto-coder.web", "chat-lists")
     os.makedirs(task_dir, exist_ok=True)
     return task_dir
 
@@ -230,8 +234,10 @@ async def save_task_history(
     """
     try:
         task_dir = ensure_task_dir(project_path)
-        task_file = os.path.join(task_dir, f"{request.event_file_id}.json")
+        # task_file = os.path.join(task_dir, f"{request.event_file_id}.json")
+        task_file = os.path.join(task_dir, f"{request.name}.json")
         task_data = request.model_dump()
+        task_data["conversation_id"] = get_conversation_id()
 
         # 写入文件
         with open(task_file, "w", encoding="utf-8") as f:
@@ -298,7 +304,8 @@ async def get_task_detail(task_id: str, project_path: str = Depends(get_project_
     获取特定任务的详细信息
 
     Args:
-        task_id: 任务ID (event_file_id)
+        # task_id: 任务ID (event_file_id)
+        task_id: 任务ID (文件name)
         project_path: 项目路径
 
     Returns:

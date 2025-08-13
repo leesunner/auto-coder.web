@@ -33,7 +33,7 @@ interface MarkdownComponentProps {
 }
 
 const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
-  const [isCollapsed, setIsCollapsed] = useState(message.type === "ERROR");
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // 处理thinking标签
   const processThinkingTags = (content: string): string => {

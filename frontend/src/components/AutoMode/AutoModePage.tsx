@@ -15,6 +15,7 @@ import AskUserDialog from "./AskUserDialog"; // Import the new component
 import { autoCommandService } from "../../services/autoCommandService";
 import { DEFAULT_TABS } from "@/components/Sidebar/ChatPanels";
 import { useChatContext } from "../../contexts/ChatContext";
+import { formatterMessageMetadata } from "@/utils/formatUtils";
 // Lazy load CommitListPanel and CurrentChangePanel
 const CommitListPanel = lazy(() => import("./CommitListPanel"));
 const CurrentChangePanel = lazy(() => import("./CurrentChangePanel"));
@@ -37,10 +38,6 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
   isAutoMode,
   className,
 }) => {
-  // 使用 ChatContext 获取聊天列表数据
-  const { chatLists, setChatLists, chatListName, setChatListName } =
-    useChatContext();
-
   // 状态管理
   const [autoSearchTerm, setAutoSearchTerm] = useState(""); // 搜索/命令输入框的状态
   const [lastSubmittedQuery, setLastSubmittedQuery] = useState(""); // 最后提交的查询
@@ -60,41 +57,55 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
   const [currentCommits, setCurrentCommits] = useState<any[]>([]); // 当前变化的提交详情
 
   const messagesRef = useRef(messages);
+  const messageName = useRef("");
 
   useEffect(() => {
     messagesRef.current = messages;
   }, [messages]);
 
   const saveTaskHistory = useCallback(
-    async (
-      isError: boolean = false,
-      query: string,
-      eventFileId: string | null
-    ) => {
-      if (!query || !eventFileId) return;
-      console.log(messagesRef.current); // 使用 ref 获取最新值
-
-      try {
-        await fetch("/api/auto-command/save-history", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: query,
-            event_file_id: eventFileId,
-            messages: messagesRef.current,
-            status: isError ? "error" : "completed",
-            timestamp: Date.now(),
-          }),
-        });
-        console.log("Task history saved successfully");
-      } catch (error) {
-        console.error("Failed to save task history:", error);
-      }
-    },
+    (() => {
+      let curTime = Date.now();
+      return async (
+        isError: boolean = false,
+        query: string,
+        eventFileId: string | null,
+        isQuickSave = true
+      ) => {
+        if (!query || !eventFileId) return;
+        // 使用 ref 获取最新值
+        // console.log(messagesRef.current);
+        if (!isQuickSave && Date.now() - curTime < 150) return;
+        try {
+          await fetch("/api/auto-command/save-history", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              metadata: formatterMessageMetadata(messagesRef.current),
+              name: messageName.current,
+              query: query,
+              event_file_id: eventFileId,
+              messages: messagesRef.current,
+              status: isError ? "error" : "completed",
+              timestamp: Date.now(),
+            }),
+          });
+          console.log("Task history saved successfully");
+        } catch (error) {
+          console.error("Failed to save task history:", error);
+        }
+      };
+    })(),
     []
   );
+
+  useEffect(() => {
+    if (!lastSubmittedQuery || !currentEventFileId) return;
+
+    saveTaskHistory(false, lastSubmittedQuery, currentEventFileId);
+  }, [messages, lastSubmittedQuery, currentEventFileId]);
 
   // 处理用户对ASK_USER事件的响应
   const handleUserResponse = async (response: string, eventId?: string) => {
@@ -293,12 +304,24 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
             isUser: true,
           },
         ]);
+
+        // 兼容之前的没有相关数据的内容
+        if (!messageName.current) {
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          messageName.current = `chat_${timestamp}`;
+          await autoCommandService.createConversation({
+            name: messageName.current,
+            description: contentToSubmit,
+          });
+        }
+
         // 执行命令并获取事件文件ID
         const result = await autoCommandService.executeCommand(contentToSubmit);
         console.log(
           "AutoModePage: Command executed, received event_file_id:",
           result.event_file_id
         );
+
         // 存储事件文件ID以便后续用户响应使用
         setCurrentEventFileId(result.event_file_id);
         console.log(
@@ -324,20 +347,26 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
   };
 
   // 恢复历史任务状态
-  const restoreHistoryTask = (task: HistoryCommand) => {
+  const restoreHistoryTask = async (task: HistoryCommand) => {
     // 设置查询
     setAutoSearchTerm(task.query);
     // 更新最后提交的查询
     setLastSubmittedQuery(task.query);
-    // 更新消息列表
+
     console.log("Restoring history task messages:", task.messages);
+    // 更新消息列表
+    messagesRef.current = task.messages;
     setMessages(task.messages);
 
     // 恢复事件文件ID
     if (task.event_file_id) {
       setCurrentEventFileId(task.event_file_id);
     }
-
+    // 更新消息名字
+    if (task.name) {
+      messageName.current = task.name;
+    }
+    //TODO 可能还要更新会话名
     // 确保消息区域可见
     setIsMessageAreaVisible(true);
 

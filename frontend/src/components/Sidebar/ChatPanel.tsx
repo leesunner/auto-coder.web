@@ -60,6 +60,7 @@ import {
   SendMessageEventData,
   StopGenerationEventData,
 } from "../../services/event_bus_data";
+import { formatterMessageMetadata } from "@/utils/formatUtils";
 
 const saveChatListHandler = (() => {
   let curTime = Date.now();
@@ -70,15 +71,21 @@ const saveChatListHandler = (() => {
     panelId,
     isQuickSave,
     metadata,
+    eventFileId,
+    query = "",
+    isError = false,
   }: any) => {
-    if (!isQuickSave && Date.now() - curTime < 100) return;
+    if (!isQuickSave && Date.now() - curTime < 150) return;
     try {
-      const res = await chatListService.saveChatList(
+      const res = await chatListService.saveChatList({
+        status: isError ? "error" : "completed",
+        query,
+        event_file_id: eventFileId,
         name,
         messages,
         panelId,
-        metadata
-      );
+        metadata,
+      });
       return res;
     } catch (error) {
     } finally {
@@ -107,6 +114,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const fileGroupServiceRef = useRef<FileGroupService | null>(null);
 
   const isChatRunningRef = useRef(false);
+  const lastQuestion = useRef("");
 
   // 确保服务实例已初始化
   const ensureServices = useCallback(() => {
@@ -324,66 +332,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 当messages变化时更新累计统计
   useEffect(() => {
-    let inputTokens = 0;
-    let outputTokens = 0;
-    let totalCost = 0;
-    let contextWindowUsage = 0;
-    let maxContextWindow = 0;
-    let cacheHits = 0;
-    let cacheMisses = 0;
-
-    // 遍历所有消息，累计token统计
-    messages.forEach((message) => {
-      if (message.contentType === "token_stat" && message.metadata) {
-        inputTokens += message.metadata.input_tokens || 0;
-        outputTokens += message.metadata.output_tokens || 0;
-        totalCost +=
-          (message.metadata.input_cost || 0) +
-          (message.metadata.output_cost || 0);
-        contextWindowUsage = Math.max(
-          contextWindowUsage,
-          message.metadata.context_window || 0
-        );
-        maxContextWindow =
-          message.metadata.max_context_window || maxContextWindow;
-        cacheHits += message.metadata.cache_hit || 0;
-        cacheMisses += message.metadata.cache_miss || 0;
-      }
-
-      if (
-        message.metadata?.stream_out_type === "index_build" &&
-        message.metadata?.input_tokens
-      ) {
-        inputTokens += message.metadata.input_tokens || 0;
-        outputTokens += message.metadata.output_tokens || 0;
-        totalCost +=
-          (message.metadata.input_cost || 0) +
-          (message.metadata.output_cost || 0);
-        contextWindowUsage = Math.max(
-          contextWindowUsage,
-          message.metadata.context_window || 0
-        );
-        maxContextWindow =
-          message.metadata.max_context_window || maxContextWindow;
-        cacheHits += message.metadata.cache_hit || 0;
-        cacheMisses += message.metadata.cache_miss || 0;
-      }
-
-      if (message.metadata?.path === "/agent/edit/window_length_change") {
-        const content = JSON.parse(message.content);
-        contextWindowUsage = content.tokens_used;
-      }
-    });
-
-    setAccumulatedStats({
-      inputTokens,
-      outputTokens,
-      totalCost,
-      contextWindowUsage,
-      maxContextWindow,
-      cacheHits,
-      cacheMisses,
-    });
+    setAccumulatedStats(formatterMessageMetadata(messages));
   }, [messages]);
 
   // 添加新的 useEffect 用于滚动到最新消息
@@ -539,6 +488,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
 
     const success: boolean = await saveChatListHandler({
+      eventFileId: localRequestIdRef.current,
+      query: lastQuestion.current,
       chatListService,
       name,
       messages: newMessages,
@@ -763,8 +714,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     // 仅当需要保存且有消息且有聊天名称时保存
     if (shouldSaveMessages && chatListName) {
       saveChatListHandler({
+        eventFileId: localRequestIdRef.current,
+        query: lastQuestion.current,
         name: chatListName,
         messages,
+        isError: messages.at(-1)?.type?.toUpperCase?.() === "ERROR",
         panelId,
         isQuickSave: false,
         chatListService,
@@ -1101,12 +1055,12 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     // 监听停止生成事件
     const handleStopGenerationEvent = (data: StopGenerationEventData) => {
       console.log("监听停止生成事件");
-      endChatRunning();
       // 如果传入了panelId且与当前面板的panelId不匹配，则不处理此事件
       if (data.panelId && data.panelId !== panelId) {
         return;
       }
 
+      endChatRunning();
       // 调用停止生成函数
       handleStopGeneration();
     };
@@ -1167,6 +1121,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       AntdMessage.warning(getMessage("pleaseEnterMessage"));
       return;
     }
+
+    lastQuestion.current = trimmedText;
 
     // 控制开关
     if (isChatRunningRef.current) return;
@@ -1266,23 +1222,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           endChatRunning();
           return;
         }
-      }
-      console.log(
-        "------------------>: ",
-        chatListNameRef.current,
-        messagesRef.current.length === 0,
-        messages.length === 0
-      );
-      // 没有消息的时候创建一个会话
-      if (
-        chatListNameRef.current &&
-        messagesRef.current.length === 0 &&
-        messages.length === 0
-      ) {
-        await chatListService.createConversation({
-          name: chatListNameRef.current,
-          description: processedText,
-        });
       }
 
       // 根据当前模式使用适当的服务

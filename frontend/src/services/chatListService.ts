@@ -1,6 +1,17 @@
 import { Message as AutoModeMessage } from "../components/AutoMode/types";
 import { EventEmitter } from "eventemitter3";
 
+type SaveData = {
+  status?: "error" | "completed";
+  timestamp?: number;
+  query?: string;
+  event_file_id?: string;
+  name: `chat_${string}`;
+  messages: AutoModeMessage[];
+  panelId?: string;
+  metadata?: any;
+};
+
 export class ChatListService extends EventEmitter {
   private defaultChatName: string = "";
   private conversation_id: string = "";
@@ -108,25 +119,27 @@ export class ChatListService extends EventEmitter {
    * @param metadata 聊天元数据
    * @returns 是否保存成功
    */
-  async saveChatList(
-    name: string,
-    messages: AutoModeMessage[] = [],
-    panelId?: string,
-    metadata?: any
-  ): Promise<boolean> {
+  async saveChatList(data: SaveData): Promise<boolean> {
+    const name = data.name;
     if (!name.trim()) {
       this.emit("error", "请输入聊天列表名称");
       return false;
     }
-
+    const { panelId, metadata, event_file_id, ...rest } = data;
     try {
       const bodyData: any = {
-        name: name,
-        messages: messages,
+        timestamp: Date.now(),
+        status: "completed",
+        query: "",
+        ...rest,
         conversation_id: this.conversation_id,
       };
+
       if (metadata !== undefined) {
         bodyData.metadata = metadata;
+      }
+      if (event_file_id !== undefined) {
+        bodyData.event_file_id = event_file_id;
       }
       const response = await fetch("/api/chat-lists/save", {
         method: "POST",
@@ -336,7 +349,11 @@ export class ChatListService extends EventEmitter {
         description: newChatName,
       });
       // 保存新的空对话列表
-      const saveSuccess = await this.saveChatList(newChatName, [], panelId);
+      const saveSuccess = await this.saveChatList({
+        name: newChatName as any,
+        messages: [],
+        panelId,
+      });
       if (!saveSuccess) {
         throw new Error("Failed to save new chat");
       }
