@@ -15,6 +15,7 @@ import AskUserDialog from "./AskUserDialog"; // Import the new component
 import { autoCommandService } from "../../services/autoCommandService";
 import { useChatContext } from "../../contexts/ChatContext";
 import { formatterMessageMetadata } from "@/utils/formatUtils";
+import eventBus, { EVENTS } from "@/services/eventBus";
 // Lazy load CommitListPanel and CurrentChangePanel
 const CommitListPanel = lazy(() => import("./CommitListPanel"));
 const CurrentChangePanel = lazy(() => import("./CurrentChangePanel"));
@@ -108,6 +109,55 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
 
     saveTaskHistory(false, lastSubmittedQuery, currentEventFileId);
   }, [messages, lastSubmittedQuery, currentEventFileId]);
+
+  // 处理从特定消息重新开始对话
+  const handleRefreshFromMessage = useCallback(
+    (data: {
+      messageId: string;
+      messageContent: string;
+      askAgain?: boolean;
+      panelId?: string;
+    }) => {
+      // 检查事件是否与当前面板相关
+      if (activeTabId && data.panelId && activeTabId !== data.panelId) {
+        return; // 如果事件不属于当前面板，直接返回
+      }
+
+      // 清理该消息后面的所有消息
+      setMessages((prevMessages) => {
+        // 找到消息在数组中的实际位置
+        const messagePosition = prevMessages.findIndex(
+          (msg) => msg.id === data.messageId
+        );
+        if (messagePosition === -1) return prevMessages; // 如果找不到消息，不做任何改变
+        const lastIndex = data.askAgain ? messagePosition : messagePosition + 1;
+
+        const newList = prevMessages.slice(0, lastIndex);
+        // 只保留到该消息的所有消息（包括该消息）
+        messagesRef.current = newList;
+        return newList;
+      });
+
+      //如果是重新询问，直接发送消息
+      if (data.askAgain) {
+        submitSendMessage(data.messageContent);
+        return;
+      }
+
+      // 设置编辑器内容为该消息的内容，准备重新发送
+      setAutoSearchTerm(data.messageContent);
+    },
+    [activeTabId]
+  );
+
+  useEffect(() => {
+    // 订阅刷新消息事件
+    const unsubscribeRefresh = eventBus.subscribe(
+      EVENTS.CHAT.REFRESH_FROM_MESSAGE,
+      handleRefreshFromMessage
+    );
+    return unsubscribeRefresh;
+  }, [handleRefreshFromMessage]);
 
   // 处理用户对ASK_USER事件的响应
   const handleUserResponse = async (response: string, eventId?: string) => {
@@ -278,6 +328,66 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
     };
   }, [lastSubmittedQuery, currentEventFileId, saveTaskHistory]);
 
+  async function submitSendMessage(contentToSubmit: string) {
+    try {
+      // 添加用户消息到消息列表
+      setMessages([
+        {
+          id: "user-" + Date.now(),
+          type: "USER",
+          content: contentToSubmit,
+          isUser: true,
+        },
+      ]);
+      setIsProcessing(true);
+      console.log("AutoModePage: Set isProcessing to true");
+      // 保存最后提交的查询
+      setLastSubmittedQuery(contentToSubmit);
+
+      // 兼容之前的没有相关数据的内容
+      if (!messageName.current) {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        messageName.current = `chat_${timestamp}`;
+        await autoCommandService.createConversation({
+          name: messageName.current,
+          description: contentToSubmit,
+        });
+        await autoCommandService.setCurrentSessionName(
+          messageName.current,
+          activeTabId
+        );
+      }
+
+      // 执行命令并获取事件文件ID
+      const result = await autoCommandService.executeCommand(contentToSubmit);
+      console.log(
+        "AutoModePage: Command executed, received event_file_id:",
+        result.event_file_id
+      );
+
+      // 存储事件文件ID以便后续用户响应使用
+      setCurrentEventFileId(result.event_file_id);
+      console.log(
+        "AutoModePage: Set currentEventFileId to:",
+        result.event_file_id
+      );
+      // 清空输入框
+      setAutoSearchTerm("");
+    } catch (error) {
+      console.error("Error executing command:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: "error-" + Date.now(),
+          type: "ERROR",
+          content: "Failed to execute command. Please try again.",
+        },
+      ]);
+    } finally {
+      console.log("query submitted");
+    }
+  }
+
   // 处理自动模式搜索提交
   const handleAutoSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -292,63 +402,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
     }
 
     if (contentToSubmit.trim()) {
-      try {
-        setIsProcessing(true);
-        console.log("AutoModePage: Set isProcessing to true");
-        // 保存最后提交的查询
-        setLastSubmittedQuery(contentToSubmit);
-        // 添加用户消息到消息列表
-        setMessages([
-          {
-            id: "user-" + Date.now(),
-            type: "USER",
-            content: contentToSubmit,
-            isUser: true,
-          },
-        ]);
-
-        // 兼容之前的没有相关数据的内容
-        if (!messageName.current) {
-          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-          messageName.current = `chat_${timestamp}`;
-          await autoCommandService.createConversation({
-            name: messageName.current,
-            description: contentToSubmit,
-          });
-          await autoCommandService.setCurrentSessionName(
-            messageName.current,
-            activeTabId
-          );
-        }
-
-        // 执行命令并获取事件文件ID
-        const result = await autoCommandService.executeCommand(contentToSubmit);
-        console.log(
-          "AutoModePage: Command executed, received event_file_id:",
-          result.event_file_id
-        );
-
-        // 存储事件文件ID以便后续用户响应使用
-        setCurrentEventFileId(result.event_file_id);
-        console.log(
-          "AutoModePage: Set currentEventFileId to:",
-          result.event_file_id
-        );
-        // 清空输入框
-        setAutoSearchTerm("");
-      } catch (error) {
-        console.error("Error executing command:", error);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: "error-" + Date.now(),
-            type: "ERROR",
-            content: "Failed to execute command. Please try again.",
-          },
-        ]);
-      } finally {
-        console.log("query submitted");
-      }
+      submitSendMessage(contentToSubmit);
     }
   };
 

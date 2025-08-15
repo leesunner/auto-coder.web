@@ -12,12 +12,12 @@ interface UserMessageProps {
 }
 
 const UserMessage: React.FC<UserMessageProps> = ({ message }) => {
-  const handleRefresh = () => {
+  const handleRefresh = (askAgain: boolean) => {
     // 使用eventBus发布刷新事件，传递消息内容和索引
     eventBus.publish(EVENTS.CHAT.REFRESH_FROM_MESSAGE, {
       messageId: message.id,
       messageContent: message.content,
-      askAgain: true,
+      askAgain,
     });
   };
 
@@ -28,7 +28,7 @@ const UserMessage: React.FC<UserMessageProps> = ({ message }) => {
       {/* Refresh Icon - Positioned top-right, appears on hover */}
       <div className="flex items-center absolute top-1 right-1 p-1 rounded text-gray-400 transition-opacity">
         <button
-          onClick={handleRefresh}
+          onClick={() => handleRefresh(true)}
           className="mr-2 hover:text-gray-200"
           title={getMessage("askAgain")}
         >
@@ -49,7 +49,7 @@ const UserMessage: React.FC<UserMessageProps> = ({ message }) => {
         </button>
         <button
           className="hover:text-gray-200"
-          onClick={handleRefresh}
+          onClick={() => handleRefresh(false)}
           title={getMessage("refreshFromHere")}
         >
           <svg

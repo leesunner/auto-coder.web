@@ -350,12 +350,13 @@ async def cancel_task(
     def cancel_task_thread(event_file_id: str, project_path: str):
         try:
             # 获取事件文件路径和事件管理器
-            # event_file = get_event_file_path(
-            #     file_id=event_file_id, project_path=project_path
-            # )
-            # logger.info(f"event_file path {event_file}")
-            # global_cancel.set(token=event_file)
-            # event_manager = get_event_manager(event_file)
+            event_file = get_event_file_path(
+                file_id=event_file_id, project_path=project_path
+            )
+            global_cancel.set(token=event_file)
+            event_manager = get_event_manager(event_file)
+
+            logger.info(f"event_file path {event_file}")
             # file_change_manager = FileChangeManager(
             #     project_dir=project_path,
             #     backup_dir=os.path.join(project_path, ".auto-coder", "checkpoint"),
