@@ -7,7 +7,7 @@ import React, {
   Suspense,
 } from "react"; // Import lazy and Suspense
 import { getMessage } from "../../lang";
-import { ServiceFactory } from "../../services/ServiceFactory";
+// import { ServiceFactory } from "../../services/ServiceFactory";
 import { Message as ServiceMessage, HistoryCommand } from "./types";
 import { ChatPanel } from "./index";
 import InputPanel from "./InputPanel";

@@ -800,13 +800,9 @@ const InputArea: React.FC<InputAreaProps> = ({
                     onClick={() => {
                       const newActive = !agenticActive;
                       setAgenticActive(newActive);
-                      import("../../services/eventBus").then(
-                        ({ default: eventBus }) => {
-                          eventBus.publish(
-                            EVENTS.AGENTIC.MODE_CHANGED,
-                            new AgenticModeChangedEventData(newActive, panelId)
-                          );
-                        }
+                      eventBus.publish(
+                        EVENTS.AGENTIC.MODE_CHANGED,
+                        new AgenticModeChangedEventData(newActive, panelId)
                       );
                     }}
                     title={getMessage("stepByStep")}
