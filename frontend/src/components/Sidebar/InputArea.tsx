@@ -24,6 +24,7 @@ import {
   StopGenerationEventData,
 } from "../../services/event_bus_data";
 import CommandPanel from "./CommandPanel";
+import FileListSelector from "./FileListSelector";
 
 interface InputAreaProps {
   fileGroups: FileGroup[];
@@ -656,10 +657,8 @@ const InputArea: React.FC<InputAreaProps> = ({
           {!isCommandMode && <ProviderSelectors isWriteMode={isWriteMode} />}
 
           {/* 文件组选择器区域 */}
-          {!isCommandMode && (
+          {/* !isCommandMode && (
             <div className="w-full mt-1">
-              {" "}
-              {/* Add margin top if needed */}
               <FileGroupSelect
                 fileGroups={fileGroups}
                 selectedGroups={selectedGroups}
@@ -668,13 +667,13 @@ const InputArea: React.FC<InputAreaProps> = ({
                 panelId={panelId}
               />
             </div>
-          )}
+          ) */}
         </div>
       </div>
 
       {/* 主内容区域（编辑器或命令面板） */}
       <div
-        className={`px-1 py-0.5 overflow-hidden flex-1 flex flex-col ${
+        className={`px-1 py-0.5 flex-1 flex flex-col ${
           isMaximized && !isInputAreaMaximized
             ? "fixed inset-0 z-50 bg-gray-800"
             : ""
@@ -684,7 +683,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       >
         {/* 编辑器/命令面板容器 */}
         <div
-          className={`flex-1 overflow-hidden ${
+          className={`flex-1 ${
             isInputAreaMaximized ? "flex-grow h-full" : "min-h-[100px]"
           }`}
           style={
@@ -699,20 +698,32 @@ const InputArea: React.FC<InputAreaProps> = ({
               <CommandPanel panelId={panelId} />
             </div>
           ) : (
-            /* 编辑器模式 */
-            <div className="w-full h-full">
-              <EditorComponent
-                isMaximized={isMaximized || isInputAreaMaximized}
-                onEditorDidMount={handleEditorDidMount}
-                onToggleMaximize={() => {
-                  if (isInputAreaMaximized) {
-                    return;
-                  }
-                  setIsMaximized((prev: boolean): boolean => !prev);
-                }}
-                panelId={panelId}
-                isActive={isActive}
-              />
+            <div className="w-full h-full bg-[#1e1e1e]">
+              {!isCommandMode && (
+                <FileListSelector
+                  fileGroups={fileGroups}
+                  selectedGroups={selectedGroups}
+                  setSelectedGroups={setSelectedGroups}
+                  fetchFileGroups={fetchFileGroups}
+                  panelId={panelId}
+                />
+              )}
+              {/* <div className="h-[1px] bg-gray-700/50 my-1 w-full"></div> */}
+              {/* 编辑器模式 */}
+              <div className="w-full h-full ai-text">
+                <EditorComponent
+                  isMaximized={isMaximized || isInputAreaMaximized}
+                  onEditorDidMount={handleEditorDidMount}
+                  onToggleMaximize={() => {
+                    if (isInputAreaMaximized) {
+                      return;
+                    }
+                    setIsMaximized((prev: boolean): boolean => !prev);
+                  }}
+                  panelId={panelId}
+                  isActive={isActive}
+                />
+              </div>
             </div>
           )}
         </div>

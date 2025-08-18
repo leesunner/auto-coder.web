@@ -1,14 +1,26 @@
-
-import React, { useState, useEffect, useRef, KeyboardEvent, useCallback } from 'react';
-import { message } from 'antd';
-import { PlusOutlined, CloseOutlined, SearchOutlined, FolderOutlined, FileOutlined } from '@ant-design/icons';
-import { FileGroup, EnhancedCompletionItem } from './Sidebar/types';
-import eventBus, { EVENTS } from '../services/eventBus';
-import { FileMetadata } from '../types/file_meta';
-import { getMessage } from '../lang';
-import { FileGroupSelectionUpdatedEventData } from '../services/event_bus_data';
-import { ServiceFactory } from '../services/ServiceFactory';
-import './FileListSelector.css';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  KeyboardEvent,
+  useCallback,
+  useMemo,
+} from "react";
+import { message } from "antd";
+import {
+  PlusOutlined,
+  CloseOutlined,
+  SearchOutlined,
+  FolderOutlined,
+  FileOutlined,
+} from "@ant-design/icons";
+import { FileGroup, EnhancedCompletionItem } from "../types";
+import eventBus, { EVENTS } from "../../../services/eventBus";
+import { FileMetadata } from "../../../types/file_meta";
+import { getMessage } from "../../../lang";
+import { FileGroupSelectionUpdatedEventData } from "../../../services/event_bus_data";
+import { ServiceFactory } from "../../../services/ServiceFactory";
+import "./FileListSelector.css";
 
 interface FileListSelectorProps {
   fileGroups: FileGroup[];
@@ -31,21 +43,23 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   selectedGroups,
   setSelectedGroups,
   fetchFileGroups,
-  panelId = '',
+  panelId = "",
 }) => {
   // 获取文件组服务
   const fileGroupService = ServiceFactory.getFileGroupService(panelId);
-  
+
   // 状态管理
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [fileCompletions, setFileCompletions] = useState<FileCompletion[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState('');
-  const [mentionFiles, setMentionFiles] = useState<{ path: string, display: string }[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [mentionFiles, setMentionFiles] = useState<
+    { path: string; display: string }[]
+  >([]);
   const [tokenCount, setTokenCount] = useState<number>(0);
   const [openedFiles, setOpenedFiles] = useState<FileMetadata[]>([]);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number>(-1);
-  
+
   // Refs
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -57,32 +71,39 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       setIsDropdownOpen(true);
       if (searchInputRef.current) {
         searchInputRef.current.focus();
-        message.info(getMessage('focusInput'), 1);
+        message.info(getMessage("focusInput"), 1);
       }
     };
 
-    const unsubscribe = eventBus.subscribe(EVENTS.FILE_GROUP_SELECT.FOCUS, handleFocusEvent);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.FILE_GROUP_SELECT.FOCUS,
+      handleFocusEvent
+    );
     return () => unsubscribe();
   }, []);
 
   // 监听编辑器发来的mentions变化事件
   useEffect(() => {
-    const handleMentionsChanged = (mentions: Array<{ type: string; text: string; path: string }>) => {
+    const handleMentionsChanged = (
+      mentions: Array<{ type: string; text: string; path: string }>
+    ) => {
       const fileOnlyMentions = mentions;
       if (fileOnlyMentions.length > 0) {
-        const fileMentions = fileOnlyMentions.map(item => ({
+        const fileMentions = fileOnlyMentions.map((item) => ({
           path: item.path,
-          display: item.text
+          display: item.text,
         }));
 
         setMentionFiles(fileMentions);
-        processedMentionPaths.current = new Set(fileMentions.map(file => file.path));
+        processedMentionPaths.current = new Set(
+          fileMentions.map((file) => file.path)
+        );
 
-        const mentionPaths = fileMentions.map(file => file.path);
+        const mentionPaths = fileMentions.map((file) => file.path);
         const newSelectedFiles = [...selectedFiles];
         let hasNewFiles = false;
 
-        mentionPaths.forEach(path => {
+        mentionPaths.forEach((path) => {
           if (!newSelectedFiles.includes(path)) {
             newSelectedFiles.push(path);
             hasNewFiles = true;
@@ -95,41 +116,56 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       }
     };
 
-    const unsubscribe = eventBus.subscribe(EVENTS.EDITOR.MENTIONS_CHANGED, handleMentionsChanged);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.EDITOR.MENTIONS_CHANGED,
+      handleMentionsChanged
+    );
     return () => unsubscribe();
   }, [selectedGroups, selectedFiles]);
 
   // 订阅编辑器选项卡变更事件
   useEffect(() => {
-    const unsubscribe = eventBus.subscribe(EVENTS.EDITOR.TABS_CHANGED, (tabs: FileMetadata[]) => {
-      setOpenedFiles(tabs);
-    });
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.EDITOR.TABS_CHANGED,
+      (tabs: FileMetadata[]) => {
+        setOpenedFiles(tabs);
+      }
+    );
     return () => unsubscribe();
   }, []);
 
   // 点击外部关闭下拉菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
-        setSearchText('');
+        setSearchText("");
         setFocusedOptionIndex(-1);
       }
     };
 
     if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
-  const formatPathDisplay = useCallback((path: string, maxLength: number = 40) => {
-    const dirPath = path.substring(0, path.lastIndexOf('/'));
-    return dirPath.length > maxLength ? '...' + dirPath.slice(-maxLength) : dirPath;
-  }, []);
+  const formatPathDisplay = useCallback(
+    (path: string, maxLength: number = 40) => {
+      const lastIndex = path.lastIndexOf("/");
+      const dirPath = path.substring(0, lastIndex) || "/";
+      return dirPath.length > maxLength
+        ? "..." + dirPath.slice(-maxLength)
+        : dirPath;
+    },
+    []
+  );
 
   const fetchFileCompletions = async (searchValue: string) => {
     if (searchValue.length < 2) {
@@ -138,11 +174,13 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     }
 
     try {
-      const response = await fetch(`/api/completions/files?name=${encodeURIComponent(searchValue)}`);
+      const response = await fetch(
+        `/api/completions/files?name=${encodeURIComponent(searchValue)}`
+      );
       const data = await response.json();
       setFileCompletions(data.completions || []);
     } catch (error) {
-      console.error(getMessage('errorFetchingCompletions'), error);
+      console.error(getMessage("errorFetchingCompletions"), error);
     }
   };
 
@@ -153,19 +191,30 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     setSelectedGroups(uniqueGroupValues);
     setSelectedFiles(uniqueFileValues);
 
-    fileGroupService.switchFileGroups(uniqueGroupValues, uniqueFileValues)
-      .then((result: { success: boolean; totalTokens: number; message: string }) => {
-        if (result.totalTokens !== undefined) {
-          setTokenCount(result.totalTokens);
-        }
+    fileGroupService
+      .switchFileGroups(uniqueGroupValues, uniqueFileValues)
+      .then(
+        (result: {
+          success: boolean;
+          totalTokens: number;
+          message: string;
+        }) => {
+          if (result.totalTokens !== undefined) {
+            setTokenCount(result.totalTokens);
+          }
 
-        eventBus.publish(
-          EVENTS.FILE_GROUP_SELECT.SELECTION_UPDATED,
-          new FileGroupSelectionUpdatedEventData(uniqueGroupValues, uniqueFileValues, panelId)
-        );
-      })
+          eventBus.publish(
+            EVENTS.FILE_GROUP_SELECT.SELECTION_UPDATED,
+            new FileGroupSelectionUpdatedEventData(
+              uniqueGroupValues,
+              uniqueFileValues,
+              panelId
+            )
+          );
+        }
+      )
       .catch((error: Error) => {
-        console.error(getMessage('errorUpdatingSelection'), error);
+        console.error(getMessage("errorUpdatingSelection"), error);
       });
   };
 
@@ -173,35 +222,44 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!isDropdownOpen) return;
 
-    const totalOptions = fileCompletions.length +
-      (openedFiles.length > 0 && searchText.length < 2 ? openedFiles.length : 0) +
-      (mentionFiles.length > 0 && searchText.length < 2 ? mentionFiles.length : 0) +
+    const totalOptions =
+      fileCompletions.length +
+      (openedFiles.length > 0 && searchText.length < 2
+        ? openedFiles.length
+        : 0) +
+      (mentionFiles.length > 0 && searchText.length < 2
+        ? mentionFiles.length
+        : 0) +
       fileGroups.length;
 
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
         if (totalOptions === 0) return;
-        setFocusedOptionIndex(prev => prev >= totalOptions - 1 ? 0 : prev + 1);
+        setFocusedOptionIndex((prev) =>
+          prev >= totalOptions - 1 ? 0 : prev + 1
+        );
         break;
 
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
         if (totalOptions === 0) return;
-        setFocusedOptionIndex(prev => prev <= 0 ? totalOptions - 1 : prev - 1);
+        setFocusedOptionIndex((prev) =>
+          prev <= 0 ? totalOptions - 1 : prev - 1
+        );
         break;
 
-      case 'Enter':
+      case "Enter":
         if (focusedOptionIndex >= 0) {
           e.preventDefault();
           selectFocusedOption(focusedOptionIndex);
         }
         break;
 
-      case 'Escape':
+      case "Escape":
         e.preventDefault();
         setIsDropdownOpen(false);
-        setSearchText('');
+        setSearchText("");
         setFocusedOptionIndex(-1);
         break;
     }
@@ -210,22 +268,36 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   // 选择当前聚焦的选项
   const selectFocusedOption = (index: number) => {
     let optionIndex = index;
-    let selectedValue: string = '';
+    let selectedValue: string = "";
 
     if (fileCompletions.length > 0 && optionIndex < fileCompletions.length) {
       selectedValue = fileCompletions[optionIndex].path;
     } else {
       optionIndex -= fileCompletions.length;
 
-      if (openedFiles.length > 0 && searchText.length < 2 && optionIndex < openedFiles.length) {
+      if (
+        openedFiles.length > 0 &&
+        searchText.length < 2 &&
+        optionIndex < openedFiles.length
+      ) {
         selectedValue = openedFiles[optionIndex].path;
       } else {
-        optionIndex -= (openedFiles.length > 0 && searchText.length < 2 ? openedFiles.length : 0);
+        optionIndex -=
+          openedFiles.length > 0 && searchText.length < 2
+            ? openedFiles.length
+            : 0;
 
-        if (mentionFiles.length > 0 && searchText.length < 2 && optionIndex < mentionFiles.length) {
+        if (
+          mentionFiles.length > 0 &&
+          searchText.length < 2 &&
+          optionIndex < mentionFiles.length
+        ) {
           selectedValue = mentionFiles[optionIndex].path;
         } else {
-          optionIndex -= (mentionFiles.length > 0 && searchText.length < 2 ? mentionFiles.length : 0);
+          optionIndex -=
+            mentionFiles.length > 0 && searchText.length < 2
+              ? mentionFiles.length
+              : 0;
 
           if (optionIndex < fileGroups.length) {
             selectedValue = fileGroups[optionIndex].name;
@@ -235,7 +307,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     }
 
     if (selectedValue) {
-      const isGroup = fileGroups.some(group => group.name === selectedValue);
+      const isGroup = fileGroups.some((group) => group.name === selectedValue);
 
       if (isGroup) {
         const updatedGroups = [...selectedGroups];
@@ -252,7 +324,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       }
 
       setIsDropdownOpen(false);
-      setSearchText('');
+      setSearchText("");
       setFocusedOptionIndex(-1);
     }
   };
@@ -274,19 +346,19 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     }
 
     setIsDropdownOpen(false);
-    setSearchText('');
+    setSearchText("");
     setFocusedOptionIndex(-1);
   };
 
   // 移除选中项
   const removeSelectedItem = (value: string) => {
-    const isGroup = fileGroups.some(group => group.name === value);
-    
+    const isGroup = fileGroups.some((group) => group.name === value);
+
     if (isGroup) {
-      const updatedGroups = selectedGroups.filter(group => group !== value);
+      const updatedGroups = selectedGroups.filter((group) => group !== value);
       updateSelection(updatedGroups, selectedFiles);
     } else {
-      const updatedFiles = selectedFiles.filter(file => file !== value);
+      const updatedFiles = selectedFiles.filter((file) => file !== value);
       updateSelection(selectedGroups, updatedFiles);
     }
   };
@@ -294,14 +366,15 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   // 清空所有选择
   const clearAllSelections = async () => {
     try {
-      const result: { success: boolean; message: string } = await fileGroupService.clearCurrentFiles();
+      const result: { success: boolean; message: string } =
+        await fileGroupService.clearCurrentFiles();
       if (result.success) {
         setSelectedGroups([]);
         setSelectedFiles([]);
         fetchFileGroups();
       }
     } catch (error: unknown) {
-      console.error(getMessage('clearFailed'), error);
+      console.error(getMessage("clearFailed"), error);
     }
   };
 
@@ -310,14 +383,45 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  const selectedResultData = useMemo(() => {
+    // 获取所有已打开文件路径
+    const openedFilePaths = openedFiles.map((file) => file.path);
+
+    // 检查是否所有已打开文件都已被选中
+    const allSelected = openedFilePaths.every((path) =>
+      selectedFiles.includes(path)
+    );
+
+    return { allSelected, openedFilePaths };
+  }, [openedFiles, selectedFiles]);
+
+  const selectAll = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    const { allSelected, openedFilePaths } = selectedResultData;
+    if (allSelected) {
+      // 如果全部已选中，则取消选择所有已打开文件
+      const newFileSelection = selectedFiles.filter(
+        (path) => !openedFilePaths.includes(path)
+      );
+      updateSelection(selectedGroups, newFileSelection);
+    } else {
+      // 否则选择所有已打开文件
+      const newFileSelection = [
+        ...selectedFiles.filter((path) => !openedFilePaths.includes(path)),
+        ...openedFilePaths,
+      ];
+      updateSelection(selectedGroups, newFileSelection);
+    }
+  };
+
   // 渲染选中的标签
   const renderSelectedTags = () => {
     const allSelected = [...selectedGroups, ...selectedFiles];
-    
+
     return allSelected.map((value) => {
       const isGroup = selectedGroups.includes(value);
       let fileName = value;
-      
+
       if (!isGroup) {
         if (value.includes("/")) {
           fileName = value.split("/").pop() || value;
@@ -329,7 +433,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       return (
         <span
           key={value}
-          className={`selected-tag ${isGroup ? 'file-group' : 'file-item'}`}
+          className={`selected-tag ${isGroup ? "file-group" : "file-item"}`}
           title={value}
         >
           {isGroup ? (
@@ -356,23 +460,23 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     if (fileCompletions.length > 0) {
       options.push(
         <div key="search-group" className="option-group-title">
-          {getMessage('searchResults')}
+          {getMessage("searchResults")}
         </div>
       );
-      
+
       fileCompletions.forEach((file, index) => {
         const isFocused = focusedOptionIndex === optionIndex;
         options.push(
           <div
             key={`search-${file.path}`}
-            className={`option-item ${isFocused ? 'focused' : ''}`}
+            className={`option-item ${isFocused ? "focused" : ""}`}
             onClick={() => handleOptionClick(file.path, false)}
           >
             <div className="option-content" title={file.path}>
               <div className="option-main">
                 {file.display} ({formatPathDisplay(file.path)})
               </div>
-              <div className="option-badge">{getMessage('fileType')}</div>
+              <div className="option-badge">{getMessage("fileType")}</div>
             </div>
           </div>
         );
@@ -383,27 +487,71 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     // 已打开文件
     if (openedFiles.length > 0 && searchText.length < 2) {
       options.push(
-        <div key="opened-group" className="option-group-title">
-          {getMessage('openedFiles')}
+        <div
+          key="opened-group"
+          className="option-group-title flex items-center justify-between"
+        >
+          <div className="flex-1 flex items-center">
+            {getMessage("openedFiles")}
+            {/* Token 计数显示 */}
+            <span className="text-xs text-gray-400 flex items-center ml-2">
+              <span className="mr-1">Tokens:</span>
+              <span className="font-medium !text-green-400">
+                {formatTokenCount(tokenCount)}
+              </span>
+            </span>
+          </div>
+          <span
+            onClick={selectAll}
+            className={`flex-shrink-0 cursor-pointer ${
+              selectedResultData.allSelected ? "!text-green-400" : ""
+            }`}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="feather feather-check-square"
+            >
+              <polyline points="9 11 12 14 22 4"></polyline>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </span>
         </div>
       );
-      
+
       openedFiles.forEach((file, index) => {
         const isFocused = focusedOptionIndex === optionIndex;
-        const display = file.label || file.path.split('/').pop() || file.path;
-        
+        const display = file.label || file.path.split("/").pop() || file.path;
+        console.log(file);
         options.push(
           <div
             key={`opened-${file.path}`}
-            className={`option-item ${isFocused ? 'focused' : ''}`}
+            className={`option-item ${isFocused ? "focused" : ""}`}
             onClick={() => handleOptionClick(file.path, false)}
           >
             <div className="option-content" title={file.path}>
-              <div className={`option-main ${file.isSelected ? 'font-medium' : ''}`}>
+              <div
+                className={`option-main ${
+                  file.isSelected ? "font-medium text-green-400" : ""
+                }`}
+              >
                 {display} ({formatPathDisplay(file.path)})
               </div>
-              <div className={`option-badge ${file.isSelected ? 'text-green-400' : 'text-green-600/70'}`}>
-                {getMessage(file.isSelected ? 'fileStatusActive' : 'fileStatusOpened')}
+              <div
+                className={`option-badge ${
+                  file.isSelected ? "!text-green-400" : "!text-green-600/70"
+                }`}
+              >
+                {getMessage(
+                  file.isSelected ? "fileStatusActive" : "fileStatusOpened"
+                )}
               </div>
             </div>
           </div>
@@ -416,24 +564,26 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     if (mentionFiles.length > 0 && searchText.length < 2) {
       options.push(
         <div key="mention-group" className="option-group-title">
-          {getMessage('mentionedFiles')}
+          {getMessage("mentionedFiles")}
         </div>
       );
-      
+
       mentionFiles.forEach((file, index) => {
         const isFocused = focusedOptionIndex === optionIndex;
-        
+
         options.push(
           <div
             key={`mention-${file.path}`}
-            className={`option-item ${isFocused ? 'focused' : ''}`}
+            className={`option-item ${isFocused ? "focused" : ""}`}
             onClick={() => handleOptionClick(file.path, false)}
           >
             <div className="option-content" title={file.path}>
               <div className="option-main">
                 {file.display} ({formatPathDisplay(file.path, 20)})
               </div>
-              <div className="option-badge text-blue-400">{getMessage('mentionedFileStatus')}</div>
+              <div className="option-badge text-blue-400">
+                {getMessage("mentionedFileStatus")}
+              </div>
             </div>
           </div>
         );
@@ -448,20 +598,20 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
           文件组
         </div>
       );
-      
+
       fileGroups.forEach((group, index) => {
         const isFocused = focusedOptionIndex === optionIndex;
-        
+
         options.push(
           <div
             key={`group-${group.name}`}
-            className={`option-item ${isFocused ? 'focused' : ''}`}
+            className={`option-item ${isFocused ? "focused" : ""}`}
             onClick={() => handleOptionClick(group.name, true)}
           >
             <div className="option-content">
               <div className="option-main">{group.name}</div>
               <div className="option-badge">
-                {getMessage('fileCount', { count: String(group.files.length) })}
+                {getMessage("fileCount", { count: String(group.files.length) })}
               </div>
             </div>
           </div>
@@ -475,20 +625,8 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
 
   return (
     <div className="file-list-selector px-1 w-full" onKeyDown={handleKeyDown}>
-      <div className="h-[1px] bg-gray-700/50 my-0.5 w-full"></div>
-      
-      {/* Token 计数显示 */}
-      <div className="flex items-center justify-between w-full mb-1">
-        <span className="text-xs text-gray-400 flex items-center">
-          <span className="mr-1">Tokens:</span>
-          <span className="font-medium text-green-400">{formatTokenCount(tokenCount)}</span>
-        </span>
-      </div>
-
       {/* 选中的标签显示区域 */}
-      <div className="tags-container flex flex-wrap items-center gap-1 min-h-[32px] mb-2 p-2 bg-gray-800 rounded border border-gray-600">
-        {renderSelectedTags()}
-        
+      <div className="tags-container flex flex-wrap items-center gap-1 min-h-[32px] p-2  rounded">
         {/* + 号按钮 */}
         <button
           className="action-button add-button"
@@ -507,15 +645,16 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
         </button>
 
         {/* 清空按钮 */}
-        {(selectedGroups.length > 0 || selectedFiles.length > 0) && (
+        {/* {(selectedGroups.length > 0 || selectedFiles.length > 0) && (
           <button
             className="action-button clear-button"
             onClick={clearAllSelections}
-            title={getMessage('clearContext')}
+            title={getMessage("clearContext")}
           >
             <CloseOutlined />
           </button>
-        )}
+        )} */}
+        {renderSelectedTags()}
       </div>
 
       {/* 下拉选择层 */}
@@ -523,8 +662,10 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
         <div
           ref={dropdownRef}
           className="dropdown-container"
-          style={{ top: '100%', left: 0, right: 0 }}
+          style={{ bottom: "100%", left: 0, right: 0 }}
         >
+          {/* 选项列表 */}
+          <div className="options-container">{renderDropdownOptions()}</div>
           {/* 搜索框 */}
           <div className="search-container">
             <div className="relative">
@@ -534,19 +675,15 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
                 type="text"
                 value={searchText}
                 onChange={(e) => {
-                  setSearchText(e.target.value);
-                  fetchFileCompletions(e.target.value);
+                  const text = e.target.value;
+                  setSearchText(text);
+                  fetchFileCompletions(text);
                   setFocusedOptionIndex(-1);
                 }}
                 placeholder="搜索文件..."
                 className="search-input"
               />
             </div>
-          </div>
-
-          {/* 选项列表 */}
-          <div className="options-container">
-            {renderDropdownOptions()}
           </div>
         </div>
       )}

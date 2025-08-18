@@ -1778,7 +1778,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         </Layout.Header>
 
         {/* 消息列表区域 */}
-        <Layout.Content className="flex-1 overflow-hidden flex flex-col">
+        <Layout.Content className="flex-1 flex flex-col">
           <div
             className="flex-1 overflow-y-auto bg-gray-900 p-2 transition-all duration-300 relative"
             ref={messagesContainerRef}
