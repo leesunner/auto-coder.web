@@ -89,15 +89,28 @@ async def get_chat_list_endpoint(
             conversation_id = create_conversation(
                 data.get("name"), getattr(first_message, "content", data.get("name"))
             )
-            # 后面改成异步任务队列取处理
-            await save_chat_list(
-                project_path,
-                data,
-                # data["name"],
-                # data["messages"],
-                # conversation_id,
-                # metadata=getattr(data, "metadata", None),
-            )
+            # 更新数据中的conversation_id
+            data["conversation_id"] = conversation_id
+            
+            # 检查是否有ChatList所需的所有字段，如果没有则补充默认值
+            if "query" not in data:
+                data["query"] = data.get("name", "")
+            if "event_file_id" not in data:
+                data["event_file_id"] = ""
+            if "status" not in data:
+                data["status"] = "completed"
+            if "timestamp" not in data:
+                # 使用文件修改时间作为时间戳
+                import time
+                data["timestamp"] = int(time.time())
+            
+            # 将字典数据转换为ChatList对象后保存
+            try:
+                chat_list = ChatList(**data)
+                await save_chat_list(project_path, chat_list)
+            except Exception as e:
+                logger.error(f"Error converting data to ChatList: {str(e)}")
+                # 如果转换失败，仍然继续执行，只是不保存更新的数据
 
         set_current_conversation(conversation_id)
         data["conversation_id"] = conversation_id

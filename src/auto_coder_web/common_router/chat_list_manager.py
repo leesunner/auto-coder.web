@@ -30,20 +30,17 @@ async def save_chat_list(project_path: str, data: ChatList) -> None:
 
     Args:
         project_path: 项目路径
-        name: 聊天列表名称
-        messages: 聊天消息列表
-        metadata: 聊天元数据
+        data: ChatList 对象，包含聊天列表的所有信息
 
     Raises:
         Exception: 如果保存失败
     """
     file_path = _get_chat_list_file_path(project_path, data.name)
     try:
-        # data = {"name": name, "messages": messages, "conversation_id": conversation_id}
-        # if metadata is not None:
-        #     data["metadata"] = metadata
-        async with aiofiles.open(file_path, "w") as f:
-            await f.write(json.dumps(data, indent=2, ensure_ascii=False))
+        # 将 Pydantic 模型转换为字典，然后序列化为 JSON
+        data_dict = data.model_dump()
+        async with aiofiles.open(file_path, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(data_dict, indent=2, ensure_ascii=False))
 
     except Exception as e:
         logger.error(f"Error saving chat list {data.name}: {str(e)}")
@@ -195,15 +192,20 @@ async def rename_chat_list(project_path: str, old_name: str, new_name: str) -> N
 
     try:
         # 读取旧文件内容
-        async with aiofiles.open(old_file_path, "r") as f:
+        async with aiofiles.open(old_file_path, "r", encoding="utf-8") as f:
             content = await f.read()
 
+        # 解析JSON内容并更新name字段
+        contentData = json.loads(content)
+        contentData["name"] = new_name
+        
         # 写入新文件
-        async with aiofiles.open(new_file_path, "w") as f:
-            await f.write(content)
-            contentData = json.loads(content)
-            if "conversation_id" in contentData:
-                update_conversation(contentData["conversation_id"], new_name)
+        async with aiofiles.open(new_file_path, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(contentData, indent=2, ensure_ascii=False))
+            
+        # 更新会话名称
+        if "conversation_id" in contentData:
+            update_conversation(contentData["conversation_id"], new_name)
         # 删除旧文件
         os.remove(old_file_path)
 
