@@ -280,9 +280,9 @@ async def get_task_history(project_path: str = Depends(get_project_path)):
                     with open(file_path, "r", encoding="utf-8") as f:
                         task_data = json.load(f)
                         # 只添加文件名作为ID (不含扩展名)
-                        task_id = os.path.splitext(filename)[0]
+                        # task_id = os.path.splitext(filename)[0]
                         # 返回完整的原始数据，只添加ID
-                        task_data["id"] = task_id
+                        task_data["id"] = filename
                         task_files.append(task_data)
                 except Exception as e:
                     logger.error(f"Error reading task file {filename}: {str(e)}")

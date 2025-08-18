@@ -32,7 +32,7 @@ class ChatMetadata(BaseModel):
 
 class ChatList(BaseModel):
     query: str
-    event_file_id: str
+    event_file_id: Optional[str] = None
     status: str
     timestamp: int
     name: str
