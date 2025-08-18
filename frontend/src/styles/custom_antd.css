@@ -164,6 +164,13 @@
 .custom-select .ant-select-arrow {
   color: var(--dark-text-tertiary) !important;
 }
+.ant-select .ant-select-arrow {
+  color: #ffffff !important;
+}
+
+.ant-select-open .ant-select-selection-item {
+  color: #ffffff !important;
+}
 
 .dark-select:not(.ant-select-disabled):hover .ant-select-selector,
 .custom-select:not(.ant-select-disabled):hover .ant-select-selector {
@@ -463,4 +470,4 @@
 .dark-skeleton .ant-skeleton-title,
 .dark-skeleton .ant-skeleton-paragraph > li {
   background-color: #1e293b !important;
-} 
+}

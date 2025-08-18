@@ -723,9 +723,9 @@ const InputArea: React.FC<InputAreaProps> = ({
             <div className="flex items-center justify-between px-0">
               {/* 模式选择区域 */}
               <div className="flex items-center space-x-1">
-                <span className="text-[9px] font-medium text-white">
+                {/* <span className="text-[9px] font-medium text-white">
                   {getMessage("mode")}
-                </span>
+                </span> */}
                 <Tooltip
                   title={() => {
                     return (
