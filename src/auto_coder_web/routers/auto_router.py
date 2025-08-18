@@ -288,7 +288,15 @@ async def get_task_history(project_path: str = Depends(get_project_path)):
                     logger.error(f"Error reading task file {filename}: {str(e)}")
 
         # 按时间戳排序，最新的在前
-        task_files.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        # 确保timestamp为整数类型，避免类型比较错误
+        def get_timestamp(task):
+            timestamp = task.get("timestamp", 0)
+            try:
+                return int(timestamp) if timestamp is not None else 0
+            except (ValueError, TypeError):
+                return 0
+        
+        task_files.sort(key=get_timestamp, reverse=True)
 
         return {"tasks": task_files}
     except Exception as e:
