@@ -1,0 +1,318 @@
+
+.file-list-selector {
+  position: relative;
+}
+
+/* 选中标签的容器样式 */
+.file-list-selector .tags-container {
+  min-height: 32px;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+.file-list-selector .tags-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-list-selector .tags-container::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 3px;
+}
+
+.file-list-selector .tags-container::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 3px;
+}
+
+/* 下拉选择层样式 */
+.file-list-selector .dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.file-list-selector .dropdown-container {
+  position: absolute;
+  z-index: 1000;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  max-height: 320px;
+  overflow: hidden;
+}
+
+/* 搜索框样式 */
+.file-list-selector .search-container {
+  padding: 12px;
+  border-bottom: 1px solid #374151;
+  background: #1f2937;
+}
+
+.file-list-selector .search-input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  background: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  color: #e5e7eb;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.file-list-selector .search-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.file-list-selector .search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* 选项列表样式 */
+.file-list-selector .options-container {
+  max-height: 256px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+.file-list-selector .options-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-list-selector .options-container::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 3px;
+}
+
+.file-list-selector .options-container::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 3px;
+}
+
+/* 选项组标题样式 */
+.file-list-selector .option-group-title {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #9ca3af;
+  background: #111827;
+  border-bottom: 1px solid #374151;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 选项样式 */
+.file-list-selector .option-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #d1d5db;
+  border-bottom: 1px solid rgba(55, 65, 81, 0.3);
+  transition: all 0.15s ease;
+}
+
+.file-list-selector .option-item:hover {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+.file-list-selector .option-item.focused {
+  background: #4f46e5;
+  color: #ffffff;
+  border-left: 3px solid #6366f1;
+  padding-left: 9px;
+  font-weight: 500;
+}
+
+.file-list-selector .option-item:last-child {
+  border-bottom: none;
+}
+
+/* 选项内容布局 */
+.file-list-selector .option-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-list-selector .option-main {
+  flex: 1;
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.file-list-selector .option-badge {
+  font-size: 10px;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.file-list-selector .option-item.focused .option-badge {
+  color: #e0e7ff;
+}
+
+/* 选中标签样式 */
+.file-list-selector .selected-tag {
+  display: inline-flex;
+  align-items: center;
+  margin: 2px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  max-width: 200px;
+  transition: all 0.15s ease;
+}
+
+.file-list-selector .selected-tag.file-group {
+  background: #1e40af;
+  color: #dbeafe;
+}
+
+.file-list-selector .selected-tag.file-item {
+  background: #374151;
+  color: #d1d5db;
+}
+
+.file-list-selector .selected-tag:hover {
+  opacity: 0.8;
+}
+
+.file-list-selector .tag-icon {
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.file-list-selector .tag-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-list-selector .tag-close {
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0.7;
+  transition: all 0.15s ease;
+}
+
+.file-list-selector .tag-close:hover {
+  opacity: 1;
+  color: #ef4444;
+}
+
+/* 操作按钮样式 */
+.file-list-selector .action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.file-list-selector .add-button {
+  background: #4b5563;
+  color: #ffffff;
+}
+
+.file-list-selector .add-button:hover {
+  background: #6b7280;
+}
+
+.file-list-selector .clear-button {
+  background: #dc2626;
+  color: #ffffff;
+  margin-left: 4px;
+}
+
+.file-list-selector .clear-button:hover {
+  background: #ef4444;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .file-list-selector .dropdown-container {
+    max-height: 280px;
+  }
+  
+  .file-list-selector .options-container {
+    max-height: 200px;
+  }
+  
+  .file-list-selector .selected-tag {
+    max-width: 150px;
+  }
+}
+
+/* 键盘导航焦点样式 */
+.file-list-selector:focus-within .dropdown-container {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* 空状态样式 */
+.file-list-selector .empty-state {
+  padding: 24px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* 加载状态样式 */
+.file-list-selector .loading-state {
+  padding: 16px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* 动画效果 */
+.file-list-selector .dropdown-container {
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-list-selector .selected-tag {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
