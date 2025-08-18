@@ -56,13 +56,7 @@ async def save_chat_list_endpoint(
             f"api/chat-lists/save:conversation_id------>: {chat_list.conversation_id}"
         )
         # 调用管理模块保存聊天列表，支持 metadata, conversation_id
-        await save_chat_list(
-            project_path,
-            chat_list.name,
-            chat_list.messages,
-            chat_list.conversation_id,
-            metadata=chat_list.metadata.dict() if chat_list.metadata else None,
-        )
+        await save_chat_list(project_path, chat_list)
         return {
             "status": "success",
             "message": f"Chat list {chat_list.name} saved successfully",
@@ -98,10 +92,11 @@ async def get_chat_list_endpoint(
             # 后面改成异步任务队列取处理
             await save_chat_list(
                 project_path,
-                data["name"],
-                data["messages"],
-                conversation_id,
-                metadata=getattr(data, "metadata", None),
+                data,
+                # data["name"],
+                # data["messages"],
+                # conversation_id,
+                # metadata=getattr(data, "metadata", None),
             )
 
         set_current_conversation(conversation_id)

@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Tuple
 from loguru import logger
 
 from auto_coder_web.common_router.chat_conversations_manager import update_conversation
+from auto_coder_web.types import ChatList
 
 
 def _get_chat_lists_dir(project_path: str) -> str:
@@ -23,13 +24,7 @@ def _get_chat_list_file_path(project_path: str, name: str) -> str:
     return os.path.join(chat_lists_dir, f"{name}.json")
 
 
-async def save_chat_list(
-    project_path: str,
-    name: str,
-    messages: List[Dict[str, Any]],
-    conversation_id: str,
-    metadata: dict = None,
-) -> None:
+async def save_chat_list(project_path: str, data: ChatList) -> None:
     """
     保存聊天列表到文件
 
@@ -42,16 +37,16 @@ async def save_chat_list(
     Raises:
         Exception: 如果保存失败
     """
-    file_path = _get_chat_list_file_path(project_path, name)
+    file_path = _get_chat_list_file_path(project_path, data.name)
     try:
-        data = {"name": name, "messages": messages, "conversation_id": conversation_id}
-        if metadata is not None:
-            data["metadata"] = metadata
+        # data = {"name": name, "messages": messages, "conversation_id": conversation_id}
+        # if metadata is not None:
+        #     data["metadata"] = metadata
         async with aiofiles.open(file_path, "w") as f:
             await f.write(json.dumps(data, indent=2, ensure_ascii=False))
 
     except Exception as e:
-        logger.error(f"Error saving chat list {name}: {str(e)}")
+        logger.error(f"Error saving chat list {data.name}: {str(e)}")
         raise e
 
 

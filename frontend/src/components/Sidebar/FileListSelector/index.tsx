@@ -495,7 +495,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
             {getMessage("openedFiles")}
             {/* Token 计数显示 */}
             <span className="text-xs text-gray-400 flex items-center ml-2">
-              <span className="mr-1">Tokens:</span>
+              <span className="mr-1">{getMessage("tokensLabel")}</span>
               <span className="font-medium !text-green-400">
                 {formatTokenCount(tokenCount)}
               </span>
@@ -595,7 +595,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     if (fileGroups.length > 0) {
       options.push(
         <div key="groups-header" className="option-group-title">
-          文件组
+          {getMessage("fileGroups")}
         </div>
       );
 
@@ -639,7 +639,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
               }
             }, 100);
           }}
-          title="添加文件或文件组"
+          title={getMessage("addFileOrGroup")}
         >
           <PlusOutlined />
         </button>
@@ -680,7 +680,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
                   fetchFileCompletions(text);
                   setFocusedOptionIndex(-1);
                 }}
-                placeholder="搜索文件..."
+                placeholder={getMessage("searchFiles")}
                 className="search-input"
               />
             </div>
