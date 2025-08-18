@@ -8,6 +8,7 @@ import { autoCommandService } from "../../services/autoCommandService";
 interface InputPanelProps {
   projectName: string;
   isProcessing: boolean;
+  hasMessageArea: boolean;
   autoSearchTerm: string;
   setAutoSearchTerm: (term: string) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -18,6 +19,7 @@ interface InputPanelProps {
 const InputPanel: React.FC<InputPanelProps> = ({
   projectName,
   isProcessing,
+  hasMessageArea,
   autoSearchTerm,
   setAutoSearchTerm,
   onSubmit,
@@ -220,6 +222,7 @@ const InputPanel: React.FC<InputPanelProps> = ({
 
           {/* 使用 SimpleEditor 替换原有的输入框 */}
           <SimpleEditor
+            hasMessageArea={hasMessageArea}
             ref={autoSearchInputRef}
             value={autoSearchTerm}
             onChange={setAutoSearchTerm}

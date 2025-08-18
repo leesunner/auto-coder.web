@@ -710,6 +710,7 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
 
         {/* 命令输入区域 - 使用独立的InputPanel组件 */}
         <InputPanel
+          hasMessageArea={messages.length > 0}
           projectName={projectName}
           isProcessing={isProcessing}
           autoSearchTerm={autoSearchTerm}

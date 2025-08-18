@@ -33,6 +33,7 @@ loader.config({
 });
 
 export interface SimpleEditorProps {
+  hasMessageArea: boolean;
   /** 输入框的当前值 */
   value: string;
   /** 输入框的占位符 */
@@ -64,6 +65,7 @@ export interface SimpleEditorProps {
 const SimpleEditor = forwardRef<any, SimpleEditorProps>(
   (
     {
+      hasMessageArea,
       value,
       placeholder = "",
       onChange,
@@ -518,7 +520,7 @@ const SimpleEditor = forwardRef<any, SimpleEditorProps>(
     };
 
     return (
-      <div className="w-full h-9 rounded-full overflow-hidden bg-gray-800 border border-gray-700 shadow-lg pl-16 pr-16">
+      <div className="w-full h-9 rounded-full bg-gray-800 border border-gray-700 shadow-lg pl-16 pr-16">
         {/* 机器人图标（保持现有样式） */}
         <div className="absolute left-3.5 top-0 bottom-0 flex items-center z-10">
           <svg
@@ -548,7 +550,9 @@ const SimpleEditor = forwardRef<any, SimpleEditorProps>(
           {showHistory && (
             <div
               ref={historyRef}
-              className="absolute left-0 top-full mt-2 w-96 max-h-80 overflow-y-auto bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20"
+              className={`absolute left-0 w-96 max-h-80 overflow-y-auto bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 ${
+                hasMessageArea ? "bottom-full mb-2" : "top-full mt-2"
+              }`}
             >
               <div className="py-1 border-b border-gray-700">
                 <div className="px-4 py-2 text-sm text-gray-300 font-semibold flex justify-between items-center">
