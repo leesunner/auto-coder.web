@@ -20,7 +20,13 @@ import { FileMetadata } from "../../../types/file_meta";
 import { getMessage } from "../../../lang";
 import { FileGroupSelectionUpdatedEventData } from "../../../services/event_bus_data";
 import { ServiceFactory } from "../../../services/ServiceFactory";
-import { useWindowResize, useClickOutside, useDropdownDirection, useKeyboardNavigation, DropdownDirection } from "../../../hooks";
+import {
+  useWindowResize,
+  useClickOutside,
+  useDropdownDirection,
+  useKeyboardNavigation,
+  DropdownDirection,
+} from "../../../hooks";
 import "./FileListSelector.css";
 
 interface FileListSelectorProps {
@@ -60,7 +66,8 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   const [tokenCount, setTokenCount] = useState<number>(0);
   const [openedFiles, setOpenedFiles] = useState<FileMetadata[]>([]);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number>(-1);
-  const [dropdownDirection, setDropdownDirection] = useState<DropdownDirection>("up");
+  const [dropdownDirection, setDropdownDirection] =
+    useState<DropdownDirection>("up");
 
   // Refs
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -237,11 +244,23 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
 
   // 计算总选项数量
   const totalOptions = useMemo(() => {
-    return fileCompletions.length +
-      (openedFiles.length > 0 && searchText.length < 2 ? openedFiles.length : 0) +
-      (mentionFiles.length > 0 && searchText.length < 2 ? mentionFiles.length : 0) +
-      fileGroups.length;
-  }, [fileCompletions.length, openedFiles.length, searchText.length, mentionFiles.length, fileGroups.length]);
+    return (
+      fileCompletions.length +
+      (openedFiles.length > 0 && searchText.length < 2
+        ? openedFiles.length
+        : 0) +
+      (mentionFiles.length > 0 && searchText.length < 2
+        ? mentionFiles.length
+        : 0) +
+      fileGroups.length
+    );
+  }, [
+    fileCompletions.length,
+    openedFiles.length,
+    searchText.length,
+    mentionFiles.length,
+    fileGroups.length,
+  ]);
 
   // 使用键盘导航hook
   const handleKeyDown = useKeyboardNavigation({
@@ -258,7 +277,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   });
 
   // 选择当前聚焦的选项
-  const selectFocusedOption = (index: number) => {
+  function selectFocusedOption(index: number) {
     let optionIndex = index;
     let selectedValue: string = "";
 
@@ -319,7 +338,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       setSearchText("");
       setFocusedOptionIndex(-1);
     }
-  };
+  }
 
   // 处理选项点击
   const handleOptionClick = (value: string, isGroup: boolean) => {
@@ -616,9 +635,9 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="file-list-selector px-1 w-full" 
+      className="file-list-selector px-1 w-full"
       onKeyDown={handleKeyDown}
     >
       {/* 选中的标签显示区域 */}
@@ -659,10 +678,9 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
           ref={dropdownRef}
           className={`dropdown-container dropdown-${dropdownDirection}`}
           style={{
-            ...(dropdownDirection === "up" 
+            ...(dropdownDirection === "up"
               ? { bottom: "100%", marginBottom: "4px" }
-              : { top: "100%", marginTop: "4px" }
-            ),
+              : { top: "100%", marginTop: "4px" }),
             left: 0,
             right: 0,
           }}
