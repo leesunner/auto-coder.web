@@ -59,11 +59,14 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   const [tokenCount, setTokenCount] = useState<number>(0);
   const [openedFiles, setOpenedFiles] = useState<FileMetadata[]>([]);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number>(-1);
+  const [dropdownDirection, setDropdownDirection] = useState<'up' | 'down'>('up');
 
   // Refs
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const processedMentionPaths = useRef<Set<string>>(new Set());
+=======
 
   // 监听编辑器发来的聚焦事件
   useEffect(() => {
@@ -134,7 +137,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // 点击外部关闭下拉菜单
+  // 点击外部关闭下拉菜单和窗口大小变化监听
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -147,14 +150,25 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       }
     };
 
+    const handleResize = () => {
+      if (isDropdownOpen) {
+        const direction = calculateDropdownDirection();
+        setDropdownDirection(direction);
+      }
+    };
+
     if (isDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("scroll", handleResize);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleResize);
     };
-  }, [isDropdownOpen]);
+  }, [isDropdownOpen, calculateDropdownDirection]);
 
   const formatPathDisplay = useCallback(
     (path: string, maxLength: number = 40) => {

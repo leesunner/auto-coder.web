@@ -285,14 +285,29 @@
 }
 
 /* 动画效果 */
-.file-list-selector .dropdown-container {
+.file-list-selector .dropdown-container.dropdown-up {
   animation: slideDown 0.15s ease-out;
+}
+
+.file-list-selector .dropdown-container.dropdown-down {
+  animation: slideUp 0.15s ease-out;
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
     transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
