@@ -44,10 +44,10 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   const {
     needApiKey = false,
     configKey = "code_model",
-    title = "自定义模型",
-    placeholder = "请选择模型",
+    title = getMessage("customModel"),
+    placeholder = getMessage("selectModel"),
     icon = <CodeOutlined />,
-    tooltip = "选择自定义模型",
+    tooltip = getMessage("selectCustomModel"),
     eventKey = "CODE_MODEL_UPDATED",
   } = props;
 
@@ -354,7 +354,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
                 ))}
                 {selectedModels.length > 1 && (
                   <span className="more-count">
-                    +{selectedModels.length - 1} more
+                    {getMessage("moreModelsSelected", { count: String(selectedModels.length - 1) })}
                   </span>
                 )}
               </div>
@@ -401,7 +401,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
                   </div>
                 ))
               ) : (
-                <div className="no-options">暂无匹配的模型</div>
+                <div className="no-options">{getMessage("noMatchingModels")}</div>
               )}
             </div>
             <div className="search-container">
@@ -409,7 +409,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
                 ref={searchInputRef}
                 type="text"
                 className="search-input"
-                placeholder="搜索模型..."
+                placeholder={getMessage("searchModels")}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onClick={(e) => e.stopPropagation()}

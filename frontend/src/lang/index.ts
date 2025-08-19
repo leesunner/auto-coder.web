@@ -22,7 +22,8 @@ import { messagesConfig } from "./messages";
 import { dotNotationMessages } from "./dotNotationMessages";
 import { commitListLang } from "./commitList";
 import { chatListDropdownMessages } from "./chatListDropdown";
-import { fileListSelectorMessages } from "../components/Sidebar/FileListSelector/index.lang";
+import { fileListSelectorMessages } from "./fileListSelector";
+import { customModelSelectorMessages } from "./customModelSelector";
 
 interface Message {
   en: string;
@@ -54,6 +55,7 @@ export const messages: { [key: string]: Message } = {
   ...commitListLang,
   ...chatListDropdownMessages,
   ...fileListSelectorMessages,
+  ...customModelSelectorMessages,
 
   // 补充缺失的消息
   noProjectSelected: {
