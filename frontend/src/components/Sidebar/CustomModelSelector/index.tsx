@@ -59,9 +59,36 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [filteredModels, setFilteredModels] = useState<Model[]>([]);
+  const [dropdownDirection, setDropdownDirection] = useState<'up' | 'down'>('down');
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const selectorRef = useRef<HTMLDivElement>(null);
+
+  // 检测下拉框应该向上还是向下展开
+  const detectDropdownDirection = useCallback(() => {
+    if (!selectorRef.current) return 'down';
+    
+    const selectorRect = selectorRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = 240; // 预估下拉框高度
+    
+    const spaceBelow = viewportHeight - selectorRect.bottom;
+    const spaceAbove = selectorRect.top;
+    
+    // 如果下方空间足够，优先向下展开
+    if (spaceBelow >= dropdownHeight) {
+      return 'down';
+    }
+    
+    // 如果上方空间更大，向上展开
+    if (spaceAbove > spaceBelow) {
+      return 'up';
+    }
+    
+    // 默认向下展开
+    return 'down';
+  }, []);
 
   // 过滤模型列表
   useEffect(() => {
@@ -277,6 +304,12 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
 
   // 打开下拉框时聚焦搜索框
   const handleToggleDropdown = () => {
+    if (!isOpen) {
+      // 检测方向并设置
+      const direction = detectDropdownDirection();
+      setDropdownDirection(direction);
+    }
+    
     setIsOpen(!isOpen);
     if (!isOpen) {
       setTimeout(() => {
@@ -306,6 +339,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
       <div className="custom-model-selector">
         {/* 选择器主体 */}
         <div
+          ref={selectorRef}
           className={`custom-selector ${isOpen ? "open" : ""} ${
             isLoading || isUpdating ? "loading" : ""
           }`}
@@ -359,7 +393,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
 
         {/* 下拉选项 */}
         {isOpen && (
-          <div className="dropdown-panel">
+          <div className={`dropdown-panel dropdown-${dropdownDirection}`}>
             <div className="options-container">
               {filteredModels.length > 0 ? (
                 filteredModels.map((model) => (
