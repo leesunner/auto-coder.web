@@ -21,20 +21,20 @@ const ProviderSelectors: React.FC<ProviderSelectorsProps> = ({
   isWriteMode,
 }) => {
   // 默认选中"代码模型"标签
-  const [activeKey, setActiveKey] = useState<string>("code-model");
+  const [activeKey, setActiveKey] = useState<string>("lib");
 
   // 创建标签项
   const items = [
-    {
-      key: "code-model",
-      label: (
-        <span className="flex items-center text-xs">
-          <CodeOutlined className="mr-1" />
-          {getMessage("providerCodeModel")}
-        </span>
-      ),
-      children: <CodeModelSelector needApiKey={true} />,
-    },
+    // {
+    //   key: "code-model",
+    //   label: (
+    //     <span className="flex items-center text-xs">
+    //       <CodeOutlined className="mr-1" />
+    //       {getMessage("providerCodeModel")}
+    //     </span>
+    //   ),
+    //   children: <CodeModelSelector needApiKey={true} />,
+    // },
     // 仅在非写作模式下显示RAG选择器
     ...(isWriteMode
       ? []

@@ -43,12 +43,12 @@ interface CustomModelSelectorProps {
 const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   const {
     needApiKey = false,
-    configKey = "custom_model",
+    configKey = "code_model",
     title = "自定义模型",
     placeholder = "请选择模型",
     icon = <CodeOutlined />,
     tooltip = "选择自定义模型",
-    eventKey = "CUSTOM_MODEL_UPDATED",
+    eventKey = "CODE_MODEL_UPDATED",
   } = props;
 
   const [availableModels, setAvailableModels] = useState<Model[]>([]);
@@ -59,7 +59,9 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [filteredModels, setFilteredModels] = useState<Model[]>([]);
-  const [dropdownDirection, setDropdownDirection] = useState<'up' | 'down'>('down');
+  const [dropdownDirection, setDropdownDirection] = useState<"up" | "down">(
+    "down"
+  );
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -67,27 +69,27 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
 
   // 检测下拉框应该向上还是向下展开
   const detectDropdownDirection = useCallback(() => {
-    if (!selectorRef.current) return 'down';
-    
+    if (!selectorRef.current) return "down";
+
     const selectorRect = selectorRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const dropdownHeight = 240; // 预估下拉框高度
-    
+
     const spaceBelow = viewportHeight - selectorRect.bottom;
     const spaceAbove = selectorRect.top;
-    
+
     // 如果下方空间足够，优先向下展开
     if (spaceBelow >= dropdownHeight) {
-      return 'down';
+      return "down";
     }
-    
+
     // 如果上方空间更大，向上展开
     if (spaceAbove > spaceBelow) {
-      return 'up';
+      return "up";
     }
-    
+
     // 默认向下展开
-    return 'down';
+    return "down";
   }, []);
 
   // 过滤模型列表
@@ -309,7 +311,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
       const direction = detectDropdownDirection();
       setDropdownDirection(direction);
     }
-    
+
     setIsOpen(!isOpen);
     if (!isOpen) {
       setTimeout(() => {
@@ -323,19 +325,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   const isLoading = loadingModels || loadingConfig;
 
   return (
-    <div className="w-full mb-0" ref={dropdownRef}>
-      {/* <Tooltip title={tooltip}>
-        <div className="flex items-center cursor-default h-5">
-          {React.cloneElement(icon as React.ReactElement, {
-            className: "mr-1 text-gray-400 flex-shrink-0",
-            style: { fontSize: "11px" }
-          })}
-          <span className="text-xxs text-gray-400 truncate max-w-[80%]">
-            {title}
-          </span>
-        </div>
-      </Tooltip> */}
-
+    <div className="w-full max-w-20 mb-0" ref={dropdownRef}>
       <div className="custom-model-selector">
         {/* 选择器主体 */}
         <div
@@ -369,20 +359,20 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
                 )}
               </div>
             ) : (
-              <span className="placeholder">{placeholder}</span>
+              <div className="placeholder truncate">{placeholder}</div>
             )}
           </div>
 
           <div className="selector-actions">
-            {selectedModels.length > 0 && (
-              <CloseOutlined
-                className="clear-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClearAll();
-                }}
-              />
-            )}
+            {selectedModels.length > 0 &&
+              // <CloseOutlined
+              //   className="clear-icon"
+              //   onClick={(e) => {
+              //     e.stopPropagation();
+              //     handleClearAll();
+              //   }}
+              // />
+              null}
             {isOpen ? (
               <UpOutlined className="arrow-icon" />
             ) : (

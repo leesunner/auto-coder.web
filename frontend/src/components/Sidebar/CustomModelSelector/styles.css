@@ -125,6 +125,7 @@
   min-width: 100%;
   width: max-content;
   max-width: 400px;
+  padding-top: 6px;
 }
 
 /* 向下展开 */
