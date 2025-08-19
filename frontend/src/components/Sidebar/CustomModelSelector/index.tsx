@@ -1,7 +1,11 @@
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { message, Tag, Tooltip, notification } from "antd";
-import { CodeOutlined, DownOutlined, UpOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+  CodeOutlined,
+  DownOutlined,
+  UpOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import { getMessage } from "../../../lang";
 import "./styles.css";
 import eventBus, { EVENTS } from "../../../services/eventBus";
@@ -44,7 +48,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
     placeholder = "请选择模型",
     icon = <CodeOutlined />,
     tooltip = "选择自定义模型",
-    eventKey = "CUSTOM_MODEL_UPDATED"
+    eventKey = "CUSTOM_MODEL_UPDATED",
   } = props;
 
   const [availableModels, setAvailableModels] = useState<Model[]>([]);
@@ -70,7 +74,10 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   // 点击外部关闭下拉框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
         setSearchValue("");
       }
@@ -105,7 +112,9 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
     try {
       const response = await fetch("/api/conf");
       if (!response.ok) {
-        console.warn("Failed to fetch initial configuration, proceeding with defaults.");
+        console.warn(
+          "Failed to fetch initial configuration, proceeding with defaults."
+        );
         setSelectedModels([]);
         return;
       }
@@ -205,14 +214,19 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
       });
     };
 
-    const unsubscribe = eventBus.subscribe(EVENTS.CONFIG[eventKey], handleUpdate);
+    const unsubscribe = eventBus.subscribe(
+      EVENTS.CONFIG[eventKey],
+      handleUpdate
+    );
     return () => unsubscribe();
   }, [eventKey, configKey]);
 
   // 订阅模型列表更新
   useEffect(() => {
     const handleModelListUpdate = () => {
-      console.log(`${configKey} received model list update, fetching models...`);
+      console.log(
+        `${configKey} received model list update, fetching models...`
+      );
       fetchModels();
     };
 
@@ -227,7 +241,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   // 处理模型选择
   const handleModelSelect = (modelName: string) => {
     let newSelectedModels: string[];
-    
+
     if (selectedModels.includes(modelName)) {
       newSelectedModels = selectedModels.filter((name) => name !== modelName);
     } else {
@@ -248,7 +262,9 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
   // 移除选中的模型
   const handleRemoveModel = (modelName: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    const newSelectedModels = selectedModels.filter((name) => name !== modelName);
+    const newSelectedModels = selectedModels.filter(
+      (name) => name !== modelName
+    );
     setSelectedModels(newSelectedModels);
     updateOrDeleteConfig(configKey, newSelectedModels);
   };
@@ -275,7 +291,7 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
 
   return (
     <div className="w-full mb-0" ref={dropdownRef}>
-      <Tooltip title={tooltip}>
+      {/* <Tooltip title={tooltip}>
         <div className="flex items-center cursor-default h-5">
           {React.cloneElement(icon as React.ReactElement, {
             className: "mr-1 text-gray-400 flex-shrink-0",
@@ -285,12 +301,14 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
             {title}
           </span>
         </div>
-      </Tooltip>
-      
+      </Tooltip> */}
+
       <div className="custom-model-selector">
         {/* 选择器主体 */}
         <div
-          className={`custom-selector ${isOpen ? "open" : ""} ${isLoading || isUpdating ? "loading" : ""}`}
+          className={`custom-selector ${isOpen ? "open" : ""} ${
+            isLoading || isUpdating ? "loading" : ""
+          }`}
           onClick={handleToggleDropdown}
         >
           <div className="selector-content">
@@ -305,18 +323,22 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
                     className="selected-tag"
                     title={modelName}
                   >
-                    {modelName.length > 20 ? `${modelName.substring(0, 20)}...` : modelName}
+                    {modelName.length > 20
+                      ? `${modelName.substring(0, 20)}...`
+                      : modelName}
                   </Tag>
                 ))}
                 {selectedModels.length > 1 && (
-                  <span className="more-count">+{selectedModels.length - 1} more</span>
+                  <span className="more-count">
+                    +{selectedModels.length - 1} more
+                  </span>
                 )}
               </div>
             ) : (
               <span className="placeholder">{placeholder}</span>
             )}
           </div>
-          
+
           <div className="selector-actions">
             {selectedModels.length > 0 && (
               <CloseOutlined
@@ -338,24 +360,14 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
         {/* 下拉选项 */}
         {isOpen && (
           <div className="dropdown-panel">
-            <div className="search-container">
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="search-input"
-                placeholder="搜索模型..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-            
             <div className="options-container">
               {filteredModels.length > 0 ? (
                 filteredModels.map((model) => (
                   <div
                     key={model.name}
-                    className={`option-item ${selectedModels.includes(model.name) ? "selected" : ""}`}
+                    className={`option-item ${
+                      selectedModels.includes(model.name) ? "selected" : ""
+                    }`}
                     onClick={() => handleModelSelect(model.name)}
                   >
                     <span className="option-label">{model.name}</span>
@@ -367,6 +379,17 @@ const CustomModelSelector: React.FC<CustomModelSelectorProps> = (props) => {
               ) : (
                 <div className="no-options">暂无匹配的模型</div>
               )}
+            </div>
+            <div className="search-container">
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="search-input"
+                placeholder="搜索模型..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
           </div>
         )}

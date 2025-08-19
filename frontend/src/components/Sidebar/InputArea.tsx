@@ -25,6 +25,7 @@ import {
 } from "../../services/event_bus_data";
 import CommandPanel from "./CommandPanel";
 import FileListSelector from "./FileListSelector";
+import CustomModelSelector from "./CustomModelSelector";
 
 interface InputAreaProps {
   fileGroups: FileGroup[];
@@ -795,7 +796,8 @@ const InputArea: React.FC<InputAreaProps> = ({
                     );
                   }}
                 >
-                  <QuestionCircleOutlined className="text-white" />
+                  {/* <QuestionCircleOutlined className="text-white" /> */}
+                  <CustomModelSelector needApiKey />
                 </Tooltip>
               </div>
               <div className="flex items-center space-x-2">
