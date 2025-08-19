@@ -20,6 +20,7 @@ import { FileMetadata } from "../../../types/file_meta";
 import { getMessage } from "../../../lang";
 import { FileGroupSelectionUpdatedEventData } from "../../../services/event_bus_data";
 import { ServiceFactory } from "../../../services/ServiceFactory";
+import { useWindowResize, useClickOutside, useDropdownDirection, useKeyboardNavigation, DropdownDirection } from "../../../hooks";
 import "./FileListSelector.css";
 
 interface FileListSelectorProps {
@@ -59,15 +60,20 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   const [tokenCount, setTokenCount] = useState<number>(0);
   const [openedFiles, setOpenedFiles] = useState<FileMetadata[]>([]);
   const [focusedOptionIndex, setFocusedOptionIndex] = useState<number>(-1);
-  const [dropdownDirection, setDropdownDirection] = useState<"up" | "down">(
-    "up"
-  );
+  const [dropdownDirection, setDropdownDirection] = useState<DropdownDirection>("up");
 
   // Refs
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const processedMentionPaths = useRef<Set<string>>(new Set());
+
+  // 使用自定义hooks
+  const calculateDropdownDirection = useDropdownDirection({
+    containerRef,
+    dropdownHeight: 320,
+    offset: 10,
+  });
 
   // 监听编辑器发来的聚焦事件
   useEffect(() => {
@@ -138,37 +144,33 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     return () => unsubscribe();
   }, []);
 
-  // 点击外部关闭下拉菜单和窗口大小变化监听
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-        setSearchText("");
-        setFocusedOptionIndex(-1);
-      }
-    };
+  // 使用自定义hooks处理点击外部和窗口变化
+  useClickOutside(
+    dropdownRef,
+    useCallback(() => {
+      setIsDropdownOpen(false);
+      setSearchText("");
+      setFocusedOptionIndex(-1);
+    }, []),
+    isDropdownOpen
+  );
 
-    const handleResize = () => {
+  useWindowResize({
+    debounceMs: 100,
+    onResize: useCallback(() => {
       if (isDropdownOpen) {
         const direction = calculateDropdownDirection();
         setDropdownDirection(direction);
       }
-    };
+    }, [isDropdownOpen, calculateDropdownDirection]),
+  });
 
+  // 当下拉框打开时，计算初始方向
+  useEffect(() => {
     if (isDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      window.addEventListener("resize", handleResize);
-      window.addEventListener("scroll", handleResize);
+      const direction = calculateDropdownDirection();
+      setDropdownDirection(direction);
     }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", handleResize);
-    };
   }, [isDropdownOpen, calculateDropdownDirection]);
 
   const formatPathDisplay = useCallback(
@@ -233,52 +235,27 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       });
   };
 
-  // 处理键盘导航
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (!isDropdownOpen) return;
-
-    const totalOptions =
-      fileCompletions.length +
-      (openedFiles.length > 0 && searchText.length < 2
-        ? openedFiles.length
-        : 0) +
-      (mentionFiles.length > 0 && searchText.length < 2
-        ? mentionFiles.length
-        : 0) +
+  // 计算总选项数量
+  const totalOptions = useMemo(() => {
+    return fileCompletions.length +
+      (openedFiles.length > 0 && searchText.length < 2 ? openedFiles.length : 0) +
+      (mentionFiles.length > 0 && searchText.length < 2 ? mentionFiles.length : 0) +
       fileGroups.length;
+  }, [fileCompletions.length, openedFiles.length, searchText.length, mentionFiles.length, fileGroups.length]);
 
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        if (totalOptions === 0) return;
-        setFocusedOptionIndex((prev) =>
-          prev >= totalOptions - 1 ? 0 : prev + 1
-        );
-        break;
-
-      case "ArrowUp":
-        e.preventDefault();
-        if (totalOptions === 0) return;
-        setFocusedOptionIndex((prev) =>
-          prev <= 0 ? totalOptions - 1 : prev - 1
-        );
-        break;
-
-      case "Enter":
-        if (focusedOptionIndex >= 0) {
-          e.preventDefault();
-          selectFocusedOption(focusedOptionIndex);
-        }
-        break;
-
-      case "Escape":
-        e.preventDefault();
-        setIsDropdownOpen(false);
-        setSearchText("");
-        setFocusedOptionIndex(-1);
-        break;
-    }
-  };
+  // 使用键盘导航hook
+  const handleKeyDown = useKeyboardNavigation({
+    totalItems: totalOptions,
+    isOpen: isDropdownOpen,
+    currentIndex: focusedOptionIndex,
+    onIndexChange: setFocusedOptionIndex,
+    onSelect: selectFocusedOption,
+    onClose: useCallback(() => {
+      setIsDropdownOpen(false);
+      setSearchText("");
+      setFocusedOptionIndex(-1);
+    }, []),
+  });
 
   // 选择当前聚焦的选项
   const selectFocusedOption = (index: number) => {
@@ -639,7 +616,11 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
   };
 
   return (
-    <div className="file-list-selector px-1 w-full" onKeyDown={handleKeyDown}>
+    <div 
+      ref={containerRef}
+      className="file-list-selector px-1 w-full" 
+      onKeyDown={handleKeyDown}
+    >
       {/* 选中的标签显示区域 */}
       <div className="tags-container flex flex-wrap items-center gap-1 min-h-[32px] p-2  rounded">
         {/* + 号按钮 */}
@@ -676,8 +657,15 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
       {isDropdownOpen && (
         <div
           ref={dropdownRef}
-          className="dropdown-container"
-          style={{ bottom: "100%", left: 0, right: 0 }}
+          className={`dropdown-container dropdown-${dropdownDirection}`}
+          style={{
+            ...(dropdownDirection === "up" 
+              ? { bottom: "100%", marginBottom: "4px" }
+              : { top: "100%", marginTop: "4px" }
+            ),
+            left: 0,
+            right: 0,
+          }}
         >
           {/* 选项列表 */}
           <div className="options-container">{renderDropdownOptions()}</div>
