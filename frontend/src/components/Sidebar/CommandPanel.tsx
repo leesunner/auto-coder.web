@@ -1,10 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Select, Input, Button, Spin, Empty, Alert, Form, Tooltip, message, Divider, Space, Typography } from 'antd';
-import { FileOutlined, ReloadOutlined, SendOutlined, QuestionCircleOutlined, EyeOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import eventBus, { EVENTS } from '../../services/eventBus';
-import { SendMessageEventData } from '../../services/event_bus_data';
-import '../../styles/custom_antd.css';
+import React, { useState, useEffect } from "react";
+import {
+  Select,
+  Input,
+  Button,
+  Spin,
+  Empty,
+  Alert,
+  Form,
+  Tooltip,
+  message,
+  Divider,
+  Space,
+  Typography,
+} from "antd";
+import {
+  FileOutlined,
+  ReloadOutlined,
+  SendOutlined,
+  QuestionCircleOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+import axios from "axios";
+import eventBus, { EVENTS } from "../../services/eventBus";
+import { SendMessageEventData } from "../../services/event_bus_data";
+import "../../styles/custom_antd.css";
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -26,18 +45,20 @@ interface CommandAnalysis {
   variables: CommandVariable[];
 }
 
-interface CommandPanelProps {  
+interface CommandPanelProps {
   panelId?: string;
 }
 
-const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
+const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [commandFiles, setCommandFiles] = useState<CommandFile[]>([]);
-  const [selectedFile, setSelectedFile] = useState<string>('');
-  const [fileContent, setFileContent] = useState<string>('');
-  const [renderedContent, setRenderedContent] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<string>("");
+  const [fileContent, setFileContent] = useState<string>("");
+  const [renderedContent, setRenderedContent] = useState<string>("");
   const [fileVariables, setFileVariables] = useState<CommandVariable[]>([]);
-  const [variableValues, setVariableValues] = useState<Record<string, string>>({});
+  const [variableValues, setVariableValues] = useState<Record<string, string>>(
+    {}
+  );
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [renderLoading, setRenderLoading] = useState<boolean>(false);
@@ -52,13 +73,13 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
     if (selectedFile) {
       fetchFileDetails(selectedFile);
     } else {
-      setFileContent('');
+      setFileContent("");
       setFileVariables([]);
       setVariableValues({});
-      setRenderedContent('');
+      setRenderedContent("");
     }
   }, [selectedFile]);
-  
+
   // Effect to handle preview toggle
   useEffect(() => {
     if (showPreview && selectedFile && Object.keys(variableValues).length > 0) {
@@ -71,19 +92,19 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('/api/file_commands', {
-        params: { recursive: true }
+      const response = await axios.get("/api/file_commands", {
+        params: { recursive: true },
       });
-      
+
       if (response.data.success) {
         setCommandFiles(response.data.documents || []);
       } else {
-        setError(response.data.errors?.[0] || 'Failed to fetch command files');
+        setError(response.data.errors?.[0] || "Failed to fetch command files");
         setCommandFiles([]);
       }
     } catch (error) {
-      console.error('Error fetching command files:', error);
-      setError('Failed to fetch command files. Please try again.');
+      console.error("Error fetching command files:", error);
+      setError("Failed to fetch command files. Please try again.");
       setCommandFiles([]);
     } finally {
       setLoading(false);
@@ -96,50 +117,57 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
     setError(null);
     try {
       // Fetch file content
-      const contentResponse = await axios.get('/api/file_commands', {
-        params: { file_name: fileName }
+      const contentResponse = await axios.get("/api/file_commands", {
+        params: { file_name: fileName },
       });
-      
+
       if (contentResponse.data.success) {
-        setFileContent(contentResponse.data.content || '');
+        setFileContent(contentResponse.data.content || "");
       } else {
-        setError(contentResponse.data.errors?.[0] || 'Failed to fetch file content');
-        setFileContent('');
+        setError(
+          contentResponse.data.errors?.[0] || "Failed to fetch file content"
+        );
+        setFileContent("");
       }
 
       // Fetch file variables
-      const variablesResponse = await axios.get('/api/file_commands/variables', {
-        params: { file_name: fileName }
-      });
-      
+      const variablesResponse = await axios.get(
+        "/api/file_commands/variables",
+        {
+          params: { file_name: fileName },
+        }
+      );
+
       if (variablesResponse.data.success && variablesResponse.data.analysis) {
         const variables = variablesResponse.data.analysis.variables || [];
         setFileVariables(variables);
-        
+
         // Initialize variable values with defaults
         const initialValues: Record<string, string> = {};
         variables.forEach((variable: CommandVariable) => {
-          initialValues[variable.name] = variable.default_value || '';
+          initialValues[variable.name] = variable.default_value || "";
         });
         setVariableValues(initialValues);
-        
+
         // If preview is shown, render the template with initial values
         if (showPreview) {
           renderTemplate(fileName, initialValues);
         }
       } else {
-        setError(variablesResponse.data.errors?.[0] || 'Failed to fetch file variables');
+        setError(
+          variablesResponse.data.errors?.[0] || "Failed to fetch file variables"
+        );
         setFileVariables([]);
         setVariableValues({});
-        setRenderedContent('');
+        setRenderedContent("");
       }
     } catch (error) {
-      console.error('Error fetching file details:', error);
-      setError('Failed to fetch file details. Please try again.');
-      setFileContent('');
+      console.error("Error fetching file details:", error);
+      setError("Failed to fetch file details. Please try again.");
+      setFileContent("");
       setFileVariables([]);
       setVariableValues({});
-      setRenderedContent('');
+      setRenderedContent("");
     } finally {
       setLoading(false);
     }
@@ -149,37 +177,40 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
   const handleVariableChange = (name: string, value: string) => {
     const newValues = {
       ...variableValues,
-      [name]: value
+      [name]: value,
     };
     setVariableValues(newValues);
-    
+
     // Render template with new values if preview is shown
     if (showPreview && selectedFile) {
       renderTemplate(selectedFile, newValues);
     }
   };
-  
+
   // Render template with variables
-  const renderTemplate = async (fileName: string, variables: Record<string, string>) => {
+  const renderTemplate = async (
+    fileName: string,
+    variables: Record<string, string>
+  ) => {
     if (!fileName) return;
-    
+
     setRenderLoading(true);
     try {
-      const response = await axios.post('/api/file_commands/render', {
+      const response = await axios.post("/api/file_commands/render", {
         file_name: fileName,
-        variables: variables
+        variables: variables,
       });
-      
+
       if (response.data.success) {
-        setRenderedContent(response.data.rendered_content || '');
+        setRenderedContent(response.data.rendered_content || "");
       } else {
-        setError(response.data.errors?.[0] || 'Failed to render template');
-        setRenderedContent('');
+        setError(response.data.errors?.[0] || "Failed to render template");
+        setRenderedContent("");
       }
     } catch (error) {
-      console.error('Error rendering template:', error);
-      setError('Failed to render template. Please try again.');
-      setRenderedContent('');
+      console.error("Error rendering template:", error);
+      setError("Failed to render template. Please try again.");
+      setRenderedContent("");
     } finally {
       setRenderLoading(false);
     }
@@ -188,50 +219,55 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
   // Handle command execution
   const handleExecuteCommand = async () => {
     if (!selectedFile) {
-      message.error('Please select a command file');
+      message.error("Please select a command file");
       return;
     }
 
     // Check if all required variables have values
     const missingVariables = fileVariables
-      .filter(variable => !variableValues[variable.name])
-      .map(variable => variable.name);
+      .filter((variable) => !variableValues[variable.name])
+      .map((variable) => variable.name);
 
     if (missingVariables.length > 0) {
-      message.error(`Please provide values for: ${missingVariables.join(', ')}`);
+      message.error(
+        `Please provide values for: ${missingVariables.join(", ")}`
+      );
       return;
     }
-    
+
     setLoading(true);
     try {
       // Get the rendered template content
-      const response = await axios.post('/api/file_commands/render', {
+      const response = await axios.post("/api/file_commands/render", {
         file_name: selectedFile,
-        variables: variableValues
+        variables: variableValues,
       });
-      
+
       if (response.data.success && response.data.rendered_content) {
         // Format a message with the command details and rendered content
         const commandMessage = response.data.rendered_content;
-        
+
         // Send the message using eventBus
-        eventBus.publish(EVENTS.CHAT.SEND_MESSAGE, new SendMessageEventData(commandMessage, panelId));                        
-        message.success('Command executed successfully');
+        eventBus.publish(
+          EVENTS.CHAT.SEND_MESSAGE,
+          new SendMessageEventData({ text: commandMessage, panelId })
+        );
+        message.success("Command executed successfully");
       } else {
-        setError(response.data.errors?.[0] || 'Failed to render template');
-        message.error('Failed to execute command');
+        setError(response.data.errors?.[0] || "Failed to render template");
+        message.error("Failed to execute command");
       }
     } catch (error) {
-      console.error('Error executing command:', error);
-      setError('Failed to execute command. Please try again.');
-      message.error('Failed to execute command');
+      console.error("Error executing command:", error);
+      setError("Failed to execute command. Please try again.");
+      message.error("Failed to execute command");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-full flex flex-col" style={{ color: 'white' }}>
+    <div className="h-full flex flex-col" style={{ color: "white" }}>
       {error && (
         <Alert
           message={error}
@@ -240,14 +276,18 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
           closable
           className="mb-1"
           onClose={() => setError(null)}
-          style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'var(--dark-error)', color: 'white' }}
+          style={{
+            backgroundColor: "rgba(239, 68, 68, 0.1)",
+            borderColor: "var(--dark-error)",
+            color: "white",
+          }}
         />
       )}
 
       <div className="flex items-center space-x-1 mb-1">
         <Select
           placeholder="Select command file"
-          style={{ width: '100%', color: 'white' }}
+          style={{ width: "100%", color: "white" }}
           value={selectedFile || undefined}
           onChange={setSelectedFile}
           loading={loading}
@@ -257,8 +297,12 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
           className="text-xs dark-select custom-select"
           dropdownClassName="dark-select-dropdown custom-select-dropdown"
         >
-          {commandFiles.map(file => (
-            <Option key={file.file_path} value={file.file_path} style={{ color: 'white' }}>
+          {commandFiles.map((file) => (
+            <Option
+              key={file.file_path}
+              value={file.file_path}
+              style={{ color: "white" }}
+            >
               <FileOutlined className="mr-1" /> {file.file_path}
             </Option>
           ))}
@@ -270,7 +314,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
             disabled={loading}
             size="small"
             className="dark-button"
-            style={{ color: 'white' }}
+            style={{ color: "white" }}
           />
         </Tooltip>
         {selectedFile && (
@@ -280,7 +324,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
               onClick={() => setShowPreview(!showPreview)}
               size="small"
               className="dark-button"
-              style={{ color: showPreview ? 'var(--dark-primary)' : 'white' }}
+              style={{ color: showPreview ? "var(--dark-primary)" : "white" }}
             />
           </Tooltip>
         )}
@@ -295,37 +339,73 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
           {showPreview && (
             <div className="mb-1">
               <div className="flex justify-between items-center">
-                <Text style={{ color: 'var(--dark-text-tertiary)', fontSize: '11px' }}>Rendered Preview:</Text>
+                <Text
+                  style={{
+                    color: "var(--dark-text-tertiary)",
+                    fontSize: "11px",
+                  }}
+                >
+                  Rendered Preview:
+                </Text>
                 {renderLoading && <Spin size="small" />}
               </div>
-              <div className="p-1 rounded text-xs overflow-auto max-h-20" style={{ backgroundColor: 'var(--dark-bg-tertiary)', color: 'white', border: '1px solid var(--dark-border)' }}>
-                <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {renderedContent || 'Waiting for input...'}
+              <div
+                className="p-1 rounded text-xs overflow-auto max-h-20"
+                style={{
+                  backgroundColor: "var(--dark-bg-tertiary)",
+                  color: "white",
+                  border: "1px solid var(--dark-border)",
+                }}
+              >
+                <pre
+                  style={{
+                    margin: 0,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {renderedContent || "Waiting for input..."}
                 </pre>
               </div>
             </div>
           )}
-          
+
           {fileVariables.length > 0 && (
             <div className="flex-grow overflow-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-                {fileVariables.map(variable => (
+                {fileVariables.map((variable) => (
                   <div key={variable.name} className="mb-1">
                     <div className="flex items-center mb-0.5">
-                      <Text style={{ color: 'white', fontSize: '11px', fontWeight: 500 }}>{variable.name}</Text>
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: "11px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {variable.name}
+                      </Text>
                       {variable.description && (
                         <Tooltip title={variable.description}>
-                          <QuestionCircleOutlined className="ml-1" style={{ color: 'var(--dark-text-tertiary)', fontSize: '10px' }} />
+                          <QuestionCircleOutlined
+                            className="ml-1"
+                            style={{
+                              color: "var(--dark-text-tertiary)",
+                              fontSize: "10px",
+                            }}
+                          />
                         </Tooltip>
                       )}
                     </div>
                     <Input
-                      value={variableValues[variable.name] || ''}
-                      onChange={e => handleVariableChange(variable.name, e.target.value)}
+                      value={variableValues[variable.name] || ""}
+                      onChange={(e) =>
+                        handleVariableChange(variable.name, e.target.value)
+                      }
                       placeholder={variable.default_value || `Enter value`}
                       size="small"
                       className="dark-input"
-                      style={{ color: 'white' }}
+                      style={{ color: "white" }}
                     />
                   </div>
                 ))}
@@ -341,17 +421,19 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = '' }) => {
               disabled={loading}
               block
               className="dark-button"
-              style={{ color: 'white' }}
+              style={{ color: "white" }}
             >
               Execute Command
             </Button>
           </div>
         </div>
       ) : (
-        <Empty 
-          description={<span style={{ color: 'white' }}>Select a command file</span>} 
-          className="flex-grow py-4" 
-          image={Empty.PRESENTED_IMAGE_SIMPLE} 
+        <Empty
+          description={
+            <span style={{ color: "white" }}>Select a command file</span>
+          }
+          className="flex-grow py-4"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
         />
       )}
     </div>

@@ -6,19 +6,6 @@
   padding: 8px;
   background-color: var(--vscode-editor-background, #1e1e1e);
   border-radius: 4px;
-  border: 1px solid var(--vscode-editorWidget-border, #454545);
-}
-
-/* 空状态 */
-.thumbnail-list-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  color: var(--vscode-descriptionForeground, #cccccc);
-  background-color: var(--vscode-editor-background, #1e1e1e);
-  border-radius: 4px;
-  border: 1px solid var(--vscode-editorWidget-border, #454545);
 }
 
 /* 缩略图项目 */
@@ -92,7 +79,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.46);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,23 +192,23 @@
     height: 40px;
     font-size: 20px;
   }
-  
+
   .thumbnail-preview-prev {
     left: -50px;
   }
-  
+
   .thumbnail-preview-next {
     right: -50px;
   }
-  
+
   .thumbnail-preview-info {
     bottom: -80px;
   }
-  
+
   .thumbnail-preview-filename {
     font-size: 12px;
   }
-  
+
   .thumbnail-preview-counter {
     font-size: 10px;
   }
@@ -235,15 +222,15 @@
     bottom: 100px;
     transform: none;
   }
-  
+
   .thumbnail-preview-prev {
     left: 20px;
   }
-  
+
   .thumbnail-preview-next {
     right: 20px;
   }
-  
+
   .thumbnail-preview-info {
     position: fixed;
     bottom: 20px;

@@ -1,20 +1,9 @@
-
 export interface ThumbnailItem {
   file: File;
   path: string;
 }
 
 export interface ThumbnailListProps {
-  items: ThumbnailItem[];
-  onDelete: (index: number) => void;
+  onDelete?: (index: number) => void;
+  onChange?: (files: ThumbnailItem[]) => void;
 }
-
-export interface ThumbnailPreviewProps {
-  isOpen: boolean;
-  currentIndex: number;
-  items: ThumbnailItem[];
-  onClose: () => void;
-  onPrevious: () => void;
-  onNext: () => void;
-}
-

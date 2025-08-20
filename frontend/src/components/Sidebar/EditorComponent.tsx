@@ -126,7 +126,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
-        new SendMessageEventData(text, panelId)
+        new SendMessageEventData({ text, panelId })
       );
     },
     [panelId]
@@ -233,6 +233,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
       // 添加上传中状态反馈
       const editor = editorRef.current;
       if (editor) {
+        const uploadingText = `![${getMessage("uploading")}...]()`;
         const position = editor.getPosition();
         const loadingId = editor.executeEdits("", [
           {
@@ -242,7 +243,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
               position.lineNumber,
               position.column
             ),
-            text: `![${getMessage("uploading")}...]()  `,
+            text: uploadingText,
             forceMoveMarkers: true,
           },
         ]);
@@ -251,15 +252,14 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
         const response = await uploadImage(file);
         // console.log('Image upload response:', response);
         if (response.success) {
+          eventBus.publish(EVENTS.FILE.PAST, { file, path: response.path });
           // 获取当前光标位置
           const currentPosition = editor.getPosition();
 
           // 查找上传中文本的位置
           const model = editor.getModel();
           const content = model.getValue();
-          const loadingTextPos = content.indexOf(
-            `![${getMessage("uploading")}...]()`
-          );
+          const loadingTextPos = content.indexOf(uploadingText);
 
           if (loadingTextPos !== -1) {
             // 计算行和列
@@ -275,7 +275,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
             }
 
             // 替换上传中文本
-            const loadingText = `![${getMessage("uploading")}...]()`;
+            const loadingText = uploadingText;
             editor.executeEdits("", [
               {
                 range: new monaco.Range(
@@ -284,7 +284,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
                   line,
                   col + loadingText.length
                 ),
-                text: `<_image_>${response.path}</_image_>`,
+                // text: `<_image_>${response.path}</_image_>`,
                 forceMoveMarkers: true,
               },
             ]);
@@ -298,7 +298,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
                   currentPosition.lineNumber,
                   currentPosition.column
                 ),
-                text: `<_image_>${response.path}</_image_>`,
+                // text: `<_image_>${response.path}</_image_>`,
                 forceMoveMarkers: true,
               },
             ]);
@@ -496,7 +496,7 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
             e.stopPropagation();
             eventBus.publish(
               EVENTS.CHAT.SEND_MESSAGE,
-              new SendMessageEventData("", panelId)
+              new SendMessageEventData({ text: "", panelId })
             );
             return false;
           case "Period": // Cmd/Ctrl + . : 切换模式

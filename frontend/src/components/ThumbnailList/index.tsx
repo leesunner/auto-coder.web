@@ -1,19 +1,18 @@
+import React, { useState, useCallback, useEffect } from "react";
+import "./ThumbnailList.css";
+import eventBus, { EVENTS } from "@/services/eventBus";
+import type { ThumbnailItem, ThumbnailListProps } from "./types";
 
-import React, { useState, useCallback } from 'react';
-import './ThumbnailList.css';
-
-export interface ThumbnailItem {
-  file: File;
-  path: string;
-}
-
-export interface ThumbnailListProps {
-  items: ThumbnailItem[];
-  onDelete: (index: number) => void;
-}
-
-const ThumbnailList: React.FC<ThumbnailListProps> = ({ items, onDelete }) => {
+const ThumbnailList: React.FC<ThumbnailListProps> = ({
+  onDelete,
+  onChange,
+}) => {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [items, setItems] = useState<ThumbnailItem[]>([]);
+
+  useEffect(() => {
+    onChange?.(items);
+  }, [items]);
 
   // 创建图片URL用于预览
   const createImageUrl = useCallback((file: File) => {
@@ -45,42 +44,56 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({ items, onDelete }) => {
   };
 
   // 处理键盘事件
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (previewIndex === null) return;
-    
-    switch (e.key) {
-      case 'Escape':
-        closePreview();
-        break;
-      case 'ArrowLeft':
-        goToPrevious();
-        break;
-      case 'ArrowRight':
-        goToNext();
-        break;
-    }
-  }, [previewIndex]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (previewIndex === null) return;
+
+      switch (e.key) {
+        case "Escape":
+          closePreview();
+          break;
+        case "ArrowLeft":
+          goToPrevious();
+          break;
+        case "ArrowRight":
+          goToNext();
+          break;
+      }
+    },
+    [previewIndex]
+  );
 
   // 监听键盘事件
   React.useEffect(() => {
     if (previewIndex !== null) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
     }
   }, [previewIndex, handleKeyDown]);
 
   // 处理删除
   const handleDelete = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
-    onDelete(index);
+    setItems((pre) => {
+      return pre.filter((_, i) => i !== index);
+    });
+    onDelete?.(index);
   };
 
+  useEffect(() => {
+    const unsubscribe = eventBus.subscribe(EVENTS.FILE.PAST, (data) => {
+      setItems((pre) => {
+        return [...pre, data];
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   if (items.length === 0) {
-    return (
-      <div className="thumbnail-list-empty">
-        <p>暂无图片</p>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -115,7 +128,10 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({ items, onDelete }) => {
       {/* 预览模态框 */}
       {previewIndex !== null && (
         <div className="thumbnail-preview-modal" onClick={closePreview}>
-          <div className="thumbnail-preview-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="thumbnail-preview-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* 关闭按钮 */}
             <button className="thumbnail-preview-close" onClick={closePreview}>
               ×
@@ -123,12 +139,18 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({ items, onDelete }) => {
 
             {/* 导航按钮 */}
             {previewIndex > 0 && (
-              <button className="thumbnail-preview-nav thumbnail-preview-prev" onClick={goToPrevious}>
+              <button
+                className="thumbnail-preview-nav thumbnail-preview-prev"
+                onClick={goToPrevious}
+              >
                 ‹
               </button>
             )}
             {previewIndex < items.length - 1 && (
-              <button className="thumbnail-preview-nav thumbnail-preview-next" onClick={goToNext}>
+              <button
+                className="thumbnail-preview-nav thumbnail-preview-next"
+                onClick={goToNext}
+              >
                 ›
               </button>
             )}
@@ -142,7 +164,9 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({ items, onDelete }) => {
 
             {/* 图片信息 */}
             <div className="thumbnail-preview-info">
-              <p className="thumbnail-preview-filename">{items[previewIndex].path}</p>
+              <p className="thumbnail-preview-filename">
+                {items[previewIndex].path}
+              </p>
               <p className="thumbnail-preview-counter">
                 {previewIndex + 1} / {items.length}
               </p>

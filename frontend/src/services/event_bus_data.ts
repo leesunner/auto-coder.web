@@ -10,7 +10,7 @@
 export class NewChatEventData {
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param panelId 面板ID
@@ -18,7 +18,7 @@ export class NewChatEventData {
   constructor(panelId?: string) {
     this.panelId = panelId;
   }
-} 
+}
 
 /**
  * 发送消息事件数据类
@@ -29,15 +29,18 @@ export class SendMessageEventData {
   text?: string;
   /** 面板ID */
   panelId?: string;
-  
+  // 文件列表
+  fileList?: any[];
+
   /**
    * 构造函数
    * @param text 消息内容
    * @param panelId 面板ID
    */
-  constructor(text?: string, panelId?: string) {
-    this.text = text;
-    this.panelId = panelId;
+  constructor(option: { text?: string; panelId?: string; fileList?: any[] }) {
+    this.text = option.text;
+    this.panelId = option.panelId;
+    this.fileList = option.fileList;
   }
 }
 
@@ -48,13 +51,13 @@ export class SendMessageEventData {
 export class StopGenerationEventData {
   /** 面板ID */
   panelId?: string;
-  isWriteMode?:boolean;
-  
+  isWriteMode?: boolean;
+
   /**
    * 构造函数
    * @param panelId 面板ID
    */
-  constructor(options: { panelId?: string; isWriteMode?:boolean }) {
+  constructor(options: { panelId?: string; isWriteMode?: boolean }) {
     this.panelId = options.panelId;
     this.isWriteMode = options.isWriteMode;
   }
@@ -69,7 +72,7 @@ export class EditorMentionsEventData {
   mentions: any[];
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param mentions mentions数据
@@ -88,7 +91,7 @@ export class EditorMentionsEventData {
 export class ToggleInputFullscreenEventData {
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param panelId 面板ID
@@ -105,7 +108,7 @@ export class ToggleInputFullscreenEventData {
 export class FileGroupSelectFocusEventData {
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param panelId 面板ID
@@ -124,7 +127,7 @@ export class AgenticModeChangedEventData {
   enabled: boolean;
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param enabled 是否启用
@@ -143,7 +146,7 @@ export class AgenticModeChangedEventData {
 export class ToggleWriteModeEventData {
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param panelId 面板ID
@@ -151,7 +154,7 @@ export class ToggleWriteModeEventData {
   constructor(panelId?: string) {
     this.panelId = panelId;
   }
-} 
+}
 
 /**
  * 热键事件数据类
@@ -160,7 +163,7 @@ export class ToggleWriteModeEventData {
 export class HotkeyEventData {
   /** 面板ID */
   panelId: string;
-  
+
   /**
    * 构造函数
    * @param panelId 面板ID
@@ -168,7 +171,7 @@ export class HotkeyEventData {
   constructor(panelId: string) {
     this.panelId = panelId;
   }
-} 
+}
 
 /**
  * 文件组选择更新事件数据类
@@ -181,7 +184,7 @@ export class FileGroupSelectionUpdatedEventData {
   filePaths: string[];
   /** 面板ID */
   panelId?: string;
-  
+
   /**
    * 构造函数
    * @param groupNames 组名列表
@@ -201,7 +204,7 @@ export class FileGroupSelectionUpdatedEventData {
 export class FilterByCommitEventData {
   /** 提交哈希 */
   commitHash: string;
-  
+
   /**
    * 构造函数
    * @param commitHash 提交哈希值

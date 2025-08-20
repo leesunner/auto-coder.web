@@ -26,6 +26,8 @@ import {
 import CommandPanel from "./CommandPanel";
 import FileListSelector from "./FileListSelector";
 import CustomModelSelector from "./CustomModelSelector";
+import ThumbnailList from "../ThumbnailList";
+import type { ThumbnailItem } from "../ThumbnailList/types";
 
 interface InputAreaProps {
   fileGroups: FileGroup[];
@@ -102,6 +104,7 @@ const InputArea: React.FC<InputAreaProps> = ({
   } | null>(null);
 
   const inputAreaRef = useRef<HTMLDivElement>(null);
+  const fileList = useRef<ThumbnailItem[]>([]);
 
   // 处理编辑器全屏切换
   const toggleFullscreen = useCallback(() => {
@@ -149,13 +152,17 @@ const InputArea: React.FC<InputAreaProps> = ({
     setIsCommandMode,
   ]);
 
+  const handleThumbnailListChange = (list: any[]) => {
+    fileList.current = list;
+  };
+
   // 自定义发送消息函数
   const handleSendMessage = useCallback(
     (text?: string) => {
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
-        new SendMessageEventData(text, panelId)
+        new SendMessageEventData({ text, panelId, fileList: fileList.current })
       );
     },
     [panelId]
@@ -710,6 +717,8 @@ const InputArea: React.FC<InputAreaProps> = ({
                 />
               )}
               {/* <div className="h-[1px] bg-gray-700/50 my-1 w-full"></div> */}
+              {/* 图片缩略图列表 */}
+              <ThumbnailList onChange={handleThumbnailListChange} />
               {/* 编辑器模式 */}
               <div className="w-full h-full ai-text">
                 <EditorComponent
