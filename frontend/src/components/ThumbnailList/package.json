@@ -1,0 +1,11 @@
+
+{
+  "name": "@components/ThumbnailList",
+  "version": "1.0.0",
+  "description": "A thumbnail list component with preview and delete functionality",
+  "main": "index.tsx",
+  "types": "types.ts",
+  "keywords": ["react", "thumbnail", "image", "preview", "gallery"],
+  "author": "auto-coder.web",
+  "license": "MIT"
+}

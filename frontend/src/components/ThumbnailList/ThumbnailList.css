@@ -1,0 +1,253 @@
+/* 缩略图列表容器 */
+.thumbnail-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background-color: var(--vscode-editor-background, #1e1e1e);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-editorWidget-border, #454545);
+}
+
+/* 空状态 */
+.thumbnail-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: var(--vscode-descriptionForeground, #cccccc);
+  background-color: var(--vscode-editor-background, #1e1e1e);
+  border-radius: 4px;
+  border: 1px solid var(--vscode-editorWidget-border, #454545);
+}
+
+/* 缩略图项目 */
+.thumbnail-item {
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.thumbnail-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 缩略图包装器 */
+.thumbnail-wrapper {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-editorWidget-border, #454545);
+}
+
+/* 缩略图图片 */
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 删除按钮 */
+.thumbnail-delete-btn {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background-color: rgba(220, 38, 38, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  z-index: 2;
+}
+
+.thumbnail-item:hover .thumbnail-delete-btn {
+  opacity: 1;
+}
+
+.thumbnail-delete-btn:hover {
+  background-color: rgba(220, 38, 38, 1);
+  transform: scale(1.1);
+}
+
+/* 预览模态框 */
+.thumbnail-preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.thumbnail-preview-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  cursor: default;
+}
+
+/* 预览图片 */
+.thumbnail-preview-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* 关闭按钮 */
+.thumbnail-preview-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.thumbnail-preview-close:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* 导航按钮 */
+.thumbnail-preview-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.thumbnail-preview-nav:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.thumbnail-preview-prev {
+  left: -60px;
+}
+
+.thumbnail-preview-next {
+  right: -60px;
+}
+
+/* 图片信息 */
+.thumbnail-preview-info {
+  position: absolute;
+  bottom: -60px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: white;
+}
+
+.thumbnail-preview-filename {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.thumbnail-preview-counter {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .thumbnail-preview-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .thumbnail-preview-prev {
+    left: -50px;
+  }
+  
+  .thumbnail-preview-next {
+    right: -50px;
+  }
+  
+  .thumbnail-preview-info {
+    bottom: -80px;
+  }
+  
+  .thumbnail-preview-filename {
+    font-size: 12px;
+  }
+  
+  .thumbnail-preview-counter {
+    font-size: 10px;
+  }
+}
+
+/* 小屏幕优化 */
+@media (max-width: 480px) {
+  .thumbnail-preview-nav {
+    position: fixed;
+    top: auto;
+    bottom: 100px;
+    transform: none;
+  }
+  
+  .thumbnail-preview-prev {
+    left: 20px;
+  }
+  
+  .thumbnail-preview-next {
+    right: 20px;
+  }
+  
+  .thumbnail-preview-info {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+}
