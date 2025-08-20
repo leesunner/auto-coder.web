@@ -47,7 +47,10 @@ async def upload_image(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
     
+    # 使用相对路径，确保跨平台兼容性
+    relative_path = Path(".") / ".auto-coder" / "auto-coder.web" / "uploads" / filename
+    
     return JSONResponse({
         "success": True,
-        "path": os.path.join(".",".auto-coder", "auto-coder.web", "uploads", filename)
+        "path": str(relative_path).replace("\\", "/")  # 统一使用正斜杠，前端更通用
     })
