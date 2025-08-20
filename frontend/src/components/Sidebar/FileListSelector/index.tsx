@@ -549,7 +549,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
           >
             <div className="option-content" title={file.path}>
               <div
-                className={`option-main ${
+                className={`option-main truncate ${
                   file.isSelected ? "font-medium text-green-400" : ""
                 }`}
               >

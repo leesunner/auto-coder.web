@@ -126,6 +126,7 @@ const MessageItem = React.memo(
           if (content.tool_name === "TodoWriteTool") {
             return <AgenticTodoWriteTool message={message} />;
           }
+          return null;
         }
         if (message.metadata?.path === "/agent/edit/tool/result") {
           return <AgenticEditToolResult message={message} />;
@@ -146,6 +147,7 @@ const MessageItem = React.memo(
         //   return <MarkdownMessage message={message} />;
         // }
         console.log("message.metadata?.path 2======", message.metadata?.path);
+
         return <MarkdownMessage message={message} />;
       }
 
@@ -241,10 +243,15 @@ const MessageItem = React.memo(
       //   ) {
       //     return <MarkdownMessage message={message} />;
       //   }
-      console.log("Default text content=======");
+      console.log("Default text content=======", message);
       // Default text content
       return <MarkdownMessage message={message} />;
     };
+
+    const aiDom = renderMessageContent(message);
+    if (message.type === "RESULT" && !aiDom) {
+      return null;
+    }
 
     return (
       <div
@@ -278,7 +285,7 @@ const MessageItem = React.memo(
                 }`}
         >
           {/* Message content based on content type */}
-          {renderMessageContent(message)}
+          {aiDom}
 
           {/* Options for ASK_USER type */}
           {message.type === "ASK_USER" &&

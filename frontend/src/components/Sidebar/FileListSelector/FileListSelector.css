@@ -142,6 +142,7 @@
 
 /* 选项内容布局 */
 .file-list-selector .option-content {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
