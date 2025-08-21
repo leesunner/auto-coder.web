@@ -8,7 +8,4 @@ export type {
   DropdownMenuProps,
 } from "./Dropdown";
 
-export type {
-  SelectProps,
-  SelectOption,
-} from "./Select";
+export type { SelectProps, SelectOption } from "./Select";

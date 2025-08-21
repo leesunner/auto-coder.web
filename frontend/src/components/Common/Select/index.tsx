@@ -6,7 +6,7 @@ import {
   CloseOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
-import "./Select.css";
+import "./index.css";
 
 export interface SelectOption {
   value: string;
