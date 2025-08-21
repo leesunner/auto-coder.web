@@ -583,7 +583,9 @@ const InputArea: React.FC<InputAreaProps> = ({
                   onClick={() => {
                     setSoundEnabled(!soundEnabled);
                   }}
-                  className="ml-0.5 p-0.5 rounded-md transition-all duration-200 text-gray-400 hover:text-gray-300"
+                  className={`ml-0.5 p-0.5 rounded-md transition-all duration-200 hover:text-blue-400 ${
+                    soundEnabled ? "text-blue-500" : "text-gray-400"
+                  }`}
                 >
                   {soundEnabled ? (
                     <svg
