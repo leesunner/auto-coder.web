@@ -30,6 +30,7 @@ import { ragSelectorMessages } from "./ragSelector";
 import { messageRendererMessages } from "./messageRenderer";
 import { thumbnailListMessages } from "./thumbnailList";
 import { monacoEditorMessages } from "./monacoEditor";
+import { fileGroupSelectMessages } from "./fileGroupSelect";
 
 interface Message {
   en: string;
@@ -68,6 +69,7 @@ export const messages: { [key: string]: Message } = {
   ...messageRendererMessages,
   ...thumbnailListMessages,
   ...monacoEditorMessages,
+  ...fileGroupSelectMessages,
 
   // 补充缺失的消息
   noProjectSelected: {
