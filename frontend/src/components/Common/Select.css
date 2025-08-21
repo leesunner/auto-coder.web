@@ -1,0 +1,381 @@
+
+.common-select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.select-selector {
+  position: relative;
+  background-color: #1e293b;
+  border: 1px solid #374151;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  min-height: 32px;
+}
+
+.select-selector:hover {
+  border-color: #4b5563;
+}
+
+.select-selector.select-open {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.select-selector.select-disabled {
+  background-color: #374151;
+  border-color: #4b5563;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.select-selector.select-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* 尺寸变体 */
+.select-small {
+  min-height: 24px;
+  padding: 1px 7px;
+  font-size: 12px;
+}
+
+.select-middle {
+  min-height: 32px;
+  padding: 4px 11px;
+  font-size: 13px;
+}
+
+.select-large {
+  min-height: 40px;
+  padding: 6px 11px;
+  font-size: 14px;
+}
+
+.select-selection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  overflow: hidden;
+}
+
+.select-selection-search {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.select-placeholder {
+  color: #9ca3af;
+  user-select: none;
+  pointer-events: none;
+}
+
+.select-single-value {
+  color: #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-tags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.select-tag {
+  margin: 0 !important;
+  padding: 0 6px !important;
+  font-size: 11px !important;
+  line-height: 20px !important;
+  background-color: #2563eb !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 3px !important;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.select-tag .anticon-close {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 10px !important;
+  margin-left: 4px !important;
+}
+
+.select-tag .anticon-close:hover {
+  color: white !important;
+}
+
+.select-more-count {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.select-arrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.select-clear-icon,
+.select-arrow-icon {
+  color: #9ca3af;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-clear-icon:hover {
+  color: #e5e7eb;
+  background-color: rgba(107, 114, 128, 0.2);
+  border-radius: 2px;
+}
+
+.select-arrow-icon {
+  pointer-events: none;
+}
+
+.select-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+  min-width: 100%;
+}
+
+/* 向下展开 */
+.select-dropdown.select-dropdown-down {
+  top: 100%;
+  margin-top: 4px;
+}
+
+/* 向上展开 */
+.select-dropdown.select-dropdown-up {
+  bottom: 100%;
+  margin-bottom: 4px;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.select-dropdown-search {
+  padding: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.select-search-input {
+  width: 100%;
+  height: 28px;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  padding: 0 8px;
+  color: #e5e7eb;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.select-search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.select-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.select-dropdown-menu {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.select-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select-dropdown-menu::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.select-dropdown-menu::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 3px;
+}
+
+.select-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.select-dropdown-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s ease;
+  color: #e5e7eb;
+  font-size: 13px;
+  position: relative;
+}
+
+.select-dropdown-menu-item:hover {
+  background-color: #374151;
+}
+
+.select-dropdown-menu-item.select-dropdown-menu-item-selected {
+  background-color: #1e40af;
+  color: white;
+}
+
+.select-dropdown-menu-item.select-dropdown-menu-item-selected:hover {
+  background-color: #1d4ed8;
+}
+
+.select-dropdown-menu-item.select-dropdown-menu-item-disabled {
+  color: #6b7280;
+  cursor: not-allowed;
+  background-color: transparent;
+}
+
+.select-dropdown-menu-item.select-dropdown-menu-item-disabled:hover {
+  background-color: transparent;
+}
+
+.select-dropdown-menu-item-content {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.select-dropdown-menu-item-check {
+  color: #10b981;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.select-dropdown-empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* 焦点状态 */
+.select-selector:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* 动画效果 */
+.select-tag {
+  animation: tagFadeIn 0.2s ease-out;
+}
+
+@keyframes tagFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 640px) {
+  .select-dropdown {
+    max-width: 100vw;
+  }
+
+  .select-tag {
+    max-width: 80px;
+  }
+
+  .select-small {
+    min-height: 28px;
+  }
+
+  .select-middle {
+    min-height: 30px;
+  }
+
+  .select-large {
+    min-height: 36px;
+  }
+}
+
+/* 深色主题适配 */
+.select-selector.select-disabled .select-placeholder,
+.select-selector.select-disabled .select-single-value {
+  color: #6b7280;
+}
+
+/* 加载状态 */
+.select-loading .select-selection,
+.select-loading .select-arrow {
+  pointer-events: none;
+}
+
+/* 多选模式下的特殊样式 */
+.select-tags:empty + .select-placeholder {
+  display: block;
+}
+
+.select-tags:not(:empty) + .select-placeholder {
+  display: none;
+}
+
+/* 确保下拉框在小屏幕上不会超出视口 */
+@media (max-width: 768px) {
+  .select-dropdown {
+    left: 0;
+    right: 0;
+    max-width: calc(100vw - 16px);
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
