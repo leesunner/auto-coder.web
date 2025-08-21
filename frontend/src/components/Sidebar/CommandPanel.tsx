@@ -23,6 +23,7 @@ import {
 import axios from "axios";
 import eventBus, { EVENTS } from "../../services/eventBus";
 import { SendMessageEventData } from "../../services/event_bus_data";
+import { getMessage } from "../../lang";
 import "../../styles/custom_antd.css";
 
 const { Option } = Select;
@@ -99,12 +100,12 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
       if (response.data.success) {
         setCommandFiles(response.data.documents || []);
       } else {
-        setError(response.data.errors?.[0] || "Failed to fetch command files");
+        setError(response.data.errors?.[0] || getMessage("failedToFetchCommandFiles"));
         setCommandFiles([]);
       }
     } catch (error) {
       console.error("Error fetching command files:", error);
-      setError("Failed to fetch command files. Please try again.");
+      setError(getMessage("failedToFetchCommandFiles"));
       setCommandFiles([]);
     } finally {
       setLoading(false);
@@ -125,7 +126,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
         setFileContent(contentResponse.data.content || "");
       } else {
         setError(
-          contentResponse.data.errors?.[0] || "Failed to fetch file content"
+          contentResponse.data.errors?.[0] || getMessage("failedToFetchFileContent")
         );
         setFileContent("");
       }
@@ -155,7 +156,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
         }
       } else {
         setError(
-          variablesResponse.data.errors?.[0] || "Failed to fetch file variables"
+          variablesResponse.data.errors?.[0] || getMessage("failedToFetchFileVariables")
         );
         setFileVariables([]);
         setVariableValues({});
@@ -163,7 +164,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
       }
     } catch (error) {
       console.error("Error fetching file details:", error);
-      setError("Failed to fetch file details. Please try again.");
+      setError(getMessage("failedToFetchFileDetails"));
       setFileContent("");
       setFileVariables([]);
       setVariableValues({});
@@ -204,12 +205,12 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
       if (response.data.success) {
         setRenderedContent(response.data.rendered_content || "");
       } else {
-        setError(response.data.errors?.[0] || "Failed to render template");
+        setError(response.data.errors?.[0] || getMessage("failedToRenderTemplate"));
         setRenderedContent("");
       }
     } catch (error) {
       console.error("Error rendering template:", error);
-      setError("Failed to render template. Please try again.");
+      setError(getMessage("failedToRenderTemplate"));
       setRenderedContent("");
     } finally {
       setRenderLoading(false);
@@ -219,7 +220,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
   // Handle command execution
   const handleExecuteCommand = async () => {
     if (!selectedFile) {
-      message.error("Please select a command file");
+      message.error(getMessage("pleaseSelectCommandFile"));
       return;
     }
 
@@ -230,7 +231,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
 
     if (missingVariables.length > 0) {
       message.error(
-        `Please provide values for: ${missingVariables.join(", ")}`
+        `${getMessage("pleaseProvideValues")}: ${missingVariables.join(", ")}`
       );
       return;
     }
@@ -252,15 +253,15 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
           EVENTS.CHAT.SEND_MESSAGE,
           new SendMessageEventData({ text: commandMessage, panelId })
         );
-        message.success("Command executed successfully");
+        message.success(getMessage("commandExecutedSuccessfully"));
       } else {
         setError(response.data.errors?.[0] || "Failed to render template");
-        message.error("Failed to execute command");
+        message.error(getMessage("failedToExecuteCommand"));
       }
     } catch (error) {
       console.error("Error executing command:", error);
       setError("Failed to execute command. Please try again.");
-      message.error("Failed to execute command");
+      message.error(getMessage("failedToExecuteCommand"));
     } finally {
       setLoading(false);
     }
@@ -307,7 +308,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
             </Option>
           ))}
         </Select>
-        <Tooltip title="Refresh files">
+        <Tooltip title={getMessage("refreshFiles")}>
           <Button
             icon={<ReloadOutlined />}
             onClick={fetchCommandFiles}
@@ -318,7 +319,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
           />
         </Tooltip>
         {selectedFile && (
-          <Tooltip title={showPreview ? "Hide preview" : "Show preview"}>
+          <Tooltip title={showPreview ? getMessage("hidePreview") : getMessage("showPreview")}>
             <Button
               icon={<EyeOutlined />}
               onClick={() => setShowPreview(!showPreview)}
@@ -345,7 +346,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
                     fontSize: "11px",
                   }}
                 >
-                  Rendered Preview:
+                  {getMessage("renderedPreview")}
                 </Text>
                 {renderLoading && <Spin size="small" />}
               </div>
@@ -364,7 +365,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
                     wordBreak: "break-word",
                   }}
                 >
-                  {renderedContent || "Waiting for input..."}
+                  {renderedContent || getMessage("waitingForInput")}
                 </pre>
               </div>
             </div>
@@ -402,7 +403,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
                       onChange={(e) =>
                         handleVariableChange(variable.name, e.target.value)
                       }
-                      placeholder={variable.default_value || `Enter value`}
+                      placeholder={variable.default_value || getMessage("enterValue")}
                       size="small"
                       className="dark-input"
                       style={{ color: "white" }}
@@ -423,14 +424,14 @@ const CommandPanel: React.FC<CommandPanelProps> = ({ panelId = "" }) => {
               className="dark-button"
               style={{ color: "white" }}
             >
-              Execute Command
+              {getMessage("executeCommand")}
             </Button>
           </div>
         </div>
       ) : (
         <Empty
           description={
-            <span style={{ color: "white" }}>Select a command file</span>
+            <span style={{ color: "white" }}>{getMessage("selectCommandFileFirst")}</span>
           }
           className="flex-grow py-4"
           image={Empty.PRESENTED_IMAGE_SIMPLE}

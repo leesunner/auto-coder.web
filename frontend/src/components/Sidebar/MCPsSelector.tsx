@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EventBus, { EVENTS } from '../../services/eventBus';
 import { Tooltip } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
+import { getMessage } from '../../lang';
 import './ragSelectorStyles.css'; // Reusing styles
 
 const MCPsSelector: React.FC = () => {
@@ -27,7 +28,7 @@ const MCPsSelector: React.FC = () => {
   return (
     <div className="w-full mb-0">
       <div className="flex items-center justify-between h-5">
-        <Tooltip title={enableMCPs ? "Disable Multi-Agent Collaboration Pattern" : "Enable Multi-Agent Collaboration Pattern"}>
+        <Tooltip title={enableMCPs ? getMessage("disableMultiAgentCollaboration") : getMessage("enableMultiAgentCollaboration")}>
           <div
             className="flex items-center cursor-pointer hover:text-green-400"
             onClick={toggleMCPs}
@@ -37,7 +38,7 @@ const MCPsSelector: React.FC = () => {
               style={{ fontSize: '11px' }}
             />
             <span className={`text-xxs truncate ${enableMCPs ? 'text-green-400' : 'text-gray-400'}`}>
-              MCPs Provider
+              {getMessage("mcpsProvider")}
             </span>
           </div>
         </Tooltip>

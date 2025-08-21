@@ -24,6 +24,10 @@ import { commitListLang } from "./commitList";
 import { chatListDropdownMessages } from "./chatListDropdown";
 import { fileListSelectorMessages } from "./fileListSelector";
 import { customModelSelectorMessages } from "./customModelSelector";
+import { commandPanelMessages } from "./commandPanel";
+import { mcpsSelectorMessages } from "./mcpsSelector";
+import { ragSelectorMessages } from "./ragSelector";
+import { messageRendererMessages } from "./messageRenderer";
 
 interface Message {
   en: string;
@@ -56,6 +60,10 @@ export const messages: { [key: string]: Message } = {
   ...chatListDropdownMessages,
   ...fileListSelectorMessages,
   ...customModelSelectorMessages,
+  ...commandPanelMessages,
+  ...mcpsSelectorMessages,
+  ...ragSelectorMessages,
+  ...messageRendererMessages,
 
   // 补充缺失的消息
   noProjectSelected: {

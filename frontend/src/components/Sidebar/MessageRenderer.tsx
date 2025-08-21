@@ -1,6 +1,7 @@
 import React from 'react';
 import { Markdown } from './Markdown';
 import { Message } from './types';
+import { getMessage } from '../../lang';
 
 interface MessageRendererProps {
   message: Message;
@@ -25,7 +26,7 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ message }) => {
     if (message.contentType === 'summary') {
       return (
         <div className="bg-gray-700 rounded p-2 border-l-4 border-blue-500">
-          <h4 className="text-blue-400 text-xs font-bold mb-1">Summary</h4>
+          <h4 className="text-blue-400 text-xs font-bold mb-1">{getMessage("summary")}</h4>
           <Markdown>{message.content}</Markdown>
         </div>
       );
@@ -40,7 +41,7 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ message }) => {
     if (message.status === 'sending') {
       return (
         <div className="flex items-center text-2xs text-gray-400 mt-1">
-          <div className="mr-1">sending</div>
+          <div className="mr-1">{getMessage("sending")}</div>
           <div className="animate-bounce">•</div>
           <div className="animate-bounce delay-100">•</div>
           <div className="animate-bounce delay-200">•</div>
@@ -51,7 +52,7 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ message }) => {
     if (message.status === 'sent') {
       return (
         <div className="text-2xs text-green-400 mt-1">
-          ✓ sent
+          ✓ {getMessage("sent")}
         </div>
       );
     }
@@ -60,7 +61,7 @@ const MessageRenderer: React.FC<MessageRendererProps> = ({ message }) => {
       return (
         <div className="flex items-center text-2xs text-red-400 mt-1">
           <span className="mr-1">⚠</span>
-          failed to send
+          {getMessage("failedToSend")}
         </div>
       );
     }

@@ -3,6 +3,7 @@ import axios from 'axios';
 import EventBus, { EVENTS } from '../../services/eventBus';
 import { Select, Tooltip, Spin, Button, Empty, Modal, Input, message } from 'antd';
 import { DatabaseOutlined, ReloadOutlined, FileSearchOutlined } from '@ant-design/icons';
+import { getMessage } from '../../lang';
 import './ragSelectorStyles.css';
 
 interface Rag {
@@ -31,7 +32,7 @@ const RagSelector: React.FC = () => {
         setSelectedRag(rags[0].name);
       }
     } catch (err) {
-      console.error('Failed to fetch RAGs', err);
+      console.error(getMessage('failedToFetchRags'), err);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ const RagSelector: React.FC = () => {
   return (
     <div className="w-full mb-0">
       <div className="flex items-center justify-between h-5">
-        <Tooltip title="Select a Retrieval-Augmented Generation provider">
+        <Tooltip title={getMessage("selectRagProvider")}>
           <div
             className="flex items-center cursor-pointer hover:text-blue-400"
             onClick={() => {
@@ -78,7 +79,7 @@ const RagSelector: React.FC = () => {
               style={{ fontSize: '11px' }}
             />
             <span className={`text-xxs truncate ${showFileSelector ? 'text-blue-400' : 'text-gray-400'}`}>
-              RAG Provider
+              {getMessage("ragProvider")}
             </span>
           </div>
         </Tooltip>
@@ -102,7 +103,7 @@ const RagSelector: React.FC = () => {
             className="w-full custom-rag-select"
             size="small"
             loading={loading}
-            placeholder="Select RAG"
+            placeholder={getMessage("selectRag")}
             value={selectedRag}
             onChange={(value) => setSelectedRag(value)}
             options={rags.map(r => ({ label: r.name, value: r.name }))}
@@ -113,7 +114,7 @@ const RagSelector: React.FC = () => {
                 {rags.length === 0 && !loading && (
                   <Empty
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="No RAG providers found"
+                    description={getMessage("noRagProvidersFound")}
                     className="my-1"
                     imageStyle={{ height: 24 }}
                   />
