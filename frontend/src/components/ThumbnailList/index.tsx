@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import "./ThumbnailList.css";
 import eventBus, { EVENTS } from "@/services/eventBus";
 import type { ThumbnailItem, ThumbnailListProps } from "./types";
+import { getMessage } from "../../lang";
 
 const ThumbnailList: React.FC<ThumbnailListProps> = ({
   onDelete,
@@ -116,7 +117,7 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({
               <button
                 className="thumbnail-delete-btn"
                 onClick={(e) => handleDelete(e, index)}
-                title="删除图片"
+                title={getMessage("deleteImage")}
               >
                 ×
               </button>
@@ -133,7 +134,11 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {/* 关闭按钮 */}
-            <button className="thumbnail-preview-close" onClick={closePreview}>
+            <button 
+              className="thumbnail-preview-close" 
+              onClick={closePreview}
+              title={getMessage("closePreview")}
+            >
               ×
             </button>
 
@@ -142,6 +147,7 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({
               <button
                 className="thumbnail-preview-nav thumbnail-preview-prev"
                 onClick={goToPrevious}
+                title={getMessage("previousImage")}
               >
                 ‹
               </button>
@@ -150,6 +156,7 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({
               <button
                 className="thumbnail-preview-nav thumbnail-preview-next"
                 onClick={goToNext}
+                title={getMessage("nextImage")}
               >
                 ›
               </button>
@@ -168,7 +175,10 @@ const ThumbnailList: React.FC<ThumbnailListProps> = ({
                 {items[previewIndex].path}
               </p>
               <p className="thumbnail-preview-counter">
-                {previewIndex + 1} / {items.length}
+                {getMessage("imageCounter", { 
+                  current: previewIndex + 1, 
+                  total: items.length 
+                })}
               </p>
             </div>
           </div>

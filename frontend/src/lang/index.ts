@@ -28,6 +28,8 @@ import { commandPanelMessages } from "./commandPanel";
 import { mcpsSelectorMessages } from "./mcpsSelector";
 import { ragSelectorMessages } from "./ragSelector";
 import { messageRendererMessages } from "./messageRenderer";
+import { thumbnailListMessages } from "./thumbnailList";
+import { monacoEditorMessages } from "./monacoEditor";
 
 interface Message {
   en: string;
@@ -64,6 +66,8 @@ export const messages: { [key: string]: Message } = {
   ...mcpsSelectorMessages,
   ...ragSelectorMessages,
   ...messageRendererMessages,
+  ...thumbnailListMessages,
+  ...monacoEditorMessages,
 
   // 补充缺失的消息
   noProjectSelected: {
