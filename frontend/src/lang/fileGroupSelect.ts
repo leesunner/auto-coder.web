@@ -31,6 +31,18 @@ export const fileGroupSelectMessages: { [key: string]: Message } = {
     en: "Clear all selected files and groups",
     zh: "清空所有选中的文件和分组"
   },
+  clearSuccess: {
+    en: "Files cleared successfully",
+    zh: "文件清空成功"
+  },
+  confirmClear: {
+    en: "Confirm Clear",
+    zh: "确认清空"
+  },
+  confirmClearContent: {
+    en: "Are you sure you want to clear all selected files and groups? This action cannot be undone.",
+    zh: "确定要清空所有选中的文件和分组吗？此操作不可撤销。"
+  },
   
   // 编辑器相关
   editorTabsChanged: {

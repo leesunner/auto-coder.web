@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, KeyboardEvent, useCallback } from 'react';
-import { Select, message } from 'antd';
+import { Select, message, Modal } from 'antd';
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { FileGroup, EnhancedCompletionItem } from './types';
@@ -43,6 +43,7 @@ const FileGroupSelect: React.FC<FileGroupSelectProps> = ({
   const [tokenCount, setTokenCount] = useState<number>(0);
   const selectRef = useRef<any>(null);
   const processedMentionPaths = useRef<Set<string>>(new Set());
+  const [isClearModalVisible, setIsClearModalVisible] = useState<boolean>(false);
 
   // 监听编辑器发来的聚焦事件
   useEffect(() => {
@@ -346,6 +347,35 @@ const FileGroupSelect: React.FC<FileGroupSelectProps> = ({
     return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  // 显示清空确认Modal
+  const showClearConfirmModal = () => {
+    setIsClearModalVisible(true);
+  };
+
+  // 处理清空确认
+  const handleClearConfirm = async () => {
+    try {
+      // 使用文件组服务清空当前文件
+      const result: { success: boolean; message: string } = await fileGroupService.clearCurrentFiles();
+      if (result.success) {
+        setSelectedGroups([]);
+        setSelectedFiles([]);
+        fetchFileGroups();
+        message.success(getMessage('clearSuccess'));
+      }
+    } catch (error: unknown) {
+      console.error(getMessage('clearFailed'), error);
+      message.error(getMessage('clearFailed'));
+    } finally {
+      setIsClearModalVisible(false);
+    }
+  };
+
+  // 取消清空操作
+  const handleClearCancel = () => {
+    setIsClearModalVisible(false);
+  };
+
   return (
     <div className="px-1 w-full" onKeyDown={handleKeyDown}>
       <div className="h-[1px] bg-gray-700/50 my-0.5 w-full"></div>
@@ -400,19 +430,7 @@ const FileGroupSelect: React.FC<FileGroupSelectProps> = ({
             }
           }}
           open={dropdownVisible}
-          onClear={async () => {
-            try {
-              // 使用文件组服务清空当前文件
-              const result: { success: boolean; message: string } = await fileGroupService.clearCurrentFiles();
-              if (result.success) {
-                setSelectedGroups([]);
-                setSelectedFiles([]);
-                fetchFileGroups();
-              }
-            } catch (error: unknown) {
-              console.error(getMessage('clearFailed'), error);
-            }
-          }}
+          onClear={showClearConfirmModal}
           onSearch={(value) => {
             setSearchText(value);
             fetchFileCompletions(value);
@@ -717,26 +735,23 @@ const FileGroupSelect: React.FC<FileGroupSelectProps> = ({
             </Select.OptGroup>
           )}
         </Select>
-        {/* <CloseCircleOutlined
-          className="text-gray-400 hover:text-gray-200 cursor-pointer text-sm"
-          onClick={async () => {
-            try {
-              // 使用文件组服务清空当前文件
-              const result: { success: boolean; message: string } = await fileGroupService.clearCurrentFiles();
-              if (result.success) {
-                setSelectedGroups([]);
-                setSelectedFiles([]);
-                fetchFileGroups();
-              }
-            } catch (error: unknown) {
-              console.error(getMessage('clearFailed'), error);
-            }
-          }}
-          title={getMessage('clearContext')}
-        /> */}
       </div>
+
+      {/* 清空确认Modal */}
+      <Modal
+        title={getMessage('confirmClear')}
+        open={isClearModalVisible}
+        onOk={handleClearConfirm}
+        onCancel={handleClearCancel}
+        okText={getMessage('okButton')}
+        cancelText={getMessage('cancelButton')}
+        okType="danger"
+        centered
+      >
+        <p>{getMessage('confirmClearContent')}</p>
+      </Modal>
     </div>
   );
 };
 
-export default FileGroupSelect; 
+export default FileGroupSelect;
