@@ -634,6 +634,9 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
     return options;
   };
 
+  const hasSelectedFiles =
+    selectedFiles.length > 0 || selectedGroups.length > 0;
+
   return (
     <div
       ref={containerRef}
@@ -658,6 +661,9 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
         >
           <PlusOutlined />
         </button>
+        {!hasSelectedFiles && (
+          <span className="text-xs text-gray-400 ml-1">选择文件组</span>
+        )}
 
         {/* 清空按钮 */}
         {/* {(selectedGroups.length > 0 || selectedFiles.length > 0) && (

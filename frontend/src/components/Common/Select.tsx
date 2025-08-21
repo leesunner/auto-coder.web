@@ -43,11 +43,11 @@ const Select: React.FC<SelectProps> = ({
   options = [],
   value: controlledValue,
   defaultValue,
-  placeholder = "请选择",
+  placeholder = "模型",
   multiple = false,
   searchable = true,
   disabled = false,
-  clearable = true,
+  clearable = false,
   maxTagCount = 3,
   loading = false,
   onChange,
@@ -56,7 +56,7 @@ const Select: React.FC<SelectProps> = ({
   style,
   dropdownClassName = "",
   dropdownStyle,
-  size = "middle",
+  size = "small",
   allowClear = true,
   showSearch = true,
   filterOption,
@@ -68,8 +68,11 @@ const Select: React.FC<SelectProps> = ({
   );
   const [isOpen, setIsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [filteredOptions, setFilteredOptions] = useState<SelectOption[]>(options);
-  const [dropdownDirection, setDropdownDirection] = useState<"up" | "down">("down");
+  const [filteredOptions, setFilteredOptions] =
+    useState<SelectOption[]>(options);
+  const [dropdownDirection, setDropdownDirection] = useState<"up" | "down">(
+    "down"
+  );
 
   const selectRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -77,8 +80,8 @@ const Select: React.FC<SelectProps> = ({
   const selectorRef = useRef<HTMLDivElement>(null);
 
   // 使用受控值或内部值
-  const currentValue = controlledValue !== undefined ? controlledValue : internalValue;
-
+  const currentValue =
+    controlledValue !== undefined ? controlledValue : internalValue;
   // 检测下拉框应该向上还是向下展开
   const detectDropdownDirection = useCallback(() => {
     if (!selectorRef.current) return "down";
@@ -110,7 +113,9 @@ const Select: React.FC<SelectProps> = ({
 
     if (searchValue && showSearch) {
       if (filterOption) {
-        filtered = options.filter((option) => filterOption(searchValue, option));
+        filtered = options.filter((option) =>
+          filterOption(searchValue, option)
+        );
       } else {
         filtered = options.filter((option) =>
           option.label.toLowerCase().includes(searchValue.toLowerCase())
@@ -281,11 +286,20 @@ const Select: React.FC<SelectProps> = ({
         ref={selectorRef}
         className={`select-selector ${getSizeClass()} ${
           isOpen ? "select-open" : ""
-        } ${disabled ? "select-disabled" : ""} ${loading ? "select-loading" : ""}`}
+        } ${disabled ? "select-disabled" : ""} ${
+          loading ? "select-loading" : ""
+        }`}
         onClick={handleToggleDropdown}
       >
         <div className="select-selection">
-          <div className="select-selection-search">
+          <span className="mr-1">
+            {isOpen ? (
+              <UpOutlined className="select-arrow-icon" />
+            ) : (
+              <DownOutlined className="select-arrow-icon" />
+            )}
+          </span>
+          <div className="select-selection-search truncate">
             {getSelectedDisplay()}
           </div>
         </div>
@@ -296,11 +310,6 @@ const Select: React.FC<SelectProps> = ({
               className="select-clear-icon"
               onClick={handleClearAll}
             />
-          )}
-          {isOpen ? (
-            <UpOutlined className="select-arrow-icon" />
-          ) : (
-            <DownOutlined className="select-arrow-icon" />
           )}
         </div>
       </div>
@@ -314,25 +323,12 @@ const Select: React.FC<SelectProps> = ({
             ...dropdownStyle,
           }}
         >
-          {showSearch && searchable && (
-            <div className="select-dropdown-search">
-              <input
-                ref={searchInputRef}
-                type="text"
-                className="select-search-input"
-                placeholder="搜索选项"
-                value={searchValue}
-                onChange={handleSearchChange}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          )}
-
           <div className="select-dropdown-menu">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {
                 const isSelected = multiple
-                  ? Array.isArray(currentValue) && currentValue.includes(option.value)
+                  ? Array.isArray(currentValue) &&
+                    currentValue.includes(option.value)
                   : currentValue === option.value;
 
                 return (
@@ -341,9 +337,13 @@ const Select: React.FC<SelectProps> = ({
                     className={`select-dropdown-menu-item ${
                       isSelected ? "select-dropdown-menu-item-selected" : ""
                     } ${
-                      option.disabled ? "select-dropdown-menu-item-disabled" : ""
+                      option.disabled
+                        ? "select-dropdown-menu-item-disabled"
+                        : ""
                     }`}
-                    onClick={() => !option.disabled && handleOptionSelect(option.value)}
+                    onClick={() =>
+                      !option.disabled && handleOptionSelect(option.value)
+                    }
                   >
                     <span className="select-dropdown-menu-item-content">
                       {option.label}
@@ -358,6 +358,19 @@ const Select: React.FC<SelectProps> = ({
               <div className="select-dropdown-empty">{notFoundContent}</div>
             )}
           </div>
+          {showSearch && searchable && (
+            <div className="select-dropdown-search">
+              <input
+                ref={searchInputRef}
+                type="text"
+                className="select-search-input"
+                placeholder="搜索选项"
+                value={searchValue}
+                onChange={handleSearchChange}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

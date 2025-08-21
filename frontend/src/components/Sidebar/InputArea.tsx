@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Switch, Select, Tooltip, message as AntdMessage, Spin } from "antd";
+import { Select, Tooltip, message as AntdMessage, Spin } from "antd";
+import { Select as CustomSelect } from "@/components/Common";
 import {
   UndoOutlined,
   BuildOutlined,
@@ -758,8 +759,8 @@ const InputArea: React.FC<InputAreaProps> = ({
                     );
                   }}
                 >
-                  <Select
-                    size="small"
+                  <CustomSelect
+                    showSearch={false}
                     value={
                       isCommandMode
                         ? "command"
@@ -770,6 +771,7 @@ const InputArea: React.FC<InputAreaProps> = ({
                         : "chat"
                     }
                     onChange={(value) => {
+                      debugger;
                       if (value === "rule") {
                         setIsRuleMode(true);
                         setIsWriteMode(false);
@@ -790,9 +792,6 @@ const InputArea: React.FC<InputAreaProps> = ({
                       { value: "rule", label: "Rule" },
                       { value: "command", label: "Command" },
                     ]}
-                    style={{ width: 80 }}
-                    className="text-xs mr-1"
-                    popupMatchSelectWidth={false}
                   />
                 </Tooltip>
                 <Tooltip
