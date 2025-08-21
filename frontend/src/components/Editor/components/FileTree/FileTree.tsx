@@ -426,7 +426,7 @@ const FileTree: React.FC<FileTreeProps> = ({
           setNewFileName("");
           setNewFileParentPath("");
         }}
-        okText={getMessage("createButton")}
+        okText={getMessage("okButton")}
         cancelText={getMessage("cancelButton")}
         okButtonProps={{ disabled: !newFileName.trim() }}
         className="vscode-dark-modal"
@@ -460,7 +460,7 @@ const FileTree: React.FC<FileTreeProps> = ({
           setNewDirName("");
           setNewDirParentPath("");
         }}
-        okText={getMessage("createButton")}
+        okText={getMessage("okButton")}
         cancelText={getMessage("cancelButton")}
         okButtonProps={{ disabled: !newDirName.trim() }}
         className="vscode-dark-modal"
