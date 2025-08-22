@@ -1,13 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Tree, Input, Button, Modal, message, Table, Switch, Checkbox, Empty } from 'antd';
-import { DeleteOutlined, PlusOutlined, SearchOutlined, CheckOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import type { DataNode, EventDataNode } from 'antd/es/tree';
-import Editor from '@monaco-editor/react';
-import { getLanguageByFileName } from '../../utils/fileUtils';
-import { getMessage } from '../../lang';
-import FileDirectorySelector from './FileDirectorySelector';
-import FileGroupDetail from './FileGroupDetail';
-import './FileGroupPanel.css'; // 假设会创建这个文件
+import React, { useState, useEffect } from "react";
+import {
+  Tree,
+  Input,
+  Button,
+  Modal,
+  message,
+  Table,
+  Switch,
+  Checkbox,
+  Empty,
+} from "antd";
+import {
+  DeleteOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  CheckOutlined,
+  ThunderboltOutlined,
+} from "@ant-design/icons";
+import type { DataNode, EventDataNode } from "antd/es/tree";
+import Editor from "@monaco-editor/react";
+import { getLanguageByFileName } from "../../utils/fileUtils";
+import { getMessage } from "../../lang";
+import FileDirectorySelector from "./FileDirectorySelector";
+import FileGroupDetail from "./FileGroupDetail";
+import "./FileGroupPanel.css"; // 假设会创建这个文件
 
 interface FileGroup {
   name: string;
@@ -37,22 +53,26 @@ const FileGroupPanel: React.FC = () => {
   const [fileGroups, setFileGroups] = useState<FileGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<FileGroup | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [fileContent, setFileContent] = useState<string>('');
+  const [fileContent, setFileContent] = useState<string>("");
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [filteredTreeData, setFilteredTreeData] = useState<DataNode[]>([]);
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupDesc, setNewGroupDesc] = useState('');
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
   const [isAutoGroupModalVisible, setIsAutoGroupModalVisible] = useState(false);
   const [isAutoGroupLoading, setIsAutoGroupLoading] = useState(false);
   const [fileSizeLimit, setFileSizeLimit] = useState<number>(100);
   const [groupNumLimit, setGroupNumLimit] = useState<number>(10);
   const [skipDiff, setSkipDiff] = useState<boolean>(false);
-  const [groupResults, setGroupResults] = useState<Array<{name: string; description: string; selected: boolean}>>([]);
-  const [isGroupResultsModalVisible, setIsGroupResultsModalVisible] = useState(false);
-  const [isExternalFileModalVisible, setIsExternalFileModalVisible] = useState(false);
-  const [externalFilePath, setExternalFilePath] = useState('');
+  const [groupResults, setGroupResults] = useState<
+    Array<{ name: string; description: string; selected: boolean }>
+  >([]);
+  const [isGroupResultsModalVisible, setIsGroupResultsModalVisible] =
+    useState(false);
+  const [isExternalFileModalVisible, setIsExternalFileModalVisible] =
+    useState(false);
+  const [externalFilePath, setExternalFilePath] = useState("");
 
   // Helper function to get all file paths from tree data
   const getAllFilePaths = (nodes: DataNode[]): string[] => {
@@ -73,25 +93,25 @@ const FileGroupPanel: React.FC = () => {
   // Fetch file groups
   const fetchFileGroups = async () => {
     try {
-      const response = await fetch('/api/file-groups');
-      if (!response.ok) throw new Error('Failed to fetch file groups');
+      const response = await fetch("/api/file-groups");
+      if (!response.ok) throw new Error("Failed to fetch file groups");
       const data = await response.json();
       setFileGroups(data.groups);
     } catch (error) {
-      message.error('Failed to load file groups');
+      message.error("Failed to load file groups");
     }
   };
 
   // Fetch file tree
   const fetchFileTree = async () => {
     try {
-      const response = await fetch('/api/files');
-      if (!response.ok) throw new Error('Failed to fetch file tree');
+      const response = await fetch("/api/files");
+      if (!response.ok) throw new Error("Failed to fetch file tree");
       const data = await response.json();
       setTreeData(data.tree);
       setFilteredTreeData(data.tree);
     } catch (error) {
-      message.error('Failed to load file tree');
+      message.error("Failed to load file tree");
     }
   };
 
@@ -103,20 +123,20 @@ const FileGroupPanel: React.FC = () => {
   // Create new group
   const handleCreateGroup = async () => {
     try {
-      const response = await fetch('/api/file-groups', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/file-groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newGroupName, description: newGroupDesc }),
       });
-      if (!response.ok) throw new Error('Failed to create group');
+      if (!response.ok) throw new Error("Failed to create group");
 
-      message.success(getMessage('fileGroup.createSuccess'));
+      message.success(getMessage("fileGroup.createSuccess"));
       setIsModalVisible(false);
-      setNewGroupName('');
-      setNewGroupDesc('');
+      setNewGroupName("");
+      setNewGroupDesc("");
       fetchFileGroups();
     } catch (error) {
-      message.error(getMessage('fileGroup.createFailed'));
+      message.error(getMessage("fileGroup.createFailed"));
     }
   };
 
@@ -124,15 +144,15 @@ const FileGroupPanel: React.FC = () => {
   const handleDeleteGroup = async (name: string) => {
     try {
       const response = await fetch(`/api/file-groups/${name}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      if (!response.ok) throw new Error('Failed to delete group');
+      if (!response.ok) throw new Error("Failed to delete group");
 
-      message.success(getMessage('fileGroup.deleteSuccess'));
+      message.success(getMessage("fileGroup.deleteSuccess"));
       fetchFileGroups();
       if (selectedGroup?.name === name) setSelectedGroup(null);
     } catch (error) {
-      message.error(getMessage('fileGroup.deleteFailed'));
+      message.error(getMessage("fileGroup.deleteFailed"));
     }
   };
 
@@ -141,28 +161,33 @@ const FileGroupPanel: React.FC = () => {
     if (!selectedGroup || checkedKeys.length === 0) return;
 
     try {
-      const response = await fetch(`/api/file-groups/${selectedGroup.name}/files`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ files: checkedKeys }),
-      });
-      if (!response.ok) throw new Error('Failed to add files');
+      const response = await fetch(
+        `/api/file-groups/${selectedGroup.name}/files`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ files: checkedKeys }),
+        }
+      );
+      if (!response.ok) throw new Error("Failed to add files");
 
-      message.success(getMessage('fileGroup.addFilesSuccess'));
+      message.success(getMessage("fileGroup.addFilesSuccess"));
       fetchFileGroups();
       setCheckedKeys([]);
       if (response.ok) {
         fetchFileGroups(); // Refresh all groups data
         if (selectedGroup) {
-          const updatedGroups = await (await fetch('/api/file-groups')).json();
-          const updatedGroup = updatedGroups.groups.find((g:FileGroup) => g.name === selectedGroup.name);
+          const updatedGroups = await (await fetch("/api/file-groups")).json();
+          const updatedGroup = updatedGroups.groups.find(
+            (g: FileGroup) => g.name === selectedGroup.name
+          );
           if (updatedGroup) {
             setSelectedGroup(updatedGroup);
           }
         }
       }
     } catch (error) {
-      message.error(getMessage('fileGroup.addFilesFailed'));
+      message.error(getMessage("fileGroup.addFilesFailed"));
     }
   };
 
@@ -170,23 +195,25 @@ const FileGroupPanel: React.FC = () => {
   const handleRemoveFile = async (groupName: string, filePath: string) => {
     try {
       const response = await fetch(`/api/file-groups/${groupName}/files`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ files: [filePath] }),
       });
-      if (!response.ok) throw new Error('Failed to remove file');
+      if (!response.ok) throw new Error("Failed to remove file");
 
-      message.success(getMessage('fileGroup.removeSuccess'));
+      message.success(getMessage("fileGroup.removeSuccess"));
       fetchFileGroups(); // Refresh all groups data
       if (selectedGroup) {
-        const updatedGroups = await (await fetch('/api/file-groups')).json();
-        const updatedGroup = updatedGroups.groups.find((g:FileGroup) => g.name === selectedGroup.name);
+        const updatedGroups = await (await fetch("/api/file-groups")).json();
+        const updatedGroup = updatedGroups.groups.find(
+          (g: FileGroup) => g.name === selectedGroup.name
+        );
         if (updatedGroup) {
           setSelectedGroup(updatedGroup);
         }
       }
     } catch (error) {
-      message.error(getMessage('fileGroup.removeFailed'));
+      message.error(getMessage("fileGroup.removeFailed"));
     }
   };
 
@@ -194,12 +221,12 @@ const FileGroupPanel: React.FC = () => {
   const handleFileSelect = async (path: string) => {
     try {
       const response = await fetch(`/api/file/${path}`);
-      if (!response.ok) throw new Error('Failed to fetch file content');
+      if (!response.ok) throw new Error("Failed to fetch file content");
       const data = await response.json();
       setSelectedFile(path);
       setFileContent(data.content);
     } catch (error) {
-      message.error(getMessage('fileGroup.loadFailed'));
+      message.error(getMessage("fileGroup.loadFailed"));
     }
   };
 
@@ -208,7 +235,9 @@ const FileGroupPanel: React.FC = () => {
       <div className="bg-gray-800 p-2 border-b border-gray-700">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <h2 className="text-white text-lg font-semibold">{getMessage('fileGroup.title')}</h2>
+            <h2 className="text-white text-lg font-semibold">
+              {getMessage("fileGroup.title")}
+            </h2>
             <div className="flex gap-2">
               <Button
                 type="primary"
@@ -237,30 +266,34 @@ const FileGroupPanel: React.FC = () => {
               dataSource={fileGroups}
               rowKey="name"
               rowClassName={(record) =>
-                record.name === selectedGroup?.name ? 'bg-blue-600' : 'bg-transparent'
+                record.name === selectedGroup?.name
+                  ? "bg-blue-600"
+                  : "bg-transparent"
               }
               onRow={(record) => ({
                 onClick: () => setSelectedGroup(record),
-                className: 'cursor-pointer hover:bg-gray-800'
+                className: "cursor-pointer hover:bg-gray-800",
               })}
               className="dark-mode-table"
               size="small"
               pagination={false}
               columns={[
                 {
-                  title: getMessage('common.group'),
-                  dataIndex: 'name',
-                  key: 'name',
+                  title: getMessage("common.group"),
+                  dataIndex: "name",
+                  key: "name",
                   render: (name, record) => (
                     <div className="flex justify-between items-center">
                       <span className="text-white font-medium">{name}</span>
-                      <span className="text-gray-500 text-xs">{record.files.length}</span>
+                      <span className="text-gray-500 text-xs">
+                        {record.files.length}
+                      </span>
                     </div>
-                  )
+                  ),
                 },
                 {
-                  title: getMessage('common.action'),
-                  key: 'action',
+                  title: getMessage("common.action"),
+                  key: "action",
                   width: 60,
                   render: (_, record) => (
                     <Button
@@ -272,43 +305,51 @@ const FileGroupPanel: React.FC = () => {
                         handleDeleteGroup(record.name);
                       }}
                     />
-                  )
-                }
+                  ),
+                },
               ]}
               locale={{
                 emptyText: (
                   <div className="py-4">
-                    <Empty 
-                      description={<span className="text-gray-400">{getMessage('fileGroup.noGroups')}</span>}
+                    <Empty
+                      description={
+                        <span className="text-gray-400">
+                          {getMessage("fileGroup.noGroups")}
+                        </span>
+                      }
                       image={Empty.PRESENTED_IMAGE_SIMPLE}
                       className="custom-empty-state"
                     />
                   </div>
-                )
+                ),
               }}
             />
           </div>
 
           {/* Group Details Panel */}
           <div className="w-80 bg-gray-900 border-r border-gray-700 overflow-y-auto p-4">
-            <FileGroupDetail 
+            <FileGroupDetail
               selectedGroup={selectedGroup}
               onFileSelect={handleFileSelect}
               onRemoveFile={handleRemoveFile}
               onUpdateDescription={async (groupName, description) => {
                 try {
-                  const response = await fetch(`/api/file-groups/${groupName}/files`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description }),
-                  });
-                  
-                  if (!response.ok) throw new Error('Failed to update description');
-                  
+                  const response = await fetch(
+                    `/api/file-groups/${groupName}/files`,
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ description }),
+                    }
+                  );
+
+                  if (!response.ok)
+                    throw new Error("Failed to update description");
+
                   if (selectedGroup) {
                     selectedGroup.description = description;
                   }
-                  
+
                   return Promise.resolve();
                 } catch (error) {
                   return Promise.reject(error);
@@ -339,23 +380,25 @@ const FileGroupPanel: React.FC = () => {
               <Editor
                 height="100%"
                 defaultLanguage="plaintext"
-                language={getLanguageByFileName(selectedFile || '')}
+                language={getLanguageByFileName(selectedFile || "")}
                 theme="vs-dark"
                 value={fileContent}
                 options={{
                   readOnly: true,
                   minimap: { enabled: true },
                   fontSize: 14,
-                  lineNumbers: 'on',
+                  lineNumbers: "on",
                   folding: true,
                   automaticLayout: true,
                 }}
               />
             ) : (
               <div className="h-full flex items-center justify-center">
-                <Empty 
+                <Empty
                   description={
-                    <span className="text-gray-400">{getMessage('fileGroup.selectFile')}</span>
+                    <span className="text-gray-400">
+                      {getMessage("fileGroup.selectFile")}
+                    </span>
                   }
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                   className="custom-empty-state"
@@ -368,23 +411,25 @@ const FileGroupPanel: React.FC = () => {
 
       {/* External File Modal */}
       <Modal
-        title={getMessage('fileGroup.addExternalFile')}
+        title={getMessage("fileGroup.addExternalFile")}
         open={isExternalFileModalVisible}
+        okText={getMessage("okButton")}
+        cancelText={getMessage("cancelButton")}
         className="dark-theme-modal"
         styles={{
           content: {
-            backgroundColor: '#1f2937',
-            padding: '20px',
+            backgroundColor: "#1f2937",
+            padding: "20px",
           },
           header: {
-            backgroundColor: '#1f2937',
-            borderBottom: '1px solid #374151',
+            backgroundColor: "#1f2937",
+            borderBottom: "1px solid #374151",
           },
           body: {
-            backgroundColor: '#1f2937',
+            backgroundColor: "#1f2937",
           },
           mask: {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
           },
         }}
         onOk={async () => {
@@ -393,7 +438,9 @@ const FileGroupPanel: React.FC = () => {
           const pathTrimmed = externalFilePath.trim();
 
           // 判断是否为http/https链接
-          const isHttpUrl = pathTrimmed.startsWith('http://') || pathTrimmed.startsWith('https://');
+          const isHttpUrl =
+            pathTrimmed.startsWith("http://") ||
+            pathTrimmed.startsWith("https://");
 
           try {
             let filesToAdd: string[] = [];
@@ -404,54 +451,62 @@ const FileGroupPanel: React.FC = () => {
             } else {
               // 调用 /api/list-files 获取文件列表
               const encodedPath = encodeURIComponent(pathTrimmed);
-              const response = await fetch(`/api/list-files?dir_path=${encodedPath}`);
-              if (!response.ok) throw new Error('Failed to list files');
+              const response = await fetch(
+                `/api/list-files?dir_path=${encodedPath}`
+              );
+              if (!response.ok) throw new Error("Failed to list files");
               const data = await response.json();
 
               if (Array.isArray(data)) {
                 filesToAdd = data.map((item: { path: string }) => item.path);
               } else {
-                message.error(getMessage('fileGroup.unexpectedResponse'));
+                message.error(getMessage("fileGroup.unexpectedResponse"));
                 return;
               }
             }
 
             // 调用添加接口
             await fetch(`/api/file-groups/${selectedGroup.name}/files`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ files: filesToAdd }),
             });
 
-            message.success(getMessage('fileGroup.externalFileSuccess'));
+            message.success(getMessage("fileGroup.externalFileSuccess"));
             setIsExternalFileModalVisible(false);
-            setExternalFilePath('');
+            setExternalFilePath("");
             fetchFileGroups();
 
             // Refresh selected group data
-            const updatedGroups = await (await fetch('/api/file-groups')).json();
-            const updatedGroup = updatedGroups.groups.find((g: FileGroup) => g.name === selectedGroup.name);
+            const updatedGroups = await (
+              await fetch("/api/file-groups")
+            ).json();
+            const updatedGroup = updatedGroups.groups.find(
+              (g: FileGroup) => g.name === selectedGroup.name
+            );
             if (updatedGroup) {
               setSelectedGroup(updatedGroup);
             }
           } catch (error) {
             console.error(error);
-            message.error(getMessage('fileGroup.externalFileFailed'));
+            message.error(getMessage("fileGroup.externalFileFailed"));
           }
         }}
         onCancel={() => {
           setIsExternalFileModalVisible(false);
-          setExternalFilePath('');
+          setExternalFilePath("");
         }}
         okButtonProps={{ disabled: !externalFilePath.trim() }}
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">{getMessage('fileGroup.externalFilePath')}</label>
+            <label className="block text-sm font-medium text-gray-200 mb-2">
+              {getMessage("fileGroup.externalFilePath")}
+            </label>
             <Input
               value={externalFilePath}
               onChange={(e) => setExternalFilePath(e.target.value)}
-              placeholder={getMessage('fileGroup.externalFilePathPlaceholder')}
+              placeholder={getMessage("fileGroup.externalFilePathPlaceholder")}
               className="bg-gray-800 border-gray-700 text-gray-200"
             />
           </div>
@@ -460,7 +515,9 @@ const FileGroupPanel: React.FC = () => {
 
       {/* New Group Modal */}
       <Modal
-        title={getMessage('fileGroup.createNewGroup')}
+        okText={getMessage("okButton")}
+        cancelText={getMessage("cancelButton")}
+        title={getMessage("fileGroup.createNewGroup")}
         open={isModalVisible}
         onOk={handleCreateGroup}
         onCancel={() => setIsModalVisible(false)}
@@ -468,37 +525,41 @@ const FileGroupPanel: React.FC = () => {
         className="dark-theme-modal"
         styles={{
           content: {
-            backgroundColor: '#1f2937',
-            padding: '20px',
+            backgroundColor: "#1f2937",
+            padding: "20px",
           },
           header: {
-            backgroundColor: '#1f2937',
-            borderBottom: '1px solid #374151',
+            backgroundColor: "#1f2937",
+            borderBottom: "1px solid #374151",
           },
           body: {
-            backgroundColor: '#1f2937',
+            backgroundColor: "#1f2937",
           },
           mask: {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
           },
         }}
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">{getMessage('fileGroup.groupName')}</label>
+            <label className="block text-sm font-medium text-gray-200 mb-2">
+              {getMessage("fileGroup.groupName")}
+            </label>
             <Input
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder={getMessage('fileGroup.groupNamePlaceholder')}
+              placeholder={getMessage("fileGroup.groupNamePlaceholder")}
               className="bg-gray-800 border-gray-700 text-gray-200"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-200 mb-2">{getMessage('fileGroup.description')}</label>
+            <label className="block text-sm font-medium text-gray-200 mb-2">
+              {getMessage("fileGroup.description")}
+            </label>
             <Input.TextArea
               value={newGroupDesc}
               onChange={(e) => setNewGroupDesc(e.target.value)}
-              placeholder={getMessage('fileGroup.descriptionPlaceholder')}
+              placeholder={getMessage("fileGroup.descriptionPlaceholder")}
               rows={4}
               className="bg-gray-800 border-gray-700 text-gray-200"
             />
@@ -509,35 +570,39 @@ const FileGroupPanel: React.FC = () => {
       {/* Auto Group Modal */}
       <Modal
         title="Auto Create Groups"
+        okText={getMessage("okButton")}
+        cancelText={getMessage("cancelButton")}
         open={isAutoGroupModalVisible}
         onOk={async () => {
           setIsAutoGroupLoading(true);
-            try {
-              const response = await fetch('/api/file-groups/auto', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                  file_size_limit: fileSizeLimit,
-                  group_num_limit: groupNumLimit,
-                  skip_diff: skipDiff 
-                }),
-              });
+          try {
+            const response = await fetch("/api/file-groups/auto", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                file_size_limit: fileSizeLimit,
+                group_num_limit: groupNumLimit,
+                skip_diff: skipDiff,
+              }),
+            });
 
-              if (!response.ok) throw new Error('Failed to auto create groups');
-              
-              const data = await response.json();
-              if (data.groups && Array.isArray(data.groups)) {
-                setGroupResults(data.groups.map((group: any) => ({
+            if (!response.ok) throw new Error("Failed to auto create groups");
+
+            const data = await response.json();
+            if (data.groups && Array.isArray(data.groups)) {
+              setGroupResults(
+                data.groups.map((group: any) => ({
                   ...group,
-                  selected: true
-                })));
-                setIsGroupResultsModalVisible(true);
-              }
+                  selected: true,
+                }))
+              );
+              setIsGroupResultsModalVisible(true);
+            }
 
-              await fetchFileGroups();
-              setIsAutoGroupModalVisible(false);
+            await fetchFileGroups();
+            setIsAutoGroupModalVisible(false);
           } catch (error) {
-            message.error('Failed to create groups automatically');
+            message.error("Failed to create groups automatically");
           } finally {
             setIsAutoGroupLoading(false);
           }
@@ -553,18 +618,18 @@ const FileGroupPanel: React.FC = () => {
         className="dark-theme-modal"
         styles={{
           content: {
-            backgroundColor: '#1f2937',
-            padding: '20px',
+            backgroundColor: "#1f2937",
+            padding: "20px",
           },
           header: {
-            backgroundColor: '#1f2937',
-            borderBottom: '1px solid #374151',
+            backgroundColor: "#1f2937",
+            borderBottom: "1px solid #374151",
           },
           body: {
-            backgroundColor: '#1f2937',
+            backgroundColor: "#1f2937",
           },
           mask: {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
           },
         }}
       >
@@ -576,7 +641,9 @@ const FileGroupPanel: React.FC = () => {
             <Input
               type="number"
               value={fileSizeLimit}
-              onChange={(e) => setFileSizeLimit(parseInt(e.target.value) || 100)}
+              onChange={(e) =>
+                setFileSizeLimit(parseInt(e.target.value) || 100)
+              }
               placeholder="Default: 100"
               className="dark-theme-input"
             />
@@ -607,27 +674,31 @@ const FileGroupPanel: React.FC = () => {
       {/* Group Results Selection Modal */}
       <Modal
         title="Select Groups to Create"
+        okText={getMessage("okButton")}
+        cancelText={getMessage("cancelButton")}
         open={isGroupResultsModalVisible}
         onOk={async () => {
-            try {
-              const selectedGroups = groupResults.filter(group => group.selected);
-              
-              for (const group of selectedGroups) {
-                await fetch('/api/file-groups', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    name: group.name,
-                    description: group.description
-                  }),
-                });
-              }
+          try {
+            const selectedGroups = groupResults.filter(
+              (group) => group.selected
+            );
 
-              await fetchFileGroups();
-              message.success('Selected groups created successfully');
-              setIsGroupResultsModalVisible(false);
+            for (const group of selectedGroups) {
+              await fetch("/api/file-groups", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: group.name,
+                  description: group.description,
+                }),
+              });
+            }
+
+            await fetchFileGroups();
+            message.success("Selected groups created successfully");
+            setIsGroupResultsModalVisible(false);
           } catch (error) {
-            message.error('Failed to create selected groups');
+            message.error("Failed to create selected groups");
           }
         }}
         onCancel={() => {
@@ -638,18 +709,18 @@ const FileGroupPanel: React.FC = () => {
         className="dark-theme-modal"
         styles={{
           content: {
-            backgroundColor: '#1f2937',
-            padding: '20px',
+            backgroundColor: "#1f2937",
+            padding: "20px",
           },
           header: {
-            backgroundColor: '#1f2937',
-            borderBottom: '1px solid #374151',
+            backgroundColor: "#1f2937",
+            borderBottom: "1px solid #374151",
           },
           body: {
-            backgroundColor: '#1f2937',
+            backgroundColor: "#1f2937",
           },
           mask: {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
           },
         }}
       >
@@ -666,8 +737,12 @@ const FileGroupPanel: React.FC = () => {
                   }}
                 />
                 <div className="flex-1">
-                  <h3 className="text-white font-medium text-lg">{group.name}</h3>
-                  <p className="text-gray-400 text-sm mt-1">{group.description}</p>
+                  <h3 className="text-white font-medium text-lg">
+                    {group.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm mt-1">
+                    {group.description}
+                  </p>
                 </div>
               </div>
             </div>
