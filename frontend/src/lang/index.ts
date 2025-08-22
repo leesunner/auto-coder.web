@@ -31,6 +31,8 @@ import { messageRendererMessages } from "./messageRenderer";
 import { thumbnailListMessages } from "./thumbnailList";
 import { monacoEditorMessages } from "./monacoEditor";
 import { fileGroupSelectMessages } from "./fileGroupSelect";
+import { todoPanelMessages } from "./todoPanel";
+import { todoEditModalMessages } from "./todoEditModal";
 // 导入新的组件专用多语言配置
 import { mainContentMessages as mainContentComponentMessages } from "../components/MainContent/MainContent.lang";
 import { autoModeMessages as autoModeComponentMessages } from "../components/AutoMode/AutoMode.lang";
@@ -73,6 +75,8 @@ export const messages: { [key: string]: Message } = {
   ...thumbnailListMessages,
   ...monacoEditorMessages,
   ...fileGroupSelectMessages,
+  ...todoPanelMessages,
+  ...todoEditModalMessages,
   // 新增的组件专用多语言配置
   ...mainContentComponentMessages,
   ...autoModeComponentMessages,

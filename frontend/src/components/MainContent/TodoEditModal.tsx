@@ -154,7 +154,7 @@ const TodoEditModal: React.FC<TodoEditModalProps> = ({
 
     // 检查是否已有任务正在拆解
     if (splittingTodoId) {
-      AntMessage.error('已有任务正在拆解中，请等待当前拆解完成');
+      AntMessage.error(getMessage('taskSplittingInProgress'));
       return;
     }
 
@@ -162,56 +162,11 @@ const TodoEditModal: React.FC<TodoEditModalProps> = ({
     
     try {            
       // 1. 构建AI提示
-      const prompt = `请帮我将以下任务需求进行细化拆解:
-标题: ${editedTodo.title}
-描述: ${editedTodo.description}
-优先级: ${editedTodo.priority || 'P2'}
-
-请按照以下步骤进行拆解:
-1. 分析需求的核心目标和关键功能点
-2. 将大任务拆分成多个小任务，每个小任务应该足够独立且能够明确衡量完成情况
-3. 为每个小任务标明以下内容:
-   - 任务标题: 简洁清晰
-   - 任务描述: 详细说明需要完成的内容
-   - 技术参考: 可能需要参考的文件、API或技术文档
-   - 实现步骤: 逐步列出完成该任务的具体操作
-   - 验收标准: 如何判断该任务已完成
-   - 优先级: 继承原任务优先级或适当调整
-   - 预估工作量: 用小时或点数表示
-4. 特别注意： 任务的执行者只会新建，修改源码文件两个能力，你的任务必须要能够让执行者能够完成。
-5. 以JSON格式文本返回结果，格式如下:
-
-\`\`\`json
-{
-  "original_task": {
-    "title": "原任务标题",
-    "description": "原任务描述"
-  },
-  "analysis": "对整体需求的分析",
-  "tasks": [
-    {
-      "title": "子任务1标题",
-      "description": "子任务1详细描述",
-      "references": ["可能需要参考的文件或文档"],
-      "steps": ["步骤1", "步骤2"...],
-      "acceptance_criteria": ["验收标准1", "验收标准2"...],
-      "priority": "优先级",
-      "estimate": "预估工作量"
-    },
-    // 更多子任务...
-  ],
-  "tasks_count": 3, // 子任务总数
-  "dependencies": [ // 可选，标明任务间依赖关系
-    {
-      "task": "子任务标题",
-      "depends_on": ["依赖的子任务标题"]
-    }
-  ]
-}
-\`\`\`
-
-特别注意，你最后调用 response_user 函数的时候，要给函数传递的是 json 文本数据，符合上面的格式要求。
-`;
+      const prompt = getMessage('taskSplitPromptTemplate', {
+        title: editedTodo.title,
+        description: editedTodo.description,
+        priority: editedTodo.priority || 'P2'
+      });
 
       const command = `split_task ${JSON.stringify(prompt)}`;
       
@@ -267,7 +222,7 @@ const TodoEditModal: React.FC<TodoEditModalProps> = ({
                   ...todo,
                   tasks: tasksForBackend,
                   status: 'developing',
-                  tags: [...(todo.tags || [])].filter(tag => tag !== '正在拆解').concat(['已拆解']),
+                  tags: [...(todo.tags || [])].filter(tag => tag !== getMessage('splittingTag')).concat([getMessage('splitCompletedTag')]),
                   analysis: splitResult.analysis || null,
                   dependencies: splitResult.dependencies || null
                 };
@@ -297,7 +252,7 @@ const TodoEditModal: React.FC<TodoEditModalProps> = ({
                   // 通知父组件更新任务（移除"正在拆解"标签，添加"已拆解"标签）
                   const updatedTodoWithNewTags = {
                     ...todo,
-                    tags: [...(todo.tags || [])].filter(tag => tag !== "正在拆解").concat(["已拆解"]),
+                    tags: [...(todo.tags || [])].filter(tag => tag !== getMessage('splittingTag')).concat([getMessage('splitCompletedTag')]),
                     analysis: splitResult.analysis || null,
                     dependencies: splitResult.dependencies || null,
                     tasks: tasksForBackend

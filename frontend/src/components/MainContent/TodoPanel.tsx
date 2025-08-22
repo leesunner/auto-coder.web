@@ -151,7 +151,7 @@ const TodoPanel: React.FC = () => {
     if (draggedTodo && 
         (source.droppableId === 'testing' || source.droppableId === 'done') && 
         (destination.droppableId === 'pending' || destination.droppableId === 'developing')) {
-      setError('测试中或已完成的任务不能移动到待办或开发中状态');
+      setError(getMessage('cannotMoveCompletedTaskBack'));
       return;
     }
 
@@ -165,7 +165,7 @@ const TodoPanel: React.FC = () => {
       // 检查 tasks 字段是否为空
       if (!draggedTodo.tasks || draggedTodo.tasks.length === 0) {
         // 如果 tasks 为空，取消拖拽操作
-        setError(getMessage('cannotExecuteEmptyTasks') || '无法执行空任务，请先拆解任务');
+        setError(getMessage('cannotExecuteEmptyTasks'));
         return;
       }
     }
@@ -662,7 +662,7 @@ const TodoPanel: React.FC = () => {
                 setShowTaskStatus(showTaskStatus === todo.id ? null : todo.id);
               }}
               className="text-gray-400 hover:text-blue-400 p-0 flex items-center justify-center"
-              title="查看任务状态"
+              title={getMessage('viewTaskStatus')}
             />
           )}
           {(todo.tasks && todo.tasks.length > 0) && (
@@ -675,7 +675,7 @@ const TodoPanel: React.FC = () => {
                 handleViewSplitResult(e, todo);
               }}
               className={`text-gray-400 hover:text-blue-400 p-0 flex items-center justify-center ${isShowingSplitResult ? 'bg-blue-900/30' : ''}`}
-              title="查看任务拆解结果"
+              title={getMessage('viewTaskSplitResult')}
             />
           )}
           <div className="todo-tags flex gap-1">
@@ -707,9 +707,9 @@ const TodoPanel: React.FC = () => {
           {/* 在pending、testing和done状态下显示删除按钮 */}
           {(todo.status === 'pending' || todo.status === 'testing' || todo.status === 'done') && (
             <Popconfirm
-              title={getMessage('confirmDeleteTask') || "确定要删除这个任务吗?"}
-              okText={getMessage('yes') || "是"}
-              cancelText={getMessage('no') || "否"}
+              title={getMessage('confirmDeleteTask')}
+              okText={getMessage('yes')}
+              cancelText={getMessage('no')}
               onConfirm={(e) => {
                 e?.stopPropagation();
                 handleDeleteTodo(todo.id);
@@ -723,7 +723,7 @@ const TodoPanel: React.FC = () => {
                 icon={<DeleteOutlined />}
                 onClick={(e) => e.stopPropagation()}
                 className="text-gray-400 hover:text-red-500 p-0 flex items-center justify-center"
-                title={getMessage('deleteTask') || "删除任务"}
+                title={getMessage('deleteTask')}
               />
             </Popconfirm>
           )}
@@ -738,7 +738,7 @@ const TodoPanel: React.FC = () => {
                 setShowTaskStatus(showTaskStatus === todo.id ? null : todo.id);
               }}
               className="text-gray-400 hover:text-blue-400 p-0 flex items-center justify-center"
-              title="查看任务状态"
+              title={getMessage('viewTaskStatus')}
             />
           )}
           {(todo.tasks && todo.tasks.length > 0) && (
@@ -887,7 +887,7 @@ const TodoPanel: React.FC = () => {
                                 {todo.status === 'pending' && splittingTodoId && todo.id === splittingTodoId && (
                                   <div className="todo-splitting-status flex items-center gap-1 text-blue-400 text-xs mt-2">
                                     <SyncOutlined spin />
-                                    <span>正在后台运行拆解任务...</span>
+                                    <span>{getMessage('taskSplittingInProgress')}</span>
                                   </div>
                                 )}
                               </div>
