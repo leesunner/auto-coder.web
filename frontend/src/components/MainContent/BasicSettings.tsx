@@ -300,7 +300,7 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({ availableKeys, onSettingC
               ]}
             />
           </div>
-          <p className="model-config-description">{getMessage('enableAgenticAutoApproveDescription') || '自动同意执行shell命令'}</p>
+          <p className="model-config-description">{getMessage('enableAgenticAutoApproveDescription')}</p>
         </div>
 
         {/* Enable Agentic Dangerous Command Check - New (only show when auto approve is enabled) */}

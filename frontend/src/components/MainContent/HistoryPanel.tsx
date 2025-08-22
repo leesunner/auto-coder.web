@@ -188,7 +188,7 @@ const HistoryPanel: React.FC = () => {
                 setRevertSuccess(null);
             }, 5000);
         } catch (err) {
-            setRevertError(err instanceof Error ? err.message : '撤销提交失败');
+            setRevertError(err instanceof Error ? err.message : getMessage('revertCommitFailed'));
             console.error('Failed to revert commit:', err);
         } finally {
             setRevertLoading(false);

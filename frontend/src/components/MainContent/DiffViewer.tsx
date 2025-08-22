@@ -5,6 +5,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Editor, loader } from '@monaco-editor/react';
 import axios from 'axios';
+import { getMessage } from '../../lang';
 
 // 防止Monaco加载多次
 loader.config({
@@ -66,11 +67,11 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                     file_changes: diffResponse.data.file_changes
                 });
             } else {
-                message.error(diffResponse.data.message || '获取diff失败');
+                message.error(diffResponse.data.message || getMessage('getDiffFailed'));
             }
         } catch (error) {
             console.error('Error fetching diff:', error);
-            message.error('获取diff失败');
+            message.error(getMessage('getDiffFailed'));
         } finally {
             setLoading(false);
         }
@@ -95,11 +96,11 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
             if (response.data.success) {
                 setFileDiff(response.data.file_diff);
             } else {
-                message.error(response.data.message || '获取文件差异失败');
+                message.error(response.data.message || getMessage('getFileDiffFailed'));
             }
         } catch (error) {
             console.error('Error fetching file diff:', error);
-            message.error('获取文件差异失败');
+            message.error(getMessage('getFileDiffFailed'));
         } finally {
             setFileDiffLoading(false);
         }
@@ -188,7 +189,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                     e.stopPropagation();
                     setMaximizedView(isMaximized ? null : viewType);
                 }}
-                title={isMaximized ? "恢复正常视图" : "最大化视图"}
+                title={isMaximized ? getMessage('restoreNormalView') : getMessage('maximizeView')}
             >
                 {isMaximized ? (
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +234,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
             return (
                 <div ref={editorContainerRef} className="bg-gray-900 rounded-lg border border-gray-700" style={{ height: '500px', width: '100%', overflow: 'hidden' }}>
                     <div className="py-1 px-3 bg-gray-800 border-b border-gray-700 text-xs font-medium text-white flex justify-between items-center">
-                        <span>差异视图</span>
+                        <span>{getMessage('diffView')}</span>
                         <MaximizeButton viewType="diff" />
                     </div>
                     <Editor
@@ -258,7 +259,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                 {(maximizedView === null || maximizedView === 'before') && (
                     <div className={`bg-gray-900 rounded-lg border border-gray-700 ${maximizedView === 'before' ? 'col-span-2' : ''}`} style={{ overflow: 'hidden' }}>
                         <div className="py-1 px-3 bg-gray-800 border-b border-gray-700 text-xs font-medium text-white flex justify-between items-center">
-                            <span>修改前 ({fileDiff.file_status === 'added' ? '新文件' : selectedFile})</span>
+                            <span>{getMessage('beforeModification')} ({fileDiff.file_status === 'added' ? getMessage('newFile') : selectedFile})</span>
                             <MaximizeButton viewType="before" />
                         </div>
                         <Editor
@@ -270,7 +271,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                             theme="vs-dark"
                             onMount={handleBeforeEditorDidMount}
                             options={editorOptions}
-                            loading={<div className="flex items-center justify-center h-full text-white">加载中...</div>}
+                            loading={<div className="flex items-center justify-center h-full text-white">{getMessage('loading')}</div>}
                         />
                     </div>
                 )}
@@ -279,7 +280,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                 {(maximizedView === null || maximizedView === 'after') && (
                     <div className={`bg-gray-900 rounded-lg border border-gray-700 ${maximizedView === 'after' ? 'col-span-2' : ''}`} style={{ overflow: 'hidden' }}>
                         <div className="py-1 px-3 bg-gray-800 border-b border-gray-700 text-xs font-medium text-white flex justify-between items-center">
-                            <span>修改后 ({fileDiff.file_status === 'deleted' ? '文件已删除' : selectedFile})</span>
+                            <span>{getMessage('afterModification')} ({fileDiff.file_status === 'deleted' ? getMessage('fileDeleted') : selectedFile})</span>
                             <MaximizeButton viewType="after" />
                         </div>
                         <Editor
@@ -291,7 +292,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                             theme="vs-dark"
                             onMount={handleAfterEditorDidMount}
                             options={editorOptions}
-                            loading={<div className="flex items-center justify-center h-full text-white">加载中...</div>}
+                            loading={<div className="flex items-center justify-center h-full text-white">{getMessage('loading')}</div>}
                         />
                     </div>
                 )}
@@ -326,14 +327,14 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
     return (
         <div className="flex flex-col h-full bg-[#111827] overflow-hidden">
             <div className="flex justify-between items-center p-4 bg-[#1F2937] border-b border-[#374151]">
-                <h2 className="text-lg font-semibold text-white">代码变更详情</h2>
+                <h2 className="text-lg font-semibold text-white">{getMessage('codeChangesDetail')}</h2>
                 <Space>
                     {onClose && (
                         <button
                             className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm"
                             onClick={onClose}
                         >
-                            关闭
+                            {getMessage('close')}
                         </button>
                     )}
                 </Space>
@@ -353,7 +354,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                     <TabPane 
                         tab={
                             <div className={`py-2 px-4 ${activeTabKey === '1' ? 'text-white font-medium' : 'text-gray-400'}`}>
-                                文件列表
+                                {getMessage('fileList')}
                             </div>
                         } 
                         key="1"
@@ -393,7 +394,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                                     ))
                                 ) : (
                                     <div className="text-center text-white py-8">
-                                        <p>没有文件变更信息</p>
+                                        <p>{getMessage('noFileChanges')}</p>
                                     </div>
                                 )}
                             </div>
@@ -419,7 +420,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                                                 color: diffViewMode === 'split' ? '#fff' : '#1f2937', 
                                             }}
                                         >
-                                            分割视图
+                                            {getMessage('splitView')}
                                         </Radio.Button>
                                         <Radio.Button 
                                             value="unified" 
@@ -427,7 +428,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                                                 color: diffViewMode === 'unified' ? '#fff' : '#1f2937', 
                                             }}
                                         >
-                                            统一视图
+                                            {getMessage('unifiedView')}
                                         </Radio.Button>
                                     </Radio.Group>
                                 </div>
@@ -440,7 +441,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ commitId, onClose }) => {
                     <TabPane 
                         tab={
                             <div className={`py-2 px-4 ${activeTabKey === '2' ? 'text-white font-medium' : 'text-gray-400'}`}>
-                                原始差异
+                                {getMessage('originalDiff')}
                             </div>
                         } 
                         key="2"

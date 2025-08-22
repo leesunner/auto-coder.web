@@ -683,6 +683,244 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Reset",
     zh: "重置",
   },
+  
+  // EditablePreviewPanel 相关消息
+  editingEnabled: {
+    en: "Editing enabled",
+    zh: "编辑模式已启用",
+  },
+  editingDisabled: {
+    en: "Editing disabled",
+    zh: "编辑模式已禁用",
+  },
+  showCode: {
+    en: "Show code",
+    zh: "显示代码",
+  },
+  hideCode: {
+    en: "Hide code",
+    zh: "隐藏代码",
+  },
+  reloadPreview: {
+    en: "Reload preview",
+    zh: "重新加载预览",
+  },
+  disableEditing: {
+    en: "Disable editing",
+    zh: "禁用编辑",
+  },
+  enableEditing: {
+    en: "Enable editing",
+    zh: "启用编辑",
+  },
+  saveEditedHTML: {
+    en: "Save edited HTML",
+    zh: "保存编辑的HTML",
+  },
+  loadingPreview: {
+    en: "Loading preview...",
+    zh: "加载预览中...",
+  },
+  enterUrlToStartPreview: {
+    en: "Enter URL to start preview",
+    zh: "输入URL开始预览",
+  },
+  
+  // ModelChatDialog 相关消息
+  modelDialogTestTitle: {
+    en: "Model Test Dialog",
+    zh: "模型测试对话",
+  },
+  noDialogMessages: {
+    en: "No messages yet",
+    zh: "暂无消息",
+  },
+  dialogInputPlaceholder: {
+    en: "Enter your message...",
+    zh: "请输入内容...",
+  },
+  send: {
+    en: "Send",
+    zh: "发送",
+  },
+  
+  // AutoExecuteNotificationModal 相关消息
+  taskExecutingMessage: {
+    en: "Task is executing...",
+    zh: "任务执行中...",
+  },
+  taskConfirmExecuteMessage: {
+    en: "Confirm to execute this task?",
+    zh: "确认执行此任务？",
+  },
+  taskAutoExecuteMessage: {
+    en: "Task will be executed automatically",
+    zh: "任务将自动执行",
+  },
+  taskConfirmExecuteDescription: {
+    en: "Please confirm whether to execute this task",
+    zh: "请确认是否执行此任务",
+  },
+  taskAutoExecuteDescription: {
+    en: "This task will be executed automatically",
+    zh: "此任务将自动执行",
+  },
+  taskAutoExecuteTitle: {
+    en: "Task Auto Execute",
+    zh: "任务自动执行",
+  },
+  
+  // FileDirectorySelector 相关消息
+  collapse: {
+    en: "Collapse",
+    zh: "收起",
+  },
+  expand: {
+    en: "Expand",
+    zh: "展开",
+  },
+  selectAllFilesInside: {
+    en: "Select all files inside",
+    zh: "选择内部所有文件",
+  },
+  deselect: {
+    en: "Deselect",
+    zh: "取消选择",
+  },
+  select: {
+    en: "Select",
+    zh: "选择",
+  },
+  previewFile: {
+    en: "Preview file",
+    zh: "预览文件",
+  },
+  copyPath: {
+    en: "Copy path",
+    zh: "复制路径",
+  },
+  addTo: {
+    en: "Add to",
+    zh: "添加到",
+  },
+  pathCopiedToClipboard: {
+    en: "Path copied to clipboard",
+    zh: "路径已复制到剪贴板",
+  },
+  failedToCopyPath: {
+    en: "Failed to copy path",
+    zh: "复制路径失败",
+  },
+  searchFiles: {
+    en: "Search files",
+    zh: "搜索文件",
+  },
+  refreshDirectoryTree: {
+    en: "Refresh directory tree",
+    zh: "刷新目录树",
+  },
+  addSelected: {
+    en: "Add selected",
+    zh: "添加选中",
+  },
+  selectAllCurrentVisible: {
+    en: "Select all currently visible",
+    zh: "选择当前可见的所有",
+  },
+  invertCurrentVisible: {
+    en: "Invert current visible",
+    zh: "反选当前可见",
+  },
+  filesSelected: {
+    en: "files selected",
+    zh: "个文件已选择",
+  },
+  filesInverted: {
+    en: "files inverted",
+    zh: "个文件已反选",
+  },
+  filterByFileType: {
+    en: "Filter by file type",
+    zh: "按文件类型筛选",
+  },
+  fileAddedToSelection: {
+    en: "File added to selection",
+    zh: "文件已添加到选择",
+  },
+  
+  // DiffViewer 相关消息
+  codeChangesDetail: {
+    en: "Code Changes Detail",
+    zh: "代码变更详情",
+  },
+  fileList: {
+    en: "File List",
+    zh: "文件列表",
+  },
+  originalDiff: {
+    en: "Original Diff",
+    zh: "原始差异",
+  },
+  diffView: {
+    en: "Diff View",
+    zh: "差异视图",
+  },
+  beforeModification: {
+    en: "Before Modification",
+    zh: "修改前",
+  },
+  afterModification: {
+    en: "After Modification",
+    zh: "修改后",
+  },
+  newFile: {
+    en: "New File",
+    zh: "新文件",
+  },
+  fileDeleted: {
+    en: "File Deleted",
+    zh: "文件已删除",
+  },
+  restoreNormalView: {
+    en: "Restore Normal View",
+    zh: "恢复正常视图",
+  },
+  maximizeView: {
+    en: "Maximize View",
+    zh: "最大化视图",
+  },
+  splitView: {
+    en: "Split View",
+    zh: "分割视图",
+  },
+  unifiedView: {
+    en: "Unified View",
+    zh: "统一视图",
+  },
+  noFileChanges: {
+    en: "No file changes information",
+    zh: "没有文件变更信息",
+  },
+  getDiffFailed: {
+    en: "Failed to get diff",
+    zh: "获取diff失败",
+  },
+  getFileDiffFailed: {
+    en: "Failed to get file diff",
+    zh: "获取文件差异失败",
+  },
+  
+  // HistoryPanel 相关消息
+  revertCommitFailed: {
+    en: "Failed to revert commit",
+    zh: "撤销提交失败",
+  },
+  
+  // BasicSettings 相关消息
+  enableAgenticAutoApproveDescription: {
+    en: "Automatically approve shell command execution",
+    zh: "自动同意执行shell命令",
+  },
 };
 
 export const getMessage = getMessageFromLang;
