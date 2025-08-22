@@ -662,7 +662,7 @@ const FileListSelector: React.FC<FileListSelectorProps> = ({
           <PlusOutlined />
         </button>
         {!hasSelectedFiles && (
-          <span className="text-sm text-gray-400 ml-1">选择文件</span>
+          <span className="text-sm text-gray-400 ml-1">{getMessage("selectFiles")}</span>
         )}
 
         {/* 清空按钮 */}

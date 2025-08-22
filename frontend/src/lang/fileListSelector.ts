@@ -80,4 +80,10 @@ export const fileListSelectorMessages = {
     en: "Error updating file selection",
     zh: "更新文件选择失败",
   },
+
+  // 新增：占位符文本
+  selectFiles: {
+    en: "Select files",
+    zh: "选择文件",
+  },
 };
