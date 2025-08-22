@@ -1,4 +1,4 @@
-import { getMessage as getMessageFromLang } from '../../lang';
+export { getMessage } from "../../lang";
 
 interface Message {
   en: string;
@@ -51,7 +51,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Disable",
     zh: "禁用",
   },
-  
+
   // 基础设置
   basicSettings: {
     en: "Basic Settings",
@@ -61,7 +61,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Advanced Settings",
     zh: "高级设置",
   },
-  
+
   // 模型配置
   modelConfiguration: {
     en: "Model Configuration",
@@ -123,7 +123,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Is Reasoning Model",
     zh: "推理模型",
   },
-  
+
   // 供应商管理
   providerManagement: {
     en: "Provider Management",
@@ -145,7 +145,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Provider Name",
     zh: "供应商名称",
   },
-  
+
   // 编译器配置
   compilerConfiguration: {
     en: "Compiler Configuration",
@@ -179,7 +179,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Initialize Default",
     zh: "初始化默认",
   },
-  
+
   // RAG配置
   ragConfiguration: {
     en: "RAG Configuration",
@@ -209,7 +209,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "RAG API Key",
     zh: "RAG API密钥",
   },
-  
+
   // MCP服务配置
   mcpServerConfiguration: {
     en: "MCP Server Configuration",
@@ -243,7 +243,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Uninstall",
     zh: "卸载",
   },
-  
+
   // 记忆系统
   memorySystem: {
     en: "Memory System",
@@ -301,7 +301,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Failed to load memory system tasks",
     zh: "加载记忆系统任务失败",
   },
-  
+
   // 任务管理
   taskManagement: {
     en: "Task Management",
@@ -355,7 +355,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Owner",
     zh: "负责人",
   },
-  
+
   // 优先级
   priorityP0: {
     en: "P0 - Critical",
@@ -373,7 +373,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "P3 - Low",
     zh: "P3 - 低",
   },
-  
+
   // 状态
   statusPending: {
     en: "Pending",
@@ -391,7 +391,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Done",
     zh: "已完成",
   },
-  
+
   // 文件组相关
   fileGroups: {
     en: "File Groups",
@@ -489,7 +489,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Unexpected response format",
     zh: "意外的响应格式",
   },
-  
+
   // 设置相关
   settingsPanel: {
     en: "Settings Panel",
@@ -515,7 +515,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Chinese",
     zh: "中文",
   },
-  
+
   // 预览相关
   preview: {
     en: "Preview",
@@ -533,7 +533,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Editable Preview",
     zh: "可编辑预览",
   },
-  
+
   // 历史相关
   history: {
     en: "History",
@@ -543,7 +543,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "History Panel",
     zh: "历史面板",
   },
-  
+
   // 错误和成功消息
   operationSuccess: {
     en: "Operation completed successfully",
@@ -577,7 +577,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Connection error",
     zh: "连接错误",
   },
-  
+
   // 确认对话框
   deleteConfirmation: {
     en: "Are you sure you want to delete this item?",
@@ -587,7 +587,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Confirm Delete",
     zh: "确认删除",
   },
-  
+
   // 表单验证
   fieldRequired: {
     en: "This field is required",
@@ -597,7 +597,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Invalid input",
     zh: "输入无效",
   },
-  
+
   // 其他通用消息
   actions: {
     en: "Actions",
@@ -683,7 +683,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Reset",
     zh: "重置",
   },
-  
+
   // EditablePreviewPanel 相关消息
   editingEnabled: {
     en: "Editing enabled",
@@ -725,7 +725,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Enter URL to start preview",
     zh: "输入URL开始预览",
   },
-  
+
   // ModelChatDialog 相关消息
   modelDialogTestTitle: {
     en: "Model Test Dialog",
@@ -743,7 +743,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Send",
     zh: "发送",
   },
-  
+
   // AutoExecuteNotificationModal 相关消息
   taskExecutingMessage: {
     en: "Task is executing...",
@@ -769,7 +769,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Task Auto Execute",
     zh: "任务自动执行",
   },
-  
+
   // FileDirectorySelector 相关消息
   collapse: {
     en: "Collapse",
@@ -847,7 +847,7 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "File added to selection",
     zh: "文件已添加到选择",
   },
-  
+
   // DiffViewer 相关消息
   codeChangesDetail: {
     en: "Code Changes Detail",
@@ -909,18 +909,16 @@ export const mainContentMessages: { [key: string]: Message } = {
     en: "Failed to get file diff",
     zh: "获取文件差异失败",
   },
-  
+
   // HistoryPanel 相关消息
   revertCommitFailed: {
     en: "Failed to revert commit",
     zh: "撤销提交失败",
   },
-  
+
   // BasicSettings 相关消息
   enableAgenticAutoApproveDescription: {
     en: "Automatically approve shell command execution",
     zh: "自动同意执行shell命令",
   },
 };
-
-export const getMessage = getMessageFromLang;

@@ -1,5 +1,4 @@
-
-import { getMessage as getMessageFromLang } from '../../lang';
+export { getMessage } from "../../lang";
 
 interface Message {
   en: string;
@@ -24,7 +23,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Try examples",
     zh: "尝试示例",
   },
-  
+
   // 项目相关
   projectName: {
     en: "Project",
@@ -34,7 +33,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "No Project Selected",
     zh: "未选择项目",
   },
-  
+
   // 导航和界面
   navigationMenu: {
     en: "Navigation Menu",
@@ -68,7 +67,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Close",
     zh: "关闭",
   },
-  
+
   // 消息类型和状态
   thinking: {
     en: "Thinking",
@@ -82,7 +81,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Thinking Complete",
     zh: "思考完成",
   },
-  
+
   // 代码生成相关
   codeGenerateStart: {
     en: "Starting code generation...",
@@ -116,7 +115,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Ranked Code",
     zh: "排序后的代码",
   },
-  
+
   // 编译和检查相关
   compileResults: {
     en: "Compile Results",
@@ -134,13 +133,13 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Lint Results",
     zh: "代码检查结果",
   },
-  
+
   // 合并相关
   unmergedBlocks: {
     en: "Merge Check",
     zh: "合并检查",
   },
-  
+
   // RAG搜索
   ragSearchStart: {
     en: "Starting RAG search...",
@@ -150,7 +149,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "RAG search complete",
     zh: "RAG搜索完成",
   },
-  
+
   // 索引构建
   indexBuildStart: {
     en: "Build incremental index...",
@@ -172,7 +171,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Selected file: {{file}}",
     zh: "已选择文件: {{file}}",
   },
-  
+
   // 任务完成状态
   completion: {
     en: "Completion",
@@ -182,7 +181,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Job Completed",
     zh: "任务完成",
   },
-  
+
   // 命令相关
   commandPreparation: {
     en: "Tool Preparation",
@@ -204,7 +203,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "After thinking, we will call the following command:",
     zh: "经过思考，我们会调用以下命令：",
   },
-  
+
   // 上下文相关
   contextUsed: {
     en: "Context Used",
@@ -230,7 +229,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Relevant Context",
     zh: "相关上下文",
   },
-  
+
   // 用户交互
   user: {
     en: "User",
@@ -240,7 +239,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Summary",
     zh: "总结",
   },
-  
+
   // Agentic Edit相关
   agenticEditToolResultReplaceInFileTool: {
     en: "AitoCoder updated the file",
@@ -282,7 +281,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "AitoCoder wants to search for files matching this pattern",
     zh: "AitoCoder 想要搜索与此模式匹配的文件",
   },
-  
+
   // Todo相关
   agenticTodoWriteToolTitle: {
     en: "AitoCoder Todo",
@@ -384,7 +383,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Task",
     zh: "任务",
   },
-  
+
   // 用户输入对话框
   askUserDialogTitle: {
     en: "User Input Required",
@@ -402,7 +401,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Send",
     zh: "发送",
   },
-  
+
   // 输入面板
   inputPanelPlaceholder: {
     en: "Ask anything about your code...",
@@ -428,7 +427,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Collapse Editor",
     zh: "收起编辑器",
   },
-  
+
   // 提交列表面板
   commitListTitle: {
     en: "Commit History",
@@ -478,7 +477,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Files Changed",
     zh: "文件变更",
   },
-  
+
   // 当前变化面板
   currentChangeTitle: {
     en: "Current Changes",
@@ -516,7 +515,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Failed to revert changes",
     zh: "撤销变化失败",
   },
-  
+
   // 文件差异查看
   fileDiffBefore: {
     en: "Before",
@@ -550,7 +549,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Minimize",
     zh: "最小化",
   },
-  
+
   // 消息列表
   messageListEmpty: {
     en: "No messages yet",
@@ -560,7 +559,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Loading messages...",
     zh: "加载消息中...",
   },
-  
+
   // 其他通用消息
   markdown: {
     en: "Markdown",
@@ -582,7 +581,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Ask Again from here",
     zh: "重新提问",
   },
-  
+
   // 面板标题
   codeViewer: {
     en: "Code Editor",
@@ -604,7 +603,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Todos",
     zh: "待办事项",
   },
-  
+
   // 工具面板
   output: {
     en: "Output",
@@ -614,7 +613,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Terminal",
     zh: "终端",
   },
-  
+
   // 弹窗和对话框
   contentPreview: {
     en: "Content Preview",
@@ -624,7 +623,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Loading History...",
     zh: "加载历史记录中...",
   },
-  
+
   // Tooltip 提示
   previewChangesStaticTooltip: {
     en: "Preview code changes in read-only mode",
@@ -634,7 +633,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Preview and edit code changes",
     zh: "预览并编辑代码变更",
   },
-  
+
   // 加载和错误状态
   loading: {
     en: "Loading...",
@@ -648,7 +647,7 @@ export const autoModeMessages: { [key: string]: Message } = {
     en: "Retry",
     zh: "重试",
   },
-  
+
   // 操作按钮
   confirm: {
     en: "Confirm",
@@ -683,6 +682,3 @@ export const autoModeMessages: { [key: string]: Message } = {
     zh: "刷新",
   },
 };
-
-export const getMessage = getMessageFromLang;
-
