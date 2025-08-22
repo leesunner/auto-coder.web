@@ -31,6 +31,9 @@ import { messageRendererMessages } from "./messageRenderer";
 import { thumbnailListMessages } from "./thumbnailList";
 import { monacoEditorMessages } from "./monacoEditor";
 import { fileGroupSelectMessages } from "./fileGroupSelect";
+// 导入新的组件专用多语言配置
+import { mainContentMessages as mainContentComponentMessages } from "../components/MainContent/MainContent.lang";
+import { autoModeMessages as autoModeComponentMessages } from "../components/AutoMode/AutoMode.lang";
 
 interface Message {
   en: string;
@@ -70,6 +73,9 @@ export const messages: { [key: string]: Message } = {
   ...thumbnailListMessages,
   ...monacoEditorMessages,
   ...fileGroupSelectMessages,
+  // 新增的组件专用多语言配置
+  ...mainContentComponentMessages,
+  ...autoModeComponentMessages,
 
   // 补充缺失的消息
   noProjectSelected: {
