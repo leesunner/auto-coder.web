@@ -1044,6 +1044,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       }
       // 拼接图片数据
       let { text, fileList } = data;
+      text = text?.trim() || editorRef.current?.getValue()?.trim();
+
       if (fileList && fileList.length) {
         text = `${text || ""} \n ${fileList
           .map((file) => `<_image_>${file.path}</_image_>`)
@@ -1052,7 +1054,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
       console.log("ChatPanel: Received message from eventBus:", text);
       // 调用发送消息函数
-      handleSendMessage(data.text);
+      handleSendMessage(text);
     };
 
     // 订阅发送消息事件
