@@ -11,7 +11,7 @@ import type { ThumbnailItem, ThumbnailListProps } from "./types";
 import { getMessage } from "../../lang";
 
 const ThumbnailList: React.FC<ThumbnailListProps> = forwardRef(
-  ({ onDelete, onChange, ref }) => {
+  ({ onDelete, onChange }, ref) => {
     const [previewIndex, setPreviewIndex] = useState<number | null>(null);
     const [items, setItems] = useState<ThumbnailItem[]>([]);
 
