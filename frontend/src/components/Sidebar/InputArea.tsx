@@ -828,6 +828,7 @@ const InputArea: React.FC<InputAreaProps> = ({
 
                 {/* 发送/停止按钮 */}
                 <Tooltip
+                  placement="leftTop"
                   title={() => {
                     return (
                       <div className=" text-white text-[12px]">

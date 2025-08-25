@@ -1,8 +1,12 @@
-import React, { useMemo, useCallback, useRef, useEffect } from 'react';
-import { FixedSizeList as List } from 'react-window';
-import { Button, Empty, Tooltip } from 'antd';
-import { DeleteOutlined, FolderOutlined, FileTextOutlined } from '@ant-design/icons';
-import './VirtualList.css';
+import React, { useMemo, useCallback, useRef, useEffect } from "react";
+import { FixedSizeList as List } from "react-window";
+import { Button, Empty, Tooltip } from "antd";
+import {
+  DeleteOutlined,
+  FolderOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
+import "./VirtualList.css";
 
 export interface VirtualListItem {
   id: string;
@@ -72,7 +76,7 @@ const ItemRenderer: React.FC<ItemRendererProps> = ({ index, style, data }) => {
   const content = (
     <div
       style={style}
-      className={`virtual-list-item ${isSelected ? 'selected' : ''}`}
+      className={`virtual-list-item ${isSelected ? "selected" : ""}`}
       onClick={handleClick}
     >
       <div className="virtual-list-item-content">
@@ -85,15 +89,18 @@ const ItemRenderer: React.FC<ItemRendererProps> = ({ index, style, data }) => {
               {item.name}
             </div>
             {item.description && (
-              <div className="virtual-list-item-description" title={item.description}>
+              <div
+                className="virtual-list-item-description truncate"
+                title={item.description}
+              >
                 {item.description}
               </div>
             )}
           </div>
         </div>
-        
+
         <div className="virtual-list-item-actions">
-          {typeof item.count === 'number' && (
+          {typeof item.count === "number" && (
             <span className="virtual-list-item-count">{item.count}</span>
           )}
           {showDeleteButton && (
@@ -108,12 +115,12 @@ const ItemRenderer: React.FC<ItemRendererProps> = ({ index, style, data }) => {
           )}
         </div>
       </div>
-      
-      {renderCustomContent && (
+
+      {/* {renderCustomContent && (
         <div className="virtual-list-item-custom">
           {renderCustomContent(item)}
         </div>
-      )}
+      )} */}
     </div>
   );
 
@@ -136,9 +143,9 @@ const VirtualList: React.FC<VirtualListProps> = ({
   onItemClick,
   onItemDelete,
   showDeleteButton = true,
-  emptyText = '暂无数据',
-  className = '',
-  searchValue = '',
+  emptyText = "暂无数据",
+  className = "",
+  searchValue = "",
   renderCustomContent,
   showTooltip = false,
 }) => {
@@ -157,10 +164,10 @@ const VirtualList: React.FC<VirtualListProps> = ({
       };
 
       updateHeight();
-      
+
       const resizeObserver = new ResizeObserver(updateHeight);
       resizeObserver.observe(containerRef.current);
-      
+
       return () => {
         resizeObserver.disconnect();
       };
@@ -172,21 +179,24 @@ const VirtualList: React.FC<VirtualListProps> = ({
   // 过滤搜索结果
   const filteredItems = useMemo(() => {
     if (!searchValue.trim()) return items;
-    
+
     const searchLower = searchValue.toLowerCase();
     return items.filter(
       (item) =>
         item.name.toLowerCase().includes(searchLower) ||
-        (item.description && item.description.toLowerCase().includes(searchLower))
+        (item.description &&
+          item.description.toLowerCase().includes(searchLower))
     );
   }, [items, searchValue]);
 
   // 滚动到选中项
   useEffect(() => {
     if (selectedId && listRef.current) {
-      const selectedIndex = filteredItems.findIndex((item) => item.id === selectedId);
+      const selectedIndex = filteredItems.findIndex(
+        (item) => item.id === selectedId
+      );
       if (selectedIndex >= 0) {
-        listRef.current.scrollToItem(selectedIndex, 'center');
+        listRef.current.scrollToItem(selectedIndex, "center");
       }
     }
   }, [selectedId, filteredItems]);
@@ -214,10 +224,10 @@ const VirtualList: React.FC<VirtualListProps> = ({
 
   if (filteredItems.length === 0) {
     return (
-      <div 
+      <div
         ref={containerRef}
-        className={`virtual-list-container empty ${className}`} 
-        style={{ height: height === 0 ? '100%' : height }}
+        className={`virtual-list-container empty ${className}`}
+        style={{ height: height === 0 ? "100%" : height }}
       >
         <div className="virtual-list-empty">
           <Empty
@@ -230,10 +240,10 @@ const VirtualList: React.FC<VirtualListProps> = ({
   }
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`virtual-list-container ${className}`}
-      style={{ height: height === 0 ? '100%' : height }}
+      style={{ height: height === 0 ? "100%" : height }}
     >
       <List
         ref={listRef}
