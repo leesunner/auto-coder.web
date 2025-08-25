@@ -162,11 +162,15 @@ const InputArea: React.FC<InputAreaProps> = ({
   // 自定义发送消息函数
   const handleSendMessage = useCallback(
     (text?: string) => {
-      debugger;
+      console.log("handleSendMessage", [...fileList.current]);
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
-        new SendMessageEventData({ text, panelId, fileList: fileList.current })
+        new SendMessageEventData({
+          text,
+          panelId,
+          fileList: [...fileList.current],
+        })
       );
 
       if (thumbnailListRef.current) {
@@ -222,7 +226,6 @@ const InputArea: React.FC<InputAreaProps> = ({
 
     // 处理发送消息热键
     const handleSendHotkey = (data: HotkeyEventData) => {
-      debugger;
       if (data.panelId !== panelId) return;
       handleSendMessage();
     };
