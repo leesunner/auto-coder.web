@@ -120,18 +120,6 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
   // 存储当前装饰IDs的引用
   const decorationsRef = React.useRef<string[]>([]);
 
-  // 自定义发送消息函数
-  const handleSendMessage = React.useCallback(
-    (text?: string) => {
-      // 使用eventBus发送消息
-      eventBus.publish(
-        EVENTS.CHAT.SEND_MESSAGE,
-        new SendMessageEventData({ text, panelId })
-      );
-    },
-    [panelId]
-  );
-
   // 更新mention装饰
   const updateMentionDecorations = React.useCallback(() => {
     if (!editorRef.current) return;
