@@ -1,0 +1,668 @@
+import React, { useEffect, useRef, useState } from "react";
+import { message, Tabs, Dropdown, Menu } from "antd";
+import type { DataNode } from "antd/es/tree";
+import Split from "react-split";
+import { getLanguageByFileName } from "../../utils/fileUtils";
+import FileTree from "./components/FileTree";
+import MonacoEditor from "./components/MonacoEditor";
+import { FileMetadata } from "../../types/file_meta";
+import eventBus, { EVENTS } from "../../services/eventBus";
+import { getMessage } from "../../lang"; // Import getMessage for i18n
+import axios from "axios";
+import { queryToString } from "@/utils/formatUtils";
+import "./CodeEditor.css";
+import type { StopGenerationEventData } from "@/services/event_bus_data";
+import { useAgentFileSelect } from "../AutoMode/utils/agentFileSelect";
+import { EllipsisOutlined } from "@ant-design/icons";
+import TerminalOutput from "../ExpertMode/components/TerminalOutput";
+
+interface CodeEditorProps {
+  selectedFiles?: FileMetadata[];
+  requestId: string;
+}
+
+interface FileTab {
+  key: string;
+  label: string;
+  content: string;
+}
+
+interface EditorTab {
+  path: string;
+  label: string;
+  isActive: boolean;
+}
+
+interface EditorTabsConfig {
+  tabs: EditorTab[];
+  activeTabPath: string | null;
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({
+  selectedFiles: initialFiles,
+  requestId,
+}) => {
+  const { subscribeToAgentFileSelect } = useAgentFileSelect();
+  const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>(
+    initialFiles || []
+  );
+  const [activeFile, setActiveFile] = useState<string | null>(null);
+  const [fileTabs, setFileTabs] = useState<FileTab[]>([]);
+  const [treeData, setTreeData] = useState<DataNode[]>([]);
+  const [isCompactFolders, setCompactFolders] = useState(true);
+
+  const [isFull, setFull] = useState(false);
+
+  // 新增状态：跟踪分割面板的尺寸和折叠状态
+  const [splitSizes, setSplitSizes] = useState([75, 25]);
+  const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
+
+  const [saving, setSaving] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (fileTabs.length > 0) {
+      const openedFiles = fileTabs.map((tab) => ({
+        path: tab.key,
+        isSelected: tab.key === activeFile,
+        label: tab.label,
+      }));
+      eventBus.publish(EVENTS.EDITOR.TABS_CHANGED, openedFiles);
+
+      // 保存标签页状态到后端
+      saveTabsToBackend();
+    }
+  }, [fileTabs, activeFile]);
+
+  useEffect(() => {
+    const handleTabsLoaded = (file: string) => {
+      if (!file) return;
+      setTimeout(() => {
+        setActiveFile(file);
+        loadFileContent(file);
+      }, 50);
+    };
+    // 加载保存的标签页状态
+    loadTabsFromBackend().then((savedTabData) => {
+      const { activeTabPath, tabs } = savedTabData || {};
+      if (initialFiles && initialFiles.length > 0) {
+        // 如果有初始文件，优先处理它们
+        setSelectedFiles(initialFiles);
+        const file =
+          activeTabPath &&
+          initialFiles.find(({ path }) => path === activeTabPath)
+            ? activeTabPath
+            : initialFiles[0]?.path;
+        setFileTabs(
+          initialFiles.map((_item) => ({
+            key: _item.path as string,
+            path: _item.path as string,
+            label: _item.label as string,
+            content: "",
+          }))
+        );
+        handleTabsLoaded(file);
+        return;
+      }
+
+      if (tabs && tabs.length > 0) {
+        const file = activeTabPath || tabs[0]?.path;
+        setFileTabs(
+          tabs.map((_item) => ({
+            key: _item.path as string,
+            path: _item.path as string,
+            label: _item.label as string,
+            content: "",
+            isActive: _item.isActive,
+          }))
+        );
+        handleTabsLoaded(file);
+      }
+    });
+  }, [initialFiles]);
+
+  useEffect(() => {
+    fetchFileTree();
+  }, [isCompactFolders]);
+
+  // 切换终端区域展开/收起状态
+  const toggleTerminalExpand = () => {
+    if (isTerminalMinimized) {
+      // 展开：恢复到默认大小
+      setSplitSizes([75, 25]);
+      setIsTerminalMinimized(false);
+    } else {
+      // 收起：设置为最小高度
+      setSplitSizes([98, 2]);
+      setIsTerminalMinimized(true);
+    }
+
+    setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 50);
+  };
+
+  // 加载保存的标签页状态
+  const loadTabsFromBackend = async (): Promise<EditorTabsConfig | null> => {
+    try {
+      const response = await axios.get<EditorTabsConfig>("/api/editor/tabs");
+      return response.data;
+    } catch (error) {
+      console.error(getMessage("codeEditor.loadTabsConfigFailed"), error);
+      return null;
+    }
+  };
+
+  // 保存标签页状态到后端
+  const saveTabsToBackend = async () => {
+    try {
+      const tabs: EditorTab[] = fileTabs.map((tab) => ({
+        path: tab.key,
+        label: tab.label,
+        isActive: tab.key === activeFile,
+      }));
+
+      await axios.put("/api/editor/tabs", tabs);
+    } catch (error) {
+      console.error(getMessage("codeEditor.saveTabsFailed"), error);
+    }
+  };
+
+  const loadFileContent = async (filePath: string) => {
+    try {
+      const response = await fetch(`/api/file/${filePath}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch file content");
+      }
+      const data = await response.json();
+
+      setFileTabs((prev) => {
+        const existingTab = prev.find((tab) => tab.key === filePath);
+        if (existingTab) {
+          return prev.map((tab) =>
+            tab.key === filePath ? { ...tab, content: data.content } : tab
+          );
+        }
+
+        const newTab = {
+          key: filePath,
+          label: filePath.split("/").pop() || filePath,
+          content: data.content,
+        };
+
+        // 添加新标签到后端
+        try {
+          axios.post("/api/editor/tabs", {
+            path: filePath,
+            label: newTab.label,
+            isActive: activeFile === null, // 如果没有活跃标签，则将新标签设为活跃
+          });
+        } catch (error) {
+          console.error(getMessage("codeEditor.addTabFailed"), error);
+        }
+
+        return [...prev, newTab];
+      });
+    } catch (error) {
+      console.error("Error fetching file content:", error);
+      message.error(getMessage("codeEditor.loadFailed", { filePath }));
+    }
+  };
+
+  const undateCompactFolders = (data: boolean) => {
+    setCompactFolders(data);
+  };
+
+  const isLoadingTree = useRef(false);
+  // 订阅CODE完成事件
+  const unsubscribeStopGeneration = eventBus.subscribe(
+    EVENTS.CODING.TASK_COMPLETE,
+    async ({ success }) => {
+      if (!success) return;
+      if (isLoadingTree.current) return;
+      isLoadingTree.current = true;
+      await fetchFileTree();
+      isLoadingTree.current = false;
+    }
+  );
+
+  useEffect(() => {
+    return unsubscribeStopGeneration;
+  }, []);
+
+  const fetchFileTree = async (path = "") => {
+    try {
+      const response = await fetch(
+        `/api/files${queryToString({
+          lazy: true,
+          path,
+          compact_folders: isCompactFolders,
+        })}`
+      );
+      console.log("fetchFileTree:", response.ok);
+      if (!response.ok) {
+        throw new Error("Failed to fetch file tree");
+      }
+      const data = await response.json();
+
+      const transformNode = (node: any): DataNode => {
+        const isLeaf = node.isLeaf;
+        return {
+          title: node.title,
+          key: node.key,
+          icon: isLeaf ? "file" : "folder",
+          children: node.children
+            ? node.children.map(transformNode)
+            : undefined,
+          isLeaf,
+        };
+      };
+
+      const transformedTree = data.tree.map(transformNode);
+      if (!path) {
+        setTreeData(transformedTree);
+        return;
+      }
+
+      let _data;
+
+      const each = (
+        list: any[],
+        callback: (item: any, index: number) => any
+      ) => {
+        if (!list || !list.length) return;
+        for (let k = 0; k < list.length; k++) {
+          const res = callback(list[k], k);
+          if (res) return res;
+        }
+      };
+
+      if (isCompactFolders) {
+        const callback = (item: DataNode) => {
+          const { children, key, isLeaf } = item;
+          if (isLeaf) return;
+          if (key === path) return item;
+          if (children && children.length > 0) {
+            const res = each(children, callback) as DataNode;
+            if (res) return res;
+          }
+        };
+        _data = each(treeData, callback);
+      } else {
+        const pathList = path.split("/");
+        let i = 0;
+        const callback = (item: DataNode) => {
+          const { children, title, isLeaf } = item;
+          if (isLeaf) return;
+          const _pathName = pathList[i];
+          if (title !== _pathName) return;
+
+          if (pathList[++i]) {
+            return each(children!, callback);
+          }
+          return item;
+        };
+
+        // 找到对应目录并更新数据
+        _data = each(treeData, callback);
+      }
+      console.log("Found directory data:", _data);
+      if (!_data) return;
+      _data.children = data.tree.map(transformNode);
+      setTreeData([...treeData]);
+    } catch (error) {
+      console.error("Error fetching file tree:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!activeFile || saving) return;
+
+    try {
+      setSaving(true);
+      const currentTab = fileTabs.find((tab) => tab.key === activeFile);
+      if (!currentTab) return;
+
+      const response = await fetch(`/api/file/${activeFile}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: currentTab.content }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save file");
+      }
+
+      message.success(getMessage("codeEditor.saveSuccess"));
+    } catch (error) {
+      console.error("Error saving file:", error);
+      message.error(getMessage("codeEditor.saveFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openFile = (key: string) => {
+    const newFile: FileMetadata = { path: key, isSelected: true };
+    if (!selectedFiles.some((f) => f.path === key)) {
+      setSelectedFiles((prev) => [...prev, newFile]);
+    }
+    setActiveFile(key);
+    loadFileContent(key);
+  };
+
+  const handleSelect = async (selectedKeys: React.Key[], info: any) => {
+    const { isLeaf, key } = info.node;
+    const _key = key || (selectedKeys[0] as string);
+    if (!_key) return;
+    if (isLeaf) {
+      openFile(key);
+    }
+  };
+
+  const handleExpand = async (selectedKeys: React.Key[], info: any) => {
+    const key = selectedKeys[0] as string;
+    if (!key) return;
+
+    const { isLeaf, key: filePath } = info.node;
+    if (isLeaf) return;
+    await fetchFileTree(filePath);
+  };
+
+  useEffect(() => {
+    const fn = subscribeToAgentFileSelect(openFile);
+    return fn();
+  }, []);
+
+  const handleTabChange = async (key: string) => {
+    setActiveFile(key);
+
+    // 更新后端活跃标签
+    try {
+      await axios.put("/api/editor/active-tab", { path: key });
+      loadFileContent(key);
+    } catch (error) {
+      console.error(getMessage("codeEditor.updateActiveTabFailed"), error);
+    }
+  };
+
+  const handleTabEdit = async (targetKey: any, action: "add" | "remove") => {
+    if (action === "remove") {
+      setFileTabs((prev) => prev.filter((tab) => tab.key !== targetKey));
+      setSelectedFiles((prev) =>
+        prev.filter((file) => file.path !== targetKey)
+      );
+
+      if (activeFile === targetKey) {
+        // 如果关闭的是当前活跃标签，切换到第一个标签
+        const remainingTabs = fileTabs.filter((tab) => tab.key !== targetKey);
+        if (remainingTabs.length > 0) {
+          setActiveFile(remainingTabs[0].key);
+        } else {
+          setActiveFile(null);
+        }
+      }
+
+      // 从后端删除标签
+      try {
+        await axios.delete(`/api/editor/tabs/${targetKey}`);
+      } catch (error) {
+        console.error(getMessage("codeEditor.deleteTabFailed"), error);
+      }
+    }
+  };
+
+  const handleCopyPath = (filePath: string) => {
+    navigator.clipboard
+      .writeText(filePath)
+      .then(() => {
+        message.success(getMessage("codeEditor.copyPathSuccess"));
+      })
+      .catch((err) => {
+        console.error("Failed to copy file path: ", err);
+        message.error(getMessage("codeEditor.copyPathFailed"));
+      });
+  };
+
+  const handleCloseOtherTabs = async (filePathToKeep: string) => {
+    setFileTabs((prev) => prev.filter((tab) => tab.key === filePathToKeep));
+    setSelectedFiles((prev) =>
+      prev.filter((file) => file.path === filePathToKeep)
+    );
+    // The active file should already be the one clicked, but ensure it stays active
+    if (activeFile !== filePathToKeep) {
+      setActiveFile(filePathToKeep);
+    }
+
+    // 更新后端标签状态
+    try {
+      const tabs: EditorTab[] = [
+        {
+          path: filePathToKeep,
+          label: filePathToKeep.split("/").pop() || filePathToKeep,
+          isActive: true,
+        },
+      ];
+
+      await axios.put("/api/editor/tabs", tabs);
+    } catch (error) {
+      console.error(getMessage("codeEditor.updateTabsFailed"), error);
+    }
+  };
+
+  const handleRefreshTab = async (filePath: string) => {
+    // 重新加载文件内容
+    await loadFileContent(filePath);
+    const fileName = filePath.split("/").pop() || filePath;
+    message.success(getMessage("codeEditor.refreshSuccess", { fileName }));
+  };
+
+  const renderContextMenu = (filePath: string, label: string) => (
+    <Menu>
+      <Menu.Item key="refresh" onClick={() => handleRefreshTab(filePath)}>
+        {getMessage("codeEditor.refresh")}
+      </Menu.Item>
+      <Menu.Item key="copyPath" onClick={() => handleCopyPath(filePath)}>
+        {getMessage("codeEditor.copyPath")}
+      </Menu.Item>
+      <Menu.Item
+        key="closeOthers"
+        onClick={() => handleCloseOtherTabs(filePath)}
+      >
+        {getMessage("codeEditor.closeOtherTabs")}
+      </Menu.Item>
+    </Menu>
+  );
+
+  // 处理拖拽变化，检查终端区域是否被拖到底部
+  const handleSplitChange = (sizes: any) => {
+    setSplitSizes(sizes);
+    // 如果下方面板的大小小于等于8%，认为已经拖到底部
+    setIsTerminalMinimized(sizes[1] <= 3);
+
+    // 触发resize事件以更新Terminal大小
+    setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 50);
+  };
+
+  // 处理编辑器全屏切换
+  const toggleFullscreen = () => {
+    setFull(!isFull);
+    setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 50);
+  };
+
+  // Ctrl+S (Windows/Linux) 或 Cmd+S (Mac) 保存文件
+  useEffect(() => {
+    const callback = (e: KeyboardEvent) => {
+      // 检测 Ctrl+S (Windows/Linux) 或 Cmd+S (Mac)
+      if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener("keydown", callback);
+    return () => {
+      window.removeEventListener("keydown", callback);
+    };
+  }, [handleSave]);
+
+  return (
+    <div className="code-editor-container">
+      {/* <div className="code-editor-header">
+        <div className="code-editor-header-content">
+          <div className="file-info">
+            <span className="file-path">
+              {activeFile || getMessage("codeEditor.noFileSelected")}
+            </span>
+          </div>
+          {activeFile && (
+            <button
+              onClick={handleSave}
+              disabled={!activeFile}
+              className="save-button"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                />
+              </svg>
+              {getMessage("codeEditor.save")}
+            </button>
+          )}
+        </div>
+      </div> */}
+
+      <Split
+        className="code-editor-content split-horizontal"
+        sizes={[25, 75]}
+        minSize={[240, 300]}
+        expandToMin={false}
+        gutterSize={0.5}
+        gutterAlign="center"
+        snapOffset={30}
+        dragInterval={1}
+        direction="horizontal"
+      >
+        <div className="file-tree-panel">
+          <FileTree
+            activeKey={activeFile || undefined}
+            isCompactFolders={isCompactFolders}
+            setCompactFolders={undateCompactFolders}
+            treeData={treeData}
+            onSelect={handleSelect}
+            onExpand={handleExpand}
+            onRefresh={fetchFileTree}
+          />
+        </div>
+        <div className="editor-panel split-vertical">
+          <Split
+            direction="vertical"
+            sizes={splitSizes}
+            expandToMin={false}
+            minSize={[200, 20]}
+            gutterSize={0.5}
+            snapOffset={20}
+            dragInterval={1}
+            // cursor="row-resize"
+            className="split-vertical"
+            onDragEnd={handleSplitChange}
+          >
+            <div
+              className={`relative !z-[7] h-full ${
+                fileTabs?.length ? "block" : "hidden"
+              }`}
+            >
+              <Tabs
+                size="small"
+                type="editable-card"
+                onChange={handleTabChange}
+                onEdit={handleTabEdit}
+                activeKey={activeFile || undefined}
+                more={{
+                  icon: (
+                    <span className="more">
+                      <EllipsisOutlined />
+                    </span>
+                  ),
+                }}
+              >
+                {fileTabs.map((tab) => {
+                  const fileMeta = selectedFiles.find(
+                    (f) => f.path === tab.key
+                  );
+                  return (
+                    <Tabs.TabPane
+                      key={tab.key}
+                      tab={
+                        <Dropdown
+                          overlay={renderContextMenu(tab.key, tab.label)}
+                          trigger={["contextMenu"]}
+                          overlayClassName="vscode-dark-dropdown"
+                        >
+                          <span
+                            style={{
+                              color:
+                                fileMeta?.modifiedBy === "expert_chat_box"
+                                  ? "#ff4d4f"
+                                  : "inherit",
+                              display: "inline-block", // Necessary for Dropdown trigger
+                            }}
+                          >
+                            {tab.label}
+                          </span>
+                        </Dropdown>
+                      }
+                      closable={true}
+                    >
+                      <MonacoEditor
+                        code={tab.content}
+                        language={getLanguageByFileName(tab.key)}
+                        onChange={(value) => {
+                          setFileTabs((prev) =>
+                            prev.map((t) =>
+                              t.key === tab.key
+                                ? { ...t, content: value || "" }
+                                : t
+                            )
+                          );
+                        }}
+                      />
+                    </Tabs.TabPane>
+                  );
+                })}
+              </Tabs>
+            </div>
+            {/* 输出，终端区域*/}
+            <div
+              className={`border-t border-gray-700 flex flex-col ${
+                isFull ? "fixed left-0 top-0 w-full !z-[9] p-0" : ""
+              }`}
+            >
+              <TerminalOutput
+                toggleTerminalExpand={toggleTerminalExpand}
+                isTerminalMinimized={isTerminalMinimized}
+                requestId={requestId}
+                isFull={isFull}
+                toggleFullscreen={toggleFullscreen}
+              />
+            </div>
+          </Split>
+        </div>
+      </Split>
+    </div>
+  );
+};
+
+export default CodeEditor;

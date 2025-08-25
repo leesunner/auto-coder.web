@@ -84,6 +84,6 @@ export const fileListSelectorMessages = {
   // 新增：占位符文本
   selectFiles: {
     en: "Select files",
-    zh: "选择文件",
+    zh: "选择文件组上下文",
   },
 };

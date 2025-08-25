@@ -64,7 +64,7 @@ function TerminalOutput(props: Props) {
     },
   ];
   return (
-    <>
+    <div className="h-full w-full relative z-[9]">
       {/* Tool Panel Navigation */}
       <div className="bg-[#1f1f1f] border-b border-gray-700 px-2">
         <div className="flex items-center justify-between gap-1">
@@ -203,7 +203,7 @@ function TerminalOutput(props: Props) {
           <TerminalManager ref={terminalManager} />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

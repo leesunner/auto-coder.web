@@ -69,11 +69,14 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     addTerminal,
   }));
 
+  const showList = terminals.length > 1;
+  const sizes = showList ? [80, 20] : [100, 0];
+
   return (
     <div className="flex h-full">
       <Split
         className="flex-1 flex split-horizontal bg-[#2d2d2d] overflow-auto"
-        sizes={[80, 20]}
+        sizes={sizes}
         minSize={[360, 100]}
         gutterSize={0.5}
         dragInterval={1}
@@ -94,7 +97,11 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
         </div>
 
         {/* Right Panel - Terminal Management */}
-        <div className="bg-[#1f1f1f] flex flex-col">
+        <div
+          className={`bg-[#1f1f1f] flex flex-col ${
+            showList ? "block" : "hidden"
+          }`}
+        >
           {/* <div className="p-2 border-b border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
@@ -121,7 +128,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
             {terminals.map((terminal) => (
               <div
                 key={terminal.id}
-                className={`group flex items-center justify-between px-3 py-2 cursor-pointer 
+                className={`group flex items-center justify-between px-3 py-1 cursor-pointer 
                 ${
                   activeTerminal === terminal.id
                     ? "bg-gray-700 text-white"

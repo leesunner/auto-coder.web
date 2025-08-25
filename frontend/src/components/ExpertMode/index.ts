@@ -1,5 +1,3 @@
-import ExpertModePage from './ExpertModePage';
+import ExpertModePage from "./ExpertModePage_new";
 
-export {
-  ExpertModePage
-};
+export { ExpertModePage };

@@ -26,9 +26,10 @@ import ModalDialog from "../Common/ModalDialog";
 // 导入声音播放函数
 import { playTaskComplete } from "../AutoMode/utils/SoundEffects";
 import TerminalOutput from "./components/TerminalOutput";
+import ToolsTabs from "./components/ToolsTabs";
 
 // Define the possible panel types, including the new split preview types
-type ActivePanelType =
+export type ActivePanelType =
   | "todo"
   | "code"
   | "filegroup"
@@ -403,206 +404,98 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
 
       <Split
         className="flex-1 flex split-horizontal"
-        sizes={[68, 32]}
-        minSize={[386, 400]}
+        sizes={[75, 25]}
+        minSize={[900, 385]}
         gutterSize={0.5}
-        snapOffset={100}
+        snapOffset={20}
       >
         {/* Content Area */}
         <div className="relative flex flex-col flex-grow h-full w-full overflow-hidden">
-          <div className="absolute inset-0">
-            <Split
-              direction="vertical"
-              sizes={splitSizes}
-              minSize={[180, 20]}
-              gutterSize={0.5}
-              snapOffset={100}
-              dragInterval={1}
-              cursor="row-resize"
-              className="split-vertical"
-              onDragEnd={handleSplitChange}
-            >
-              {/* Upper Section - 顶部内容区域 */}
-              <div className="flex flex-col overflow-hidden">
-                {/* Panel Switch Buttons */}
-                <div className="bg-gray-800 p-2 border-b border-gray-700">
-                  <div className="flex space-x-2">
+          <div className="h-full w-full">
+            {/* Upper Section - 顶部内容区域 */}
+            <div className="h-full w-full flex flex-col overflow-hidden">
+              {/* Panel Switch Buttons */}
+              <div className="bg-gray-800 p-2 border-b border-gray-700">
+                <div className="flex space-x-2">
+                  <ToolsTabs
+                    activePanel={activePanel}
+                    setActivePanel={setActivePanel}
+                  />
+                  {/* 更多下拉菜单 */}
+                  <Dropdown
+                    trigger={["click"]}
+                    placement="bottomRight"
+                    menu={{ items: moreMenuItems }}
+                  >
                     <button
                       className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
-                        ${
-                          activePanel === "history"
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
-                            : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
-                        } flex items-center space-x-2`}
-                      onClick={() => setActivePanel("history")}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <span>{getMessage("devHistory")}</span>
-                    </button>
-                    <button
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
-                        ${
-                          activePanel === "code"
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
-                            : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
-                        } flex items-center space-x-2`}
-                      onClick={() => setActivePanel("code")}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                        />
-                      </svg>
-                      <span>{getMessage("codeViewer")}</span>
-                    </button>
-
-                    {/* Editable Preview Button moved to More dropdown */}
-                    <button
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300
-                        ${
-                          activePanel === "filegroup"
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
-                            : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
-                        } flex items-center space-x-2`}
-                      onClick={() => setActivePanel("filegroup")}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                        />
-                      </svg>
-                      <span>{getMessage("fileGroups")}</span>
-                    </button>
-                    <button
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
-                        ${
-                          activePanel === "settings"
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
-                            : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
-                        } flex items-center space-x-2`}
-                      onClick={() => setActivePanel("settings")}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      <span>{getMessage("settings")}</span>
-                    </button>
-                    {/* 更多下拉菜单 */}
-                    <Dropdown
-                      trigger={["click"]}
-                      placement="bottomRight"
-                      menu={{ items: moreMenuItems }}
-                    >
-                      <button
-                        className={`px-2 py-1 rounded text-xs font-medium transition-all duration-300 
                           ${
                             activePanel === "clipboard"
                               ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 transform hover:-translate-y-0.5"
                               : "bg-gray-800/60 text-gray-400 hover:bg-gray-700/80 hover:text-white hover:shadow-sm"
                           } flex items-center space-x-2`}
-                        // onClick={toggleToolsDropdown}
+                      // onClick={toggleToolsDropdown}
+                    >
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        <svg
-                          className="w-3 h-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 9l-7 7-7-7"
-                          />
-                        </svg>
-                        <span>{getMessage("more")}</span>
-                      </button>
-                    </Dropdown>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                      <span>{getMessage("more")}</span>
+                    </button>
+                  </Dropdown>
+                </div>
+              </div>
+
+              {/* Dynamic Content Area */}
+              <div className="flex-1 overflow-hidden">
+                <div
+                  className={`h-full ${
+                    activePanel === "code" ? "block" : "hidden"
+                  }`}
+                >
+                  <CodeEditorPanel
+                    selectedFiles={selectedFiles}
+                    requestId={requestId}
+                  />
+                </div>
+                {activePanel === "filegroup" ? (
+                  <div className={`h-full`}>
+                    <FileGroupPanel />
+                  </div>
+                ) : null}
+                <div
+                  className={`h-full ${
+                    activePanel === "clipboard" ? "block" : "hidden"
+                  }`}
+                >
+                  <div className="h-full p-4">
+                    <Editor
+                      theme="vs-dark"
+                      height="100%"
+                      value={clipboardContent}
+                      onChange={(value) => setClipboardContent(value || "")}
+                      defaultLanguage="plaintext"
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        lineNumbers: "on",
+                        wordWrap: "on",
+                        automaticLayout: true,
+                      }}
+                    />
                   </div>
                 </div>
-
-                {/* Dynamic Content Area */}
-                <div className="flex-1 overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      activePanel === "code" ? "block" : "hidden"
-                    }`}
-                  >
-                    <CodeEditorPanel selectedFiles={selectedFiles} />
-                  </div>
-                  {activePanel === "filegroup" ? (
-                    <div className={`h-full`}>
-                      <FileGroupPanel />
-                    </div>
-                  ) : null}
-                  <div
-                    className={`h-full ${
-                      activePanel === "clipboard" ? "block" : "hidden"
-                    }`}
-                  >
-                    <div className="h-full p-4">
-                      <Editor
-                        theme="vs-dark"
-                        height="100%"
-                        value={clipboardContent}
-                        onChange={(value) => setClipboardContent(value || "")}
-                        defaultLanguage="plaintext"
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 14,
-                          lineNumbers: "on",
-                          wordWrap: "on",
-                          automaticLayout: true,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {/* Static Preview Panel - 预览功能已屏蔽 */}
-                  {/* <div
+                {/* Static Preview Panel - 预览功能已屏蔽 */}
+                {/* <div
                     className={`h-full ${
                       activePanel === "preview_static" ? "block" : "hidden"
                     }`}
@@ -638,54 +531,38 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                  
                     <PreviewPanel files={previewFiles} />
                   </div> */}
-                  <div
-                    className={`h-full ${
-                      activePanel === "history" ? "block" : "hidden"
-                    }`}
+                <div
+                  className={`h-full ${
+                    activePanel === "history" ? "block" : "hidden"
+                  }`}
+                >
+                  {/* Wrap HistoryPanel with Suspense for lazy loading */}
+                  <Suspense
+                    fallback={
+                      <div className="p-4 text-gray-400 text-center">
+                        {getMessage("loadingHistory")}
+                      </div>
+                    }
                   >
-                    {/* Wrap HistoryPanel with Suspense for lazy loading */}
-                    <Suspense
-                      fallback={
-                        <div className="p-4 text-gray-400 text-center">
-                          {getMessage("loadingHistory")}
-                        </div>
-                      }
-                    >
-                      <HistoryPanel />
-                    </Suspense>
-                  </div>
-                  <div
-                    className={`h-full ${
-                      activePanel === "settings" ? "block" : "hidden"
-                    }`}
-                  >
-                    <SettingsPanel />
-                  </div>
-                  <div
-                    className={`h-full ${
-                      activePanel === "todo" ? "block" : "hidden"
-                    }`}
-                  >
-                    <TodoPanel />
-                  </div>
+                    <HistoryPanel />
+                  </Suspense>
+                </div>
+                <div
+                  className={`h-full ${
+                    activePanel === "settings" ? "block" : "hidden"
+                  }`}
+                >
+                  <SettingsPanel />
+                </div>
+                <div
+                  className={`h-full ${
+                    activePanel === "todo" ? "block" : "hidden"
+                  }`}
+                >
+                  <TodoPanel />
                 </div>
               </div>
-
-              {/* 输出，终端区域*/}
-              <div
-                className={`border-t border-gray-700 flex flex-col ${
-                  isFull ? "fixed left-0 top-0 w-full !h-full z-[9999] p-0" : ""
-                } ${activePanel === "code" ? "block" : "hidden"}`}
-              >
-                <TerminalOutput
-                  toggleTerminalExpand={toggleTerminalExpand}
-                  isTerminalMinimized={isTerminalMinimized}
-                  requestId={requestId}
-                  isFull={isFull}
-                  toggleFullscreen={toggleFullscreen}
-                />
-              </div>
-            </Split>
+            </div>
           </div>
         </div>
 
