@@ -10,18 +10,10 @@ type Props = {
   toggleTerminalExpand: () => void;
   isTerminalMinimized: boolean;
   requestId: string;
-  isFull: boolean;
-  toggleFullscreen: () => void;
 };
 
 function TerminalOutput(props: Props) {
-  const {
-    toggleTerminalExpand,
-    isTerminalMinimized,
-    requestId,
-    isFull,
-    toggleFullscreen,
-  } = props;
+  const { toggleTerminalExpand, isTerminalMinimized, requestId } = props;
   const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
   const terminalManager = useRef<any>(null);
   // 处理新建终端的shell选择
@@ -117,67 +109,28 @@ function TerminalOutput(props: Props) {
                 </div>
               </Tooltip>
             )}
-            {/* 全屏切换按钮 - 当终端区域被最小化时隐藏 */}
-            {!isTerminalMinimized && (
-              <Tooltip
-                placement="topLeft"
-                title={
-                  isFull
-                    ? getMessage("exitFullscreen")
-                    : getMessage("fullscreenMode")
-                }
-              >
-                <button
-                  onClick={toggleFullscreen}
-                  className="mr-1 p-0.5 rounded-md transition-all duration-200  text-white hover:bg-gray-700"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    {isFull ? (
-                      <>
-                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                      </>
-                    ) : (
-                      <>
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                      </>
-                    )}
-                  </svg>
-                </button>
-              </Tooltip>
-            )}
 
             {/* 展开/收起箭头按钮 */}
-            {!isFull && (
-              <Tooltip
-                placement="topLeft"
-                title={
-                  isTerminalMinimized
-                    ? getMessage("expandTerminal")
-                    : getMessage("collapseTerminal")
-                }
+
+            <Tooltip
+              placement="topLeft"
+              title={
+                isTerminalMinimized
+                  ? getMessage("expandTerminal")
+                  : getMessage("collapseTerminal")
+              }
+            >
+              <button
+                onClick={toggleTerminalExpand}
+                className="ml-2 mr-1 p-0 rounded-md transition-all duration-200 text-white hover:bg-gray-700"
               >
-                <button
-                  onClick={toggleTerminalExpand}
-                  className="ml-2 mr-1 p-0 rounded-md transition-all duration-200 text-white hover:bg-gray-700"
-                >
-                  {isTerminalMinimized ? (
-                    <UpOutlined style={{ fontSize: "14px" }} />
-                  ) : (
-                    <DownOutlined style={{ fontSize: "14px" }} />
-                  )}
-                </button>
-              </Tooltip>
-            )}
+                {isTerminalMinimized ? (
+                  <UpOutlined style={{ fontSize: "14px" }} />
+                ) : (
+                  <DownOutlined style={{ fontSize: "14px" }} />
+                )}
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

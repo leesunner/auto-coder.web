@@ -7,6 +7,7 @@ import {
   FileTextOutlined,
 } from "@ant-design/icons";
 import "./VirtualList.css";
+import { getMessage } from "@/lang";
 
 export interface VirtualListItem {
   id: string;
@@ -143,7 +144,7 @@ const VirtualList: React.FC<VirtualListProps> = ({
   onItemClick,
   onItemDelete,
   showDeleteButton = true,
-  emptyText = "暂无数据",
+  emptyText = getMessage("noData"),
   className = "",
   searchValue = "",
   renderCustomContent,

@@ -51,8 +51,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const [treeData, setTreeData] = useState<DataNode[]>([]);
   const [isCompactFolders, setCompactFolders] = useState(true);
 
-  const [isFull, setFull] = useState(false);
-
   // 新增状态：跟踪分割面板的尺寸和折叠状态
   const [splitSizes, setSplitSizes] = useState([75, 25]);
   const [isTerminalMinimized, setIsTerminalMinimized] = useState(false);
@@ -487,14 +485,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     }, 50);
   };
 
-  // 处理编辑器全屏切换
-  const toggleFullscreen = () => {
-    setFull(!isFull);
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-    }, 50);
-  };
-
   // Ctrl+S (Windows/Linux) 或 Cmd+S (Mac) 保存文件
   useEffect(() => {
     const callback = (e: KeyboardEvent) => {
@@ -579,83 +569,105 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             className="split-vertical"
             onDragEnd={handleSplitChange}
           >
-            <div
-              className={`relative !z-[7] h-full ${
-                fileTabs?.length ? "block" : "hidden"
-              }`}
-            >
-              <Tabs
-                size="small"
-                type="editable-card"
-                onChange={handleTabChange}
-                onEdit={handleTabEdit}
-                activeKey={activeFile || undefined}
-                more={{
-                  icon: (
-                    <span className="more">
-                      <EllipsisOutlined />
-                    </span>
-                  ),
-                }}
-              >
-                {fileTabs.map((tab) => {
-                  const fileMeta = selectedFiles.find(
-                    (f) => f.path === tab.key
-                  );
-                  return (
-                    <Tabs.TabPane
-                      key={tab.key}
-                      tab={
-                        <Dropdown
-                          overlay={renderContextMenu(tab.key, tab.label)}
-                          trigger={["contextMenu"]}
-                          overlayClassName="vscode-dark-dropdown"
-                        >
-                          <span
-                            style={{
-                              color:
-                                fileMeta?.modifiedBy === "expert_chat_box"
-                                  ? "#ff4d4f"
-                                  : "inherit",
-                              display: "inline-block", // Necessary for Dropdown trigger
-                            }}
+            <div className={`relative !z-[7] h-full`}>
+              {fileTabs?.length ? (
+                <Tabs
+                  size="small"
+                  type="editable-card"
+                  onChange={handleTabChange}
+                  onEdit={handleTabEdit}
+                  activeKey={activeFile || undefined}
+                  more={{
+                    icon: (
+                      <span className="more">
+                        <EllipsisOutlined />
+                      </span>
+                    ),
+                  }}
+                >
+                  {fileTabs.map((tab) => {
+                    const fileMeta = selectedFiles.find(
+                      (f) => f.path === tab.key
+                    );
+                    return (
+                      <Tabs.TabPane
+                        key={tab.key}
+                        tab={
+                          <Dropdown
+                            overlay={renderContextMenu(tab.key, tab.label)}
+                            trigger={["contextMenu"]}
+                            overlayClassName="vscode-dark-dropdown"
                           >
-                            {tab.label}
-                          </span>
-                        </Dropdown>
-                      }
-                      closable={true}
-                    >
-                      <MonacoEditor
-                        code={tab.content}
-                        language={getLanguageByFileName(tab.key)}
-                        onChange={(value) => {
-                          setFileTabs((prev) =>
-                            prev.map((t) =>
-                              t.key === tab.key
-                                ? { ...t, content: value || "" }
-                                : t
-                            )
-                          );
-                        }}
-                      />
-                    </Tabs.TabPane>
-                  );
-                })}
-              </Tabs>
+                            <span
+                              style={{
+                                color:
+                                  fileMeta?.modifiedBy === "expert_chat_box"
+                                    ? "#ff4d4f"
+                                    : "inherit",
+                                display: "inline-block", // Necessary for Dropdown trigger
+                              }}
+                            >
+                              {tab.label}
+                            </span>
+                          </Dropdown>
+                        }
+                        closable={true}
+                      >
+                        <MonacoEditor
+                          code={tab.content}
+                          language={getLanguageByFileName(tab.key)}
+                          onChange={(value) => {
+                            setFileTabs((prev) =>
+                              prev.map((t) =>
+                                t.key === tab.key
+                                  ? { ...t, content: value || "" }
+                                  : t
+                              )
+                            );
+                          }}
+                        />
+                      </Tabs.TabPane>
+                    );
+                  })}
+                </Tabs>
+              ) : (
+                <div className="text-white opacity-45 text-center flex flex-col items-center justify-center h-full">
+                  <h2 className="text-lg font-bold mb-4">快捷键</h2>
+                  <div className="mb-2">
+                    <span className="mr-2">发送AI对话消息</span>
+                    <span className="font-semibold">
+                      <kbd className="px-1 py-0 mx-1  border border-white-600 rounded shadow-sm">
+                        {navigator.platform.indexOf("Mac") === 0 ? "⌘" : "Ctrl"}
+                      </kbd>
+                      <span> + </span>
+                      <kbd className="px-1 py-0 mx-1   border border-white-600 rounded shadow-sm">
+                        Enter
+                      </kbd>
+                    </span>
+                  </div>
+                  <div>
+                    <span className="mr-2">
+                      {getMessage("switchModeTooltip")}
+                    </span>
+                    <span className="font-semibold">
+                      <kbd className="px-1 py-0 mx-1  border border-white-600 rounded shadow-sm">
+                        {navigator.platform.indexOf("Mac") === 0 ? "⌘" : "Ctrl"}
+                      </kbd>
+                      <span> + </span>
+                      <kbd className="px-1 py-0 mx-1   border border-white-600 rounded shadow-sm">
+                        .
+                      </kbd>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             {/* 输出，终端区域*/}
-            <div
-              className={`border-t border-gray-700 flex flex-col ${
-                isFull ? "fixed left-0 top-0 w-full !z-[9] p-0" : ""
-              }`}
-            >
+            <div className={`border-t border-gray-700 flex flex-col h-full`}>
               <TerminalOutput
                 toggleTerminalExpand={toggleTerminalExpand}
                 isTerminalMinimized={isTerminalMinimized}
                 requestId={requestId}
-                isFull={isFull}
-                toggleFullscreen={toggleFullscreen}
               />
             </div>
           </Split>

@@ -108,6 +108,8 @@ const InputArea: React.FC<InputAreaProps> = ({
   const inputAreaRef = useRef<HTMLDivElement>(null);
   const fileList = useRef<ThumbnailItem[]>([]);
 
+  const thumbnailListRef = useRef<any>(null);
+
   // 处理编辑器全屏切换
   const toggleFullscreen = useCallback(() => {
     if (inputAreaRef.current) {
@@ -166,6 +168,10 @@ const InputArea: React.FC<InputAreaProps> = ({
         EVENTS.CHAT.SEND_MESSAGE,
         new SendMessageEventData({ text, panelId, fileList: fileList.current })
       );
+      if (thumbnailListRef.current) {
+        thumbnailListRef.current.clearFiles();
+        fileList.current = [];
+      }
     },
     [panelId]
   );
@@ -706,7 +712,10 @@ const InputArea: React.FC<InputAreaProps> = ({
               )}
               {/* <div className="h-[1px] bg-gray-700/50 my-1 w-full"></div> */}
               {/* 图片缩略图列表 */}
-              <ThumbnailList onChange={handleThumbnailListChange} />
+              <ThumbnailList
+                ref={thumbnailListRef}
+                onChange={handleThumbnailListChange}
+              />
               {/* 编辑器模式 */}
               <div className="w-full h-full ai-text">
                 <EditorComponent
