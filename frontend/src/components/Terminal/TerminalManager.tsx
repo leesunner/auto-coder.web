@@ -75,7 +75,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
   return (
     <div className="flex h-full">
       <Split
-        className="flex-1 flex split-horizontal bg-[#2d2d2d] overflow-auto"
+        className="flex-1 flex split-horizontal bg-[#2d2d2d]"
         sizes={sizes}
         minSize={[360, 100]}
         gutterSize={0.5}

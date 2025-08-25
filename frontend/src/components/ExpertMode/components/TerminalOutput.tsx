@@ -64,9 +64,9 @@ function TerminalOutput(props: Props) {
     },
   ];
   return (
-    <div className="h-full w-full relative z-[9]">
+    <div className="flex-1 overflow-hidden w-full relative z-[9] flex flex-col">
       {/* Tool Panel Navigation */}
-      <div className="bg-[#1f1f1f] border-b border-gray-700 px-2">
+      <div className="flex-shrink-0 bg-[#1f1f1f] border-b border-gray-700 px-2">
         <div className="flex items-center justify-between gap-1">
           <div className="flex items-center gap-1">
             {[
@@ -183,7 +183,7 @@ function TerminalOutput(props: Props) {
       </div>
 
       {/* Tool Panel Content */}
-      <div className="flex-1 bg-[#2d2d2d] overflow-auto">
+      <div className="flex-1 bg-[#2d2d2d] overflow-hidden">
         {/* Output Panel */}
 
         <div
