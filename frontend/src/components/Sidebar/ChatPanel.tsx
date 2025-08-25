@@ -1050,7 +1050,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       }
 
       console.log("ChatPanel: Received message from eventBus:", text);
-      debugger;
       // 调用发送消息函数
       handleSendMessage(data.text);
     };
