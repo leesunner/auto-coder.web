@@ -379,11 +379,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       }
 
       // 从后端删除标签
-      try {
-        await axios.delete(`/api/editor/tabs/${targetKey}`);
-      } catch (error) {
-        console.error(getMessage("codeEditor.deleteTabFailed"), error);
-      }
+      // try {
+      //   await axios.delete(`/api/editor/tabs/${targetKey}`);
+      // } catch (error) {
+      //   console.error(getMessage("codeEditor.deleteTabFailed"), error);
+      // }
     }
   };
 

@@ -1,6 +1,5 @@
 /* BasicSettings 组件的自定义样式 */
 
-
 .model-config-item {
   background-color: var(--vscode-editorWidget-background);
   border-radius: 4px;
@@ -35,7 +34,7 @@
 }
 
 .model-config-item .ant-select-selection-item {
-  color: var(--vscode-input-foreground) !important;
+  color: #ffffff80 !important;
 }
 
 .model-config-item .ant-input-number-handler-wrap {

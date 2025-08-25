@@ -370,7 +370,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   useEffect(() => {
     const fn = subscribeToAgentFileSelect(openFile);
-    return fn();
+    return fn;
   }, []);
 
   const handleTabChange = async (key: string) => {

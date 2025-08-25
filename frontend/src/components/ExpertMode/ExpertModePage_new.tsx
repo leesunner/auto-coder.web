@@ -52,6 +52,7 @@ interface ExpertModePageProps {
   selectedFiles: FileMetadata[];
   onSwitchToAutoMode: () => void;
   setSelectedFiles: (files: FileMetadata[]) => void;
+  modeSwitch?: any;
 }
 
 const ExpertModePage: React.FC<ExpertModePageProps> = ({
@@ -67,6 +68,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
   selectedFiles,
   onSwitchToAutoMode,
   setSelectedFiles,
+  modeSwitch,
 }) => {
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [isFull, setFull] = useState(false);
@@ -405,7 +407,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
       <Split
         className="flex-1 flex split-horizontal"
         sizes={[75, 25]}
-        minSize={[900, 385]}
+        minSize={[900, 400]}
         gutterSize={0.5}
         snapOffset={20}
       >
@@ -415,7 +417,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
             {/* Upper Section - 顶部内容区域 */}
             <div className="h-full w-full flex flex-col overflow-hidden">
               {/* Panel Switch Buttons */}
-              <div className="bg-gray-800 p-2 border-b border-gray-700">
+              <div className="flex items-center justify-between bg-gray-800 p-2 border-b border-gray-700">
                 <div className="flex space-x-2">
                   <ToolsTabs
                     activePanel={activePanel}
@@ -453,6 +455,8 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                     </button>
                   </Dropdown>
                 </div>
+
+                {modeSwitch}
               </div>
 
               {/* Dynamic Content Area */}

@@ -271,7 +271,9 @@ const MessageItem = React.memo(
           </div>
         )}
         <div
-          className={`w-[80%] ${
+          className={`overflow-hidden w-full ${
+            message.isUser ? "ml-3" : "mr-3"
+          } ${
             message.isUser
               ? "bg-indigo-600"
               : message.type === "ERROR"
