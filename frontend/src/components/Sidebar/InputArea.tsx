@@ -163,12 +163,13 @@ const InputArea: React.FC<InputAreaProps> = ({
   // 自定义发送消息函数
   const handleSendMessage = useCallback(
     (text?: string) => {
+      debugger;
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
         new SendMessageEventData({ text, panelId, fileList: fileList.current })
       );
-      debugger;
+
       if (thumbnailListRef.current) {
         thumbnailListRef.current.clearFiles();
         fileList.current = [];
