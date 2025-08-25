@@ -5,7 +5,6 @@ import {
   Button,
   Modal,
   message,
-  Table,
   Switch,
   Checkbox,
   Empty,
@@ -23,6 +22,7 @@ import { getLanguageByFileName } from "../../utils/fileUtils";
 import { getMessage } from "../../lang";
 import FileDirectorySelector from "./FileDirectorySelector";
 import FileGroupDetail from "./FileGroupDetail";
+import { FileGroupVirtualList } from "../Common";
 import "./FileGroupPanel.css"; // 假设会创建这个文件
 
 interface FileGroup {
@@ -231,7 +231,7 @@ const FileGroupPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full file-group-panel">
       <div className="bg-gray-800 p-2 border-b border-gray-700">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -261,69 +261,19 @@ const FileGroupPanel: React.FC = () => {
       <div className="flex-1 overflow-hidden">
         <div className="h-full flex">
           {/* File Groups List */}
-          <div className="w-60 bg-gray-900 border-r border-gray-700 overflow-y-auto p-4">
-            <Table
-              dataSource={fileGroups}
-              rowKey="name"
-              rowClassName={(record) =>
-                record.name === selectedGroup?.name
-                  ? "bg-blue-600"
-                  : "bg-transparent"
-              }
-              onRow={(record) => ({
-                onClick: () => setSelectedGroup(record),
-                className: "cursor-pointer hover:bg-gray-800",
-              })}
-              className="dark-mode-table"
-              size="small"
-              pagination={false}
-              columns={[
-                {
-                  title: getMessage("common.group"),
-                  dataIndex: "name",
-                  key: "name",
-                  render: (name, record) => (
-                    <div className="flex justify-between items-center">
-                      <span className="text-white font-medium">{name}</span>
-                      <span className="text-gray-500 text-xs">
-                        {record.files.length}
-                      </span>
-                    </div>
-                  ),
-                },
-                {
-                  title: getMessage("common.action"),
-                  key: "action",
-                  width: 60,
-                  render: (_, record) => (
-                    <Button
-                      type="text"
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteGroup(record.name);
-                      }}
-                    />
-                  ),
-                },
-              ]}
-              locale={{
-                emptyText: (
-                  <div className="py-4">
-                    <Empty
-                      description={
-                        <span className="text-gray-400">
-                          {getMessage("fileGroup.noGroups")}
-                        </span>
-                      }
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      className="custom-empty-state"
-                    />
-                  </div>
-                ),
-              }}
-            />
+          <div className="w-60 bg-gray-900 border-r border-gray-700 overflow-hidden flex flex-col">
+            <div className="flex-1 p-4">
+              <div className="h-full">
+                <FileGroupVirtualList
+                  fileGroups={fileGroups}
+                  selectedGroup={selectedGroup}
+                  onGroupSelect={setSelectedGroup}
+                  onGroupDelete={handleDeleteGroup}
+                  height={0} // 将由CSS控制高度
+                  className="file-group-list h-full"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Group Details Panel */}
