@@ -168,6 +168,7 @@ const InputArea: React.FC<InputAreaProps> = ({
         EVENTS.CHAT.SEND_MESSAGE,
         new SendMessageEventData({ text, panelId, fileList: fileList.current })
       );
+      debugger;
       if (thumbnailListRef.current) {
         thumbnailListRef.current.clearFiles();
         fileList.current = [];
