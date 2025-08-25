@@ -225,7 +225,6 @@ const InputArea: React.FC<InputAreaProps> = ({
 
     // 处理发送消息热键
     const handleSendHotkey = (data: HotkeyEventData) => {
-      debugger;
       if (data.panelId !== panelId) return;
       handleSendMessage();
     };
