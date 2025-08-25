@@ -163,6 +163,8 @@ const InputArea: React.FC<InputAreaProps> = ({
   const handleSendMessage = useCallback(
     (text?: string) => {
       console.log("handleSendMessage", [...fileList.current]);
+      console.log("handleSendMessage2", eventBus.events[EVENTS.HOTKEY.SEND]);
+      debugger;
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
@@ -226,13 +228,13 @@ const InputArea: React.FC<InputAreaProps> = ({
 
     // 处理发送消息热键
     const handleSendHotkey = (data: HotkeyEventData) => {
+      debugger;
       if (data.panelId !== panelId) return;
       handleSendMessage();
     };
 
     // 处理模式切换热键
     const handleToggleModeHotkey = (data: HotkeyEventData) => {
-      console.log(data);
       if (data.panelId !== panelId) return;
       toggleWriteMode();
     };
@@ -242,7 +244,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       EVENTS.HOTKEY.TOGGLE_FULLSCREEN,
       handleToggleFullscreenHotkey
     );
-
+    console.log("================-111=----------------->");
     const unsubscribeSend = eventBus.subscribe(
       EVENTS.HOTKEY.SEND,
       handleSendHotkey
@@ -251,8 +253,9 @@ const InputArea: React.FC<InputAreaProps> = ({
       EVENTS.HOTKEY.TOGGLE_MODE,
       handleToggleModeHotkey
     );
-
+    console.log("handleSendMessage2", eventBus.events[EVENTS.HOTKEY.SEND]);
     return () => {
+      console.log("================-=-222---------------->");
       unsubscribeFullscreen();
       unsubscribeSend();
       unsubscribeMode();

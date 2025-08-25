@@ -109,17 +109,17 @@ type EventNames = PickValues<typeof EVENTS>;
 // type SubTypes<T> =   (T extends any ? (arg: T) => void : never) extends (arg: infer P) => void ? P : never
 
 class EventBus {
-  private events: { [key: string]: Listener[] } = {};
+  events: { [key: string]: Listener[] } = {};
 
   subscribe(event: EventNames, callback: Listener) {
     if (!this.events[event]) {
       this.events[event] = [];
     }
-    const index = this.events[event].push(callback);
+    const len = this.events[event].push(callback);
 
     // 返回取消订阅函数
     return () => {
-      this.events[event] = this.events[event].splice(index - 1, 1);
+      this.events[event].splice(len - 1, 1);
     };
   }
 

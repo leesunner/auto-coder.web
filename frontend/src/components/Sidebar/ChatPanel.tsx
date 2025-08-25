@@ -1031,6 +1031,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
     // 监听发送消息事件
     const handleSendMessageEvent = (data: SendMessageEventData) => {
+      debugger;
       console.log(
         "接受新消息:",
         data,

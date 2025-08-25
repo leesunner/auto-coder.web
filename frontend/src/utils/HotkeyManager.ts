@@ -93,7 +93,7 @@ class HotkeyManager {
     if (!this.enabled) return;
     const metaOrCtrl = this.isMac ? e.metaKey : e.ctrlKey;
     const isInEditor = this.isInMonacoEditor();
-
+    console.log("isInEditor", isInEditor);
     // 如果在编辑器内，并且不覆盖Monaco热键，则按需处理
     if (isInEditor && !this.overrideMonacoHotkeys) {
       // 我们仍然处理某些必要的快捷键，但允许其他快捷键传递给Monaco
