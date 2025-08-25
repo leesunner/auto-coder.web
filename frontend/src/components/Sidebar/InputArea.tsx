@@ -30,7 +30,6 @@ import FileListSelector from "./FileListSelector";
 import CustomModelSelector from "./CustomModelSelector";
 import ThumbnailList from "../ThumbnailList";
 import type { ThumbnailItem } from "../ThumbnailList/types";
-
 interface InputAreaProps {
   fileGroups: FileGroup[];
   selectedGroups: string[];
@@ -163,6 +162,7 @@ const InputArea: React.FC<InputAreaProps> = ({
   // 自定义发送消息函数
   const handleSendMessage = useCallback(
     (text?: string) => {
+      debugger;
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
@@ -239,7 +239,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       EVENTS.HOTKEY.TOGGLE_FULLSCREEN,
       handleToggleFullscreenHotkey
     );
-    debugger;
+
     const unsubscribeSend = eventBus.subscribe(
       EVENTS.HOTKEY.SEND,
       handleSendHotkey

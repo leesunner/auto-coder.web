@@ -492,12 +492,12 @@ const EditorComponent: React.FC<EditorComponentProps> = ({
       if (metaOrCtrl) {
         switch (e.code) {
           case "Enter": // Cmd/Ctrl + Enter: 发送消息
-            e.preventDefault();
-            e.stopPropagation();
-            eventBus.publish(
-              EVENTS.CHAT.SEND_MESSAGE,
-              new SendMessageEventData({ text: "", panelId })
-            );
+            // e.preventDefault();
+            // e.stopPropagation();
+            // eventBus.publish(
+            //   EVENTS.CHAT.SEND_MESSAGE,
+            //   new SendMessageEventData({ text: "", panelId })
+            // );
             return false;
           case "Period": // Cmd/Ctrl + . : 切换模式
             e.preventDefault();
