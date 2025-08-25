@@ -133,7 +133,6 @@ const ModelManagement: React.FC = () => {
   // 处理表单提交
   const handleSubmit = async (values: any) => {
     try {
-      debugger;
       // Ensure model_type is included from the form values
       const modelData: Model = {
         ...values,

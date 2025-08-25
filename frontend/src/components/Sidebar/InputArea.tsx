@@ -163,7 +163,6 @@ const InputArea: React.FC<InputAreaProps> = ({
   // 自定义发送消息函数
   const handleSendMessage = useCallback(
     (text?: string) => {
-      debugger;
       // 使用eventBus发送消息
       eventBus.publish(
         EVENTS.CHAT.SEND_MESSAGE,
@@ -240,6 +239,7 @@ const InputArea: React.FC<InputAreaProps> = ({
       EVENTS.HOTKEY.TOGGLE_FULLSCREEN,
       handleToggleFullscreenHotkey
     );
+    debugger;
     const unsubscribeSend = eventBus.subscribe(
       EVENTS.HOTKEY.SEND,
       handleSendHotkey
@@ -770,7 +770,6 @@ const InputArea: React.FC<InputAreaProps> = ({
                         : "chat"
                     }
                     onChange={(value) => {
-                      debugger;
                       if (value === "rule") {
                         setIsRuleMode(true);
                         setIsWriteMode(false);
