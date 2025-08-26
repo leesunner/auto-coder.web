@@ -82,29 +82,29 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     // 加载保存的标签页状态
     loadTabsFromBackend().then((savedTabData) => {
       const { activeTabPath, tabs } = savedTabData || {};
+      let list: any[] = [];
+      let file = activeTabPath || tabs?.[0]?.path;
       if (initialFiles && initialFiles.length > 0) {
         // 如果有初始文件，优先处理它们
         setSelectedFiles(initialFiles);
-        const file =
+        file =
           activeTabPath &&
           initialFiles.find(({ path }) => path === activeTabPath)
             ? activeTabPath
             : initialFiles[0]?.path;
-        setFileTabs(
+
+        list = list.concat(
           initialFiles.map((_item) => ({
             key: _item.path as string,
             path: _item.path as string,
-            label: _item.label as string,
+            label: (_item.label || _item.path) as string,
             content: "",
           }))
         );
-        handleTabsLoaded(file);
-        return;
       }
 
       if (tabs && tabs.length > 0) {
-        const file = activeTabPath || tabs[0]?.path;
-        setFileTabs(
+        list = list.concat(
           tabs.map((_item) => ({
             key: _item.path as string,
             path: _item.path as string,
@@ -113,8 +113,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
             isActive: _item.isActive,
           }))
         );
-        handleTabsLoaded(file);
       }
+      setFileTabs(list);
+      if (!file) return;
+      handleTabsLoaded(file);
     });
   }, [initialFiles]);
 
@@ -155,7 +157,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     try {
       const tabs: EditorTab[] = fileTabs.map((tab) => ({
         path: tab.key,
-        label: tab.label,
+        label: tab.label || (tab.key.split("/").pop() as string),
         isActive: tab.key === activeFile,
       }));
 
@@ -586,6 +588,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
                   }}
                 >
                   {fileTabs.map((tab) => {
+                    console.log("fileTabs->>>>>>>>>", fileTabs, tab);
                     const fileMeta = selectedFiles.find(
                       (f) => f.path === tab.key
                     );

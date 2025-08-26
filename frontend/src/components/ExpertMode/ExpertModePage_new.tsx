@@ -71,7 +71,6 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
   modeSwitch,
 }) => {
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
-  const [isFull, setFull] = useState(false);
 
   // 新增状态：跟踪分割面板的尺寸和折叠状态
   const [splitSizes, setSplitSizes] = useState([75, 25]);
@@ -93,27 +92,6 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
   const [currentEventFileId, setCurrentEventFileId] = useState<string | null>(
     null
   );
-
-  // 处理编辑器全屏切换
-  const toggleFullscreen = () => {
-    setFull(!isFull);
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-    }, 50);
-  };
-
-  // 处理拖拽变化，检查终端区域是否被拖到底部
-  const handleSplitChange = (sizes: any) => {
-    setSplitSizes(sizes);
-    // 如果下方面板的大小小于等于8%，认为已经拖到底部
-    const isMinimized = sizes[1] <= 3;
-    setIsTerminalMinimized(isMinimized);
-
-    // 触发resize事件以更新Terminal大小
-    setTimeout(() => {
-      window.dispatchEvent(new Event("resize"));
-    }, 50);
-  };
 
   // 切换终端区域展开/收起状态
   const toggleTerminalExpand = () => {

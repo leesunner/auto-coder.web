@@ -3,24 +3,13 @@ import {
   message as AntdMessage,
   Modal,
   Input,
-  Select,
   Button,
   Layout,
-  Divider,
   Typography,
-  Space,
-  Dropdown,
-  Menu,
   Tooltip,
 } from "antd";
 import {
-  PlusOutlined,
-  SettingOutlined,
-  DeleteOutlined,
-  EditOutlined,
   MessageOutlined,
-  CodeOutlined,
-  MenuOutlined,
   DownOutlined,
   SaveOutlined,
   ClearOutlined,
@@ -75,7 +64,9 @@ const saveChatListHandler = (() => {
     query = "",
     isError = false,
   }: any) => {
-    if (!isQuickSave && Date.now() - curTime < 150) return;
+    const noPass = !isQuickSave && Date.now() - curTime < 150;
+    console.log("保存聊天列表------>noPass:", noPass);
+    if (noPass) return;
     try {
       const res = await chatListService.saveChatList({
         status: isError ? "error" : "completed",
@@ -299,8 +290,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 添加消息ID计数器，用于生成唯一的消息ID
   const [messageIdCounter, setMessageIdCounter] = useState<number>(0);
-
-  const [shouldSaveMessages, setShouldSaveMessages] = useState<boolean>(false);
 
   // 添加累计token统计状态
   const [accumulatedStats, setAccumulatedStats] = useState({
@@ -610,10 +599,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
         // 使用 ref 中的最新值
         const currentRequestId = localRequestIdRef.current;
-
-        // 在任务完成时设置标记，表示应该保存消息
-        // 而不是直接保存，让 useEffect 在消息状态更新后处理保存
-        setShouldSaveMessages(true);
         // 等待一个渲染周期
         await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -670,7 +655,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       setSendLoading,
       setRequestId,
       setLocalRequestId,
-      setShouldSaveMessages,
       soundEnabled,
     ]
   );
@@ -709,10 +693,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
   // 添加一个 useEffect 来处理消息保存，当 messages 或 shouldSaveMessages 变化时触发
   useEffect(() => {
+    console.log(
+      "保存聊天列表------>useEffect:",
+      messages.length <= 1,
+      chatListName
+    );
     // 只问还没答得时候
     if (messages.length <= 1) return;
     // 仅当需要保存且有消息且有聊天名称时保存
-    if (shouldSaveMessages && chatListName) {
+    if (chatListName) {
       saveChatListHandler({
         eventFileId: localRequestIdRef.current,
         query: lastQuestion.current,
@@ -724,10 +713,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         chatListService,
       });
     }
-  }, [messages, shouldSaveMessages, chatListName, panelId]);
+  }, [messages, chatListName, panelId]);
 
   // 修改消息更新逻辑，使用函数式更新减少不必要的组件重渲染
   const updateMessage = useCallback((newMessage: AutoModeMessage) => {
+    console.log("updateMessage------->", newMessage);
     setMessages((prevMessages) => {
       // 查找是否有相同id的消息
       const messageIndex = prevMessages.findIndex(
@@ -768,11 +758,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         return [...prev, newMessage];
       });
 
-      // 标记需要保存消息
-      if (chatListName) {
-        setShouldSaveMessages(true);
-      }
-
       return newMessage.id;
     },
     [messageIdCounter, chatListName]
@@ -798,12 +783,6 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
       // 使用函数式更新
       setMessages((prev) => [...prev, newMessage]);
-
-      // 标记需要保存消息
-      if (chatListName) {
-        setShouldSaveMessages(true);
-      }
-
       return newMessage.id;
     },
     [messageIdCounter, chatListName]
@@ -1347,20 +1326,37 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       return;
     }
     // 记录原始样式
-    const originalHeight = container.style.height;
-    const originalMaxHeight = container.style.maxHeight;
-    const originalOverflow = container.style.overflow;
+    // const originalHeight = container.style.height;
+    // const originalMaxHeight = container.style.maxHeight;
+    // const originalOverflow = container.style.overflow;
 
     try {
       // 展开消息区域，确保完整内容渲染
-      container.style.height = container.scrollHeight + "px";
-      container.style.maxHeight = "none";
-      container.style.overflow = "visible";
+      // container.style.height = container.scrollHeight + "px";
+      // container.style.maxHeight = "none";
+      // container.style.overflow = "visible";
+
+      // const fragment = document.createDocumentFragment();
+
+      // 克隆元素
+      const clonedElement = container.cloneNode(true);
+
+      // 添加到目标位置
+      const targetElement = document.createElement("div");
+      targetElement.style.position = "absolute";
+      targetElement.style.top = "999999px";
+      targetElement.style.transform = "translateX(-999999px)";
+      // 展开消息区域，确保完整内容渲染
+      targetElement.style.height = "auto";
+      targetElement.style.width = "680px";
+      targetElement.style.overflow = "visible";
+      targetElement.appendChild(clonedElement);
+      document.body.appendChild(targetElement);
 
       // 等待浏览器渲染
       await new Promise((resolve) => requestAnimationFrame(resolve));
 
-      const canvas = await html2canvas(container, {
+      const canvas = await html2canvas(targetElement, {
         backgroundColor: "#1a1a1a",
         scale: 2,
         useCORS: true,
@@ -1373,14 +1369,15 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         .toISOString()
         .replace(/[:.]/g, "-")}.png`;
       link.click();
+      document.body.removeChild(targetElement);
     } catch (error) {
       console.error("导出图片失败:", error);
       AntdMessage.error(getMessage("exportImageFailed"));
     } finally {
       // 恢复原样式
-      container.style.height = originalHeight;
-      container.style.maxHeight = originalMaxHeight;
-      container.style.overflow = originalOverflow;
+      // container.style.height = originalHeight;
+      // container.style.maxHeight = originalMaxHeight;
+      // container.style.overflow = originalOverflow;
     }
   };
 
@@ -1718,7 +1715,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               panelId={panelId}
             />
 
-            <Tooltip title={getMessage("clearCurrentChat")}>
+            <Tooltip placement="left" title={getMessage("clearCurrentChat")}>
               <Button
                 icon={<ClearOutlined style={{ fontSize: "10px" }} />}
                 onClick={() => {
@@ -1748,13 +1745,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               />
             </Tooltip>
 
-            <Tooltip title={getMessage("saveCurrentChat")}>
+            <Tooltip placement="left" title={getMessage("saveCurrentChat")}>
               <Button
                 icon={<SaveOutlined style={{ fontSize: "10px" }} />}
                 onClick={() => {
                   if (chatListName && messages.length > 0) {
-                    // 使用与自动保存相同的机制
-                    setShouldSaveMessages(true);
                     AntdMessage.success(getMessage("chatSaved"));
                   } else if (!chatListName) {
                     AntdMessage.warning(getMessage("selectOrCreateChat"));
@@ -1776,7 +1771,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               />
             </Tooltip> */}
 
-            <Tooltip title={getMessage("exportChatAsImage")}>
+            <Tooltip placement="left" title={getMessage("exportChatAsImage")}>
               <Button
                 icon={<PictureOutlined style={{ fontSize: "10px" }} />}
                 onClick={handleExportMessagesAsImage}

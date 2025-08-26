@@ -1,8 +1,23 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Dropdown, Button, Tooltip, message as AntdMessage, Modal, Input } from 'antd';
-import { MessageOutlined, PlusOutlined, DeleteOutlined, DownOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
-import { getMessage } from '../../lang';
-import type { InputRef } from 'antd';
+import React, { useState, useRef, useMemo, useEffect } from "react";
+import {
+  Dropdown,
+  Button,
+  Tooltip,
+  message as AntdMessage,
+  Modal,
+  Input,
+} from "antd";
+import {
+  MessageOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  DownOutlined,
+  EditOutlined,
+  CheckOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
+import { getMessage } from "../../lang";
+import type { InputRef } from "antd";
 
 interface ChatListDropdownProps {
   chatListName: string;
@@ -27,25 +42,25 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
   deleteChatList,
   getChatTitle,
   renameChatList = async () => false,
-  panelId = ''
+  panelId = "",
 }) => {
   const [showAllChats, setShowAllChats] = useState(false);
   const [editingChat, setEditingChat] = useState<string | null>(null);
-  const [newChatName, setNewChatName] = useState('');
-  const [showList, setShowList] = useState(false)
+  const [newChatName, setNewChatName] = useState("");
+  const [showList, setShowList] = useState(false);
   const inputRef = useRef<InputRef>(null);
   const MAX_DEFAULT_CHATS = 10;
   const MAX_TOTAL_CHATS = 100;
   const handleDeleteChat = async (name: string) => {
     Modal.confirm({
-      title: getMessage('confirmDeleteTitle'),
-      content: getMessage('confirmDeleteContent', { name }),
-      okText: getMessage('deleteButton'),
-      okType: 'danger',
-      cancelText: getMessage('cancelButton'),
+      title: getMessage("confirmDeleteTitle"),
+      content: getMessage("confirmDeleteContent", { name }),
+      okText: getMessage("deleteButton"),
+      okType: "danger",
+      cancelText: getMessage("cancelButton"),
       onOk: async () => {
         await deleteChatList(name);
-        AntdMessage.success(getMessage('chatDeleted'));
+        AntdMessage.success(getMessage("chatDeleted"));
       },
     });
   };
@@ -69,7 +84,7 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
     if (e) e.stopPropagation();
 
     if (!newChatName.trim()) {
-      AntdMessage.error(getMessage('chatNameEmpty'));
+      AntdMessage.error(getMessage("chatNameEmpty"));
       return;
     }
 
@@ -79,36 +94,34 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
     }
 
     if (chatLists.includes(newChatName)) {
-      AntdMessage.error(getMessage('chatNameExists'));
+      AntdMessage.error(getMessage("chatNameExists"));
       return;
     }
 
     const success = await renameChatList(oldName, newChatName);
     if (success) {
-      AntdMessage.success(getMessage('chatRenamed'));
+      AntdMessage.success(getMessage("chatRenamed"));
       // 如果当前选中的是被重命名的对话，更新当前选中的对话名称
       if (chatListName === oldName) {
         setChatListName(newChatName);
         await setCurrentSessionName(newChatName);
       }
     } else {
-      AntdMessage.error(getMessage('renameFailed'));
+      AntdMessage.error(getMessage("renameFailed"));
     }
     setEditingChat(null);
   };
 
   // 决定显示哪些聊天记录
   const _visibleChatLists = useMemo(() => {
-    if (!chatLists) return []
-    const map: Record<string, number> = {}
-    chatLists.forEach(key => {
-      if (map[key]) return
-      map[key] = 1
-    })
-    return Object.keys(map).map(key => key)
-
-
-  }, [chatLists])
+    if (!chatLists) return [];
+    const map: Record<string, number> = {};
+    chatLists.forEach((key) => {
+      if (map[key]) return;
+      map[key] = 1;
+    });
+    return Object.keys(map).map((key) => key);
+  }, [chatLists]);
 
   const visibleChatLists = showAllChats
     ? _visibleChatLists.slice(0, MAX_TOTAL_CHATS)
@@ -119,20 +132,22 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
 
   const chatListMenuItems = [
     {
-      key: 'new-chat',
+      key: "new-chat",
       label: (
         <div className="flex items-center w-full group text-white font-medium">
-          <PlusOutlined className="mr-1" style={{ fontSize: '12px' }} />
-          <span>{getMessage('newChat')}</span>
+          <PlusOutlined className="mr-1" style={{ fontSize: "12px" }} />
+          <span>{getMessage("newChat")}</span>
         </div>
       ),
     },
-    ...(visibleChatLists.length > 0 ? [{ type: 'divider' as const }] : []),
-    ...visibleChatLists.map(name => ({
+    ...(visibleChatLists.length > 0 ? [{ type: "divider" as const }] : []),
+    ...visibleChatLists.map((name) => ({
       key: name,
       label: (
         <div
-          className={`flex justify-between items-center w-full group ${chatListName === name ? 'bg-indigo-700/40 rounded-sm' : ''}`}
+          className={`flex justify-between items-center w-full group ${
+            chatListName === name ? "bg-indigo-700/40 rounded-sm" : ""
+          }`}
           onClick={(e) => {
             if (editingChat === name) {
               e.stopPropagation();
@@ -140,11 +155,14 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
           }}
         >
           {editingChat === name ? (
-            <div className="flex items-center w-full" onClick={e => e.stopPropagation()}>
+            <div
+              className="flex items-center w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
               <Input
                 ref={inputRef}
                 value={newChatName}
-                onChange={e => setNewChatName(e.target.value)}
+                onChange={(e) => setNewChatName(e.target.value)}
                 onPressEnter={() => handleRenameChat(name)}
                 size="small"
                 className="mr-1 text-black"
@@ -155,7 +173,7 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
                 size="small"
                 className="text-green-500 p-0 flex items-center justify-center"
                 icon={<CheckOutlined />}
-                onClick={e => handleRenameChat(name, e)}
+                onClick={(e) => handleRenameChat(name, e)}
               />
               <Button
                 type="text"
@@ -167,21 +185,29 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
             </div>
           ) : (
             <>
-              <span className={`truncate max-w-[150px] ${chatListName === name ? 'text-white font-medium' : 'text-gray-200'}`}>{name}</span>
+              <span
+                className={`truncate max-w-[150px] ${
+                  chatListName === name
+                    ? "text-white font-medium"
+                    : "text-gray-200"
+                }`}
+              >
+                {name}
+              </span>
               <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   type="text"
                   size="small"
                   className="text-white p-0 mx-1 flex items-center justify-center"
                   icon={<EditOutlined />}
-                  onClick={e => startEditing(name, e)}
+                  onClick={(e) => startEditing(name, e)}
                 />
                 <Button
                   type="text"
                   size="small"
                   className="text-white p-0 flex items-center justify-center"
                   icon={<DeleteOutlined />}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteChat(name);
                   }}
@@ -193,39 +219,50 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
       ),
     })),
     // 如果有更多聊天记录且当前未显示全部，则添加"更多"选项
-    ...(hasMoreChats && !showAllChats ? [
-      {
-        key: 'show-more',
-        label: (
-          <div className="flex items-center justify-center w-full text-gray-300 hover:text-white py-1 border-t border-gray-700 mt-1">
-            <DownOutlined className="mr-1" style={{ fontSize: '10px' }} />
-            <span>{getMessage('showMore')} ({Math.min(chatLists.length - MAX_DEFAULT_CHATS, MAX_TOTAL_CHATS - MAX_DEFAULT_CHATS)})</span>
-          </div>
-        ),
-      }
-    ] : []),
+    ...(hasMoreChats && !showAllChats
+      ? [
+          {
+            key: "show-more",
+            label: (
+              <div className="flex items-center justify-center w-full text-gray-300 hover:text-white py-1 border-t border-gray-700 mt-1">
+                <DownOutlined className="mr-1" style={{ fontSize: "10px" }} />
+                <span>
+                  {getMessage("showMore")} (
+                  {Math.min(
+                    chatLists.length - MAX_DEFAULT_CHATS,
+                    MAX_TOTAL_CHATS - MAX_DEFAULT_CHATS
+                  )}
+                  )
+                </span>
+              </div>
+            ),
+          },
+        ]
+      : []),
     // 如果当前显示全部，则添加"收起"选项
-    ...(showAllChats && hasMoreChats ? [
-      {
-        key: 'show-less',
-        label: (
-          <div className="flex items-center justify-center w-full text-gray-300 hover:text-white py-1 border-t border-gray-700 mt-1">
-            <span>{getMessage('showLess')}</span>
-          </div>
-        ),
-      }
-    ] : []),
+    ...(showAllChats && hasMoreChats
+      ? [
+          {
+            key: "show-less",
+            label: (
+              <div className="flex items-center justify-center w-full text-gray-300 hover:text-white py-1 border-t border-gray-700 mt-1">
+                <span>{getMessage("showLess")}</span>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   useEffect(() => {
     const fn = () => {
-      setShowList(false)
-    }
-    document.addEventListener('click', fn)
+      setShowList(false);
+    };
+    document.addEventListener("click", fn);
     return () => {
-      document.removeEventListener('click', fn)
-    }
-  }, [])
+      document.removeEventListener("click", fn);
+    };
+  }, []);
 
   return (
     <Dropdown
@@ -233,37 +270,44 @@ const ChatListDropdown: React.FC<ChatListDropdownProps> = ({
       menu={{
         items: chatListMenuItems,
         onClick: async ({ key, domEvent }) => {
-          domEvent.stopPropagation()
-          if (key === 'new-chat') {
-            setShowList(false)
+          domEvent.stopPropagation();
+          if (key === "new-chat") {
+            setShowList(false);
             showNewChatModal();
-          } else if (key === 'show-more') {
+          } else if (key === "show-more") {
             setShowAllChats(true);
-          } else if (key === 'show-less') {
+          } else if (key === "show-less") {
             setShowAllChats(false);
           } else {
-            setShowList(false)
+            setShowList(false);
             setChatListName(key);
             await loadChatList(key);
             await setCurrentSessionName(key);
           }
-
         },
-        style: { backgroundColor: '#1F2937', borderColor: '#4B5563', color: '#FFFFFF' }
+        style: {
+          backgroundColor: "#1F2937",
+          borderColor: "#4B5563",
+          color: "#FFFFFF",
+        },
       }}
-      trigger={['click']}
+      trigger={["click"]}
       placement="bottomRight"
       arrow={{ pointAtCenter: true }}
     >
-      <Tooltip title={chatListName || getChatTitle()}>
+      <Tooltip placement="left" title={chatListName || getChatTitle()}>
         <Button
           onClick={(e) => {
-            e.stopPropagation()
-            setShowList(!showList)
+            e.stopPropagation();
+            setShowList(!showList);
           }}
-          icon={<MessageOutlined style={{ fontSize: '12px' }} />}
+          icon={<MessageOutlined style={{ fontSize: "12px" }} />}
           size="small"
-          className={`flex items-center justify-center text-gray-300 border-gray-600 ${chatListName ? 'bg-indigo-600 hover:bg-indigo-700 border-indigo-500' : 'bg-gray-700 hover:bg-gray-600'} px-1 py-0 h-6 w-6`}
+          className={`flex items-center justify-center text-gray-300 border-gray-600 ${
+            chatListName
+              ? "bg-indigo-600 hover:bg-indigo-700 border-indigo-500"
+              : "bg-gray-700 hover:bg-gray-600"
+          } px-1 py-0 h-6 w-6`}
         />
       </Tooltip>
     </Dropdown>

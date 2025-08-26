@@ -22,7 +22,7 @@ const App: React.FC = () => {
     | "history"
     | "settings"
   >("code");
-  const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
+  // const [activeToolPanel, setActiveToolPanel] = useState<string>("terminal");
   const [clipboardContent, setClipboardContent] = useState<string>("");
   const [projectName, setProjectName] = useState<string>("");
   const [previewFiles, setPreviewFiles] = useState<
@@ -32,6 +32,7 @@ const App: React.FC = () => {
   const [isFileSearchOpen, setIsFileSearchOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
   const [isExpertMode, setIsExpertMode] = useState<boolean>(false);
+
   const [isModeToggleVisible, setIsModeToggleVisible] = useState(true);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [isCheckingInitialization, setIsCheckingInitialization] =
@@ -203,7 +204,10 @@ const App: React.FC = () => {
         </div>
 
         {/* ChatProvider 包裹 AutoModePage 和 ExpertModePage */}
-        <ChatProvider>
+        <ChatProvider
+          isExpertMode={isExpertMode}
+          setIsExpertMode={setIsExpertMode}
+        >
           {/* Auto Mode Interface */}
           {
             <AutoModePage

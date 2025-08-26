@@ -116,8 +116,10 @@ const AutoModePage: React.FC<AutoModePageProps> = ({
       messageId: string;
       messageContent: string;
       askAgain?: boolean;
+      isExpertMode?: boolean;
       panelId?: string;
     }) => {
+      if (data.isExpertMode) return;
       // 检查事件是否与当前面板相关
       if (activeTabId && data.panelId && activeTabId !== data.panelId) {
         return; // 如果事件不属于当前面板，直接返回

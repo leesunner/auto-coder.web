@@ -6,18 +6,21 @@ import type { MessageProps } from "../MessageList";
 import { getMessage } from "../../../lang";
 import "./MessageStyles.css";
 import eventBus, { EVENTS } from "../../../services/eventBus";
+import { useChatContext } from "@/contexts/ChatContext";
 
 interface UserMessageProps {
   message: MessageProps;
 }
 
 const UserMessage: React.FC<UserMessageProps> = ({ message }) => {
+  const { isExpertMode } = useChatContext();
   const handleRefresh = (askAgain: boolean) => {
     // 使用eventBus发布刷新事件，传递消息内容和索引
     eventBus.publish(EVENTS.CHAT.REFRESH_FROM_MESSAGE, {
       messageId: message.id,
       messageContent: message.content,
       askAgain,
+      isExpertMode,
     });
   };
 

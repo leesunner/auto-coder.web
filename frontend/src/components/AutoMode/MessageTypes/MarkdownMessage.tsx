@@ -201,6 +201,7 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
 
   // 获取消息内容，避免使用三元操作符
   const getMessageContent = () => {
+    console.log("getMessageContent-------->>>>>>>>>", message.content);
     if (message.content) {
       return processMessageContent(message.content);
     }

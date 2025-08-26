@@ -11,6 +11,8 @@ interface ChatContextType {
   tabs: ChatTabConfig[];
   activeTabId: string;
   setActiveTabId: React.Dispatch<React.SetStateAction<string>>;
+  isExpertMode: boolean;
+  setIsExpertMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // 定义单个聊天面板的配置接口
@@ -30,6 +32,8 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 // Provider 组件的 Props 类型
 interface ChatProviderProps {
   children: ReactNode;
+  isExpertMode: boolean;
+  setIsExpertMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const DEFAULT_TABS: ChatTabConfig[] = [
@@ -38,7 +42,11 @@ export const DEFAULT_TABS: ChatTabConfig[] = [
 ];
 
 // Provider 组件
-export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+export const ChatProvider: React.FC<ChatProviderProps> = ({
+  children,
+  setIsExpertMode,
+  isExpertMode,
+}) => {
   const [chatLists, setChatLists] = useState<string[]>([]);
   const [chatListName, setChatListName] = useState<string>("");
 
@@ -55,6 +63,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     tabs,
     activeTabId,
     setActiveTabId,
+    setIsExpertMode,
+    isExpertMode,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

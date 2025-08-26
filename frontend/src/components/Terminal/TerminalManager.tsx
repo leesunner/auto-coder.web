@@ -69,6 +69,10 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     addTerminal,
   }));
 
+  const onDragEnd = () => {
+    window.dispatchEvent(new Event("resize"));
+  };
+
   const showList = terminals.length > 1;
   const sizes = showList ? [80, 20] : [100, 0];
 
@@ -80,6 +84,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
         minSize={[360, 100]}
         gutterSize={0.5}
         dragInterval={1}
+        onDragEnd={onDragEnd}
         //   snapOffset={100}
       >
         {/* Left Panel - Terminal */}

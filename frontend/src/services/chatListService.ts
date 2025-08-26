@@ -121,6 +121,7 @@ export class ChatListService extends EventEmitter {
    */
   async saveChatList(data: SaveData): Promise<boolean> {
     const name = data.name;
+    console.log("保存聊天列表------>name:", name);
     if (!name.trim()) {
       this.emit("error", "请输入聊天列表名称");
       return false;
