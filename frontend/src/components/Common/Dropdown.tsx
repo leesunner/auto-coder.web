@@ -68,7 +68,6 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
     onOpenChange?.(newOpen);
   };
-
   // 点击触发逻辑
   const handleClick = (e: React.MouseEvent) => {
     if (trigger.includes("click")) {

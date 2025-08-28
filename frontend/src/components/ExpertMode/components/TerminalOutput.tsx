@@ -56,7 +56,7 @@ function TerminalOutput(props: Props) {
     },
   ];
   return (
-    <div className="flex-1 overflow-hidden w-full relative z-[9] flex flex-col">
+    <div className="flex-1 w-full relative z-[9] flex flex-col">
       {/* Tool Panel Navigation */}
       <div className="flex-shrink-0 bg-[#1f1f1f] border-b border-gray-700 px-2">
         <div className="flex items-center justify-between gap-1">

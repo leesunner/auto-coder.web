@@ -1,4 +1,10 @@
-import React, { useState, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useEffect,
+} from "react";
 import Terminal from "./Terminal";
 import Split from "react-split";
 import {
@@ -23,7 +29,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
   const [terminals, setTerminals] = useState<TerminalTab[]>([
     { id: "1", name: `${getMessage("terminal")} 1`, fontSize: 14 },
   ]);
-
+  const divRef = useRef<HTMLDivElement>(null);
   // 在组件挂载时触发resize事件
   // 注释掉，暂时没发现这里去掉后有什么影响，其他监听的都有自己的完整的监听卸载事件
   // useEffect(() => {
@@ -69,26 +75,35 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     addTerminal,
   }));
 
-  const onDragEnd = () => {
-    window.dispatchEvent(new Event("resize"));
-  };
+  useEffect(() => {
+    if (!divRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("resize-terminal"));
+      });
+    });
+    resizeObserver.observe(divRef.current);
+
+    return () => resizeObserver.unobserve(divRef.current as Element); // 清理函数，避免内存泄漏
+  }, []); // 空依赖数组表示只执行一次
 
   const showList = terminals.length > 1;
   const sizes = showList ? [80, 20] : [100, 0];
 
   return (
-    <div className="flex h-full">
+    <div ref={divRef} className="flex h-full">
       <Split
-        className="flex-1 flex split-horizontal bg-[#2d2d2d]"
+        className="flex-1 flex overflow-hidden split-horizontal bg-[#2d2d2d]"
         sizes={sizes}
         minSize={[360, 100]}
         gutterSize={0.5}
         dragInterval={1}
-        onDragEnd={onDragEnd}
+        onDragEnd={() => window.dispatchEvent(new Event("resize-terminal"))}
         //   snapOffset={100}
       >
         {/* Left Panel - Terminal */}
-        <div className="h-full flex-grow">
+        <div className="flex-1">
           {terminals.map((terminal) => (
             <div
               key={terminal.id}
@@ -129,7 +144,7 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
               </div>
             </div>
           </div> */}
-          <div className="flex-1 overflow-y-auto ">
+          <div className="flex-1 overflow-y-auto relative z-40">
             {terminals.map((terminal) => (
               <div
                 key={terminal.id}

@@ -245,7 +245,7 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     };
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize-terminal", handleResize);
 
     // Store refs for cleanup
     xtermRef.current = xterm;
@@ -266,7 +266,7 @@ const Terminal: React.FC<TerminalProps> = ({
         xtermRef.current.dispose();
         xtermRef.current = null;
       }
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize-terminal", handleResize);
     };
   }, [useLocalHost]); // 添加useLocalHost作为依赖
 

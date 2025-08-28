@@ -287,7 +287,7 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
           </Tooltip>
           <div className="mt-1">
             <Select
-              className="bases-settings"
+              className="bases-settings custom-select"
               mode="tags"
               size="small"
               style={{ width: "100%" }}
@@ -298,7 +298,6 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
               onChange={(values) =>
                 handleSettingChange("project_type", values.join(","))
               }
-              className="custom-select" // Ensure this class provides appropriate styling
               tokenSeparators={[","]}
               maxTagCount="responsive"
             >

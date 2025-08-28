@@ -835,7 +835,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
 
       //如果是重新询问，直接发送消息
       if (data.askAgain) {
-        handleSendMessage(data.messageContent);
+        setTimeout(() => {
+          handleSendMessage(data.messageContent);
+        }, 80);
         return;
       }
 
