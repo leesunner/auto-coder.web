@@ -50,6 +50,7 @@ import {
   StopGenerationEventData,
 } from "../../services/event_bus_data";
 import { formatterMessageMetadata } from "@/utils/formatUtils";
+import { autoCommandService } from "@/services/autoCommandService";
 
 const saveChatListHandler = (() => {
   let curTime = Date.now();
@@ -64,8 +65,8 @@ const saveChatListHandler = (() => {
     query = "",
     isError = false,
   }: any) => {
-    const noPass = !isQuickSave && Date.now() - curTime < 150;
-    console.log("保存聊天列表------>noPass:", noPass);
+    const noPass = !isQuickSave && Date.now() - curTime < 300;
+
     if (noPass) return;
     try {
       const res = await chatListService.saveChatList({
@@ -1077,6 +1078,42 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
   }, [setupMessageListener, panelId]);
 
+  useEffect(() => {
+    if (!chatListService) return;
+    chatListService.on(
+      "chatListLoaded",
+      ({ messages, event_file_id, panelId }) => {
+        // 没有事件id 事件，则返回
+        if (!event_file_id) return;
+        // 如果最后一条消息是completion类型，则返回
+        if (
+          messages &&
+          messages?.[messages.length - 1]?.type?.toUpperCase?.() ===
+            "COMPLETION"
+        )
+          return;
+        // 设置当前正则进行的部分内容
+        const userTypes = ["USER", "USER_RESPONSE"];
+        const userList = messages.find((item: any) =>
+          userTypes.includes(item.type)
+        ) as AutoModeMessage[];
+        lastQuestion.current = userList[userList.length - 1]?.content || "";
+        localRequestIdRef.current = event_file_id;
+
+        setLocalRequestId(event_file_id);
+        setRequestId(event_file_id);
+
+        autoCommandService.on("message", (autoModeMessage: AutoModeMessage) => {
+          // 使用优化的消息更新函数
+          updateMessage(autoModeMessage);
+        });
+
+        autoCommandService.on("taskComplete", handleTaskCompletion);
+        autoCommandService.startEventStream(event_file_id);
+      }
+    );
+  }, [chatListService]);
+
   // 新消息到达时自动滚动到底部
   // useEffect(() => {
   //   messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1352,8 +1389,18 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       targetElement.style.height = "auto";
       targetElement.style.width = "680px";
       targetElement.style.overflow = "visible";
+      targetElement.style.display = "flex";
+      targetElement.style.flexDirection = "column";
       targetElement.appendChild(clonedElement);
       document.body.appendChild(targetElement);
+      targetElement.classList.add("exported-messages");
+
+      const style = document.createElement("style");
+      style.innerHTML = `
+        .exported-messages img { display: inline-block; }
+        .exported-messages span { display:inline-block;line-height: initial;}
+      `;
+      document.head.appendChild(style);
 
       // 等待浏览器渲染
       await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -1362,6 +1409,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         backgroundColor: "#1a1a1a",
         scale: 2,
         useCORS: true,
+        allowTaint: true,
       });
 
       const dataUrl = canvas.toDataURL("image/png");
@@ -1371,6 +1419,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         .toISOString()
         .replace(/[:.]/g, "-")}.png`;
       link.click();
+
+      document.head.removeChild(style);
       document.body.removeChild(targetElement);
     } catch (error) {
       console.error("导出图片失败:", error);

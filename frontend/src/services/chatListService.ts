@@ -127,6 +127,10 @@ export class ChatListService extends EventEmitter {
       return false;
     }
     const { panelId, metadata, event_file_id, ...rest } = data;
+
+    if (rest.messages.length > 0 && (!event_file_id || !this.conversation_id))
+      return false;
+
     try {
       const bodyData: any = {
         timestamp: Date.now(),
@@ -174,7 +178,11 @@ export class ChatListService extends EventEmitter {
   async loadChatList(
     name: string,
     panelId?: string
-  ): Promise<{ messages: AutoModeMessage[]; metadata?: any }> {
+  ): Promise<{
+    messages: AutoModeMessage[];
+    metadata?: any;
+    event_file_id?: string;
+  }> {
     try {
       const response = await fetch(`/api/chat-lists/${name}`);
       const data = await response.json();
@@ -209,11 +217,16 @@ export class ChatListService extends EventEmitter {
       // 发布事件时包含panelId信息
       this.emit("chatListLoaded", {
         name,
+        event_file_id: data.event_file_id,
         messages: convertedMessages,
         metadata: data.metadata,
         panelId,
       });
-      return { messages: convertedMessages, metadata: data.metadata };
+      return {
+        messages: convertedMessages,
+        event_file_id: data.event_file_id,
+        metadata: data.metadata,
+      };
     } catch (error) {
       console.error("Error loading chat list:", error);
       this.emit("error", "加载聊天列表失败");

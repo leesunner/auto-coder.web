@@ -85,7 +85,10 @@ const TerminalManager = forwardRef<TerminalManagerRef>((props, ref) => {
     });
     resizeObserver.observe(divRef.current);
 
-    return () => resizeObserver.unobserve(divRef.current as Element); // 清理函数，避免内存泄漏
+    return () => {
+      if (!divRef.current) return;
+      resizeObserver.unobserve(divRef.current as Element); // 清理函数，避免内存泄漏
+    };
   }, []); // 空依赖数组表示只执行一次
 
   const showList = terminals.length > 1;

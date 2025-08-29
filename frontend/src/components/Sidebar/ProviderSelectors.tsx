@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RagSelector from "./RagSelector";
 import MCPsSelector from "./MCPsSelector";
 import CodeModelSelector from "./CodeModelSelector";
@@ -20,9 +20,6 @@ interface ProviderSelectorsProps {
 const ProviderSelectors: React.FC<ProviderSelectorsProps> = ({
   isWriteMode,
 }) => {
-  // 默认选中"代码模型"标签
-  const [activeKey, setActiveKey] = useState<string>("lib");
-
   // 创建标签项
   const items = [
     // {
@@ -71,6 +68,12 @@ const ProviderSelectors: React.FC<ProviderSelectorsProps> = ({
       children: <LibSelector />,
     },
   ];
+  // 默认选中"代码模型"标签
+  const [activeKey, setActiveKey] = useState<string>(items[0].key);
+
+  useEffect(() => {
+    setActiveKey(items[0].key);
+  }, [isWriteMode]);
 
   return (
     <div className="w-full px-1">

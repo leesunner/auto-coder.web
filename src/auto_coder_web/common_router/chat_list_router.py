@@ -84,14 +84,16 @@ async def get_chat_list_endpoint(
         data = await get_chat_list(project_path, name)
         # 兼容之前的没有会话ID的聊天记录
         conversation_id = data.get("conversation_id")
-        if conversation_id is None:
+        if conversation_id is None or (
+            isinstance(conversation_id, str) and not conversation_id.strip()
+        ):
             first_message = data["messages"][0]
             conversation_id = create_conversation(
                 data.get("name"), getattr(first_message, "content", data.get("name"))
             )
             # 更新数据中的conversation_id
             data["conversation_id"] = conversation_id
-            
+
             # 检查是否有ChatList所需的所有字段，如果没有则补充默认值
             if "query" not in data:
                 data["query"] = data.get("name", "")
@@ -102,8 +104,9 @@ async def get_chat_list_endpoint(
             if "timestamp" not in data:
                 # 使用文件修改时间作为时间戳
                 import time
+
                 data["timestamp"] = int(time.time())
-            
+
             # 将字典数据转换为ChatList对象后保存
             try:
                 chat_list = ChatList(**data)

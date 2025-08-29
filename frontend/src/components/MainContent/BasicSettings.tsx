@@ -13,11 +13,11 @@ interface BasicSettingsProps {
 
 interface BasicSettingsState {
   project_type: string; // Added project_type
-  index_filter_model_max_input_length: number;
-  conversation_prune_safe_zone_tokens: number; // Added conversation_prune_safe_zone_tokens
+  index_filter_model_max_input_length?: number | string;
+  conversation_prune_safe_zone_tokens?: number | string; // Added conversation_prune_safe_zone_tokens
   auto_merge: string;
-  generate_times_same_model: number;
-  rank_times_same_model: number;
+  generate_times_same_model?: number | string;
+  rank_times_same_model?: number | string;
   enable_agentic_filter: boolean;
   skip_build_index: boolean; // Added skip_build_index
   skip_filter_index: boolean; // Added skip_filter_index
@@ -25,7 +25,7 @@ interface BasicSettingsState {
   enable_agentic_auto_approve: boolean; // Added enable_agentic_auto_approve
   enable_agentic_dangerous_command_check: boolean; // Added enable_agentic_dangerous_command_check
   context_prune?: boolean;
-  context_prune_safe_zone_tokens?: number;
+  context_prune_safe_zone_tokens?: number | string;
 }
 
 const BasicSettings: React.FC<BasicSettingsProps> = ({
@@ -35,8 +35,9 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<BasicSettingsState>({
     project_type: "", // Initialize project_type
-    index_filter_model_max_input_length: 51200,
-    conversation_prune_safe_zone_tokens: 51200, // Initialize conversation_prune_safe_zone_tokens
+    // 51200
+    index_filter_model_max_input_length: "",
+    conversation_prune_safe_zone_tokens: "", // Initialize conversation_prune_safe_zone_tokens
     auto_merge: "editblock",
     generate_times_same_model: 1,
     rank_times_same_model: 1,
@@ -47,7 +48,8 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
     skip_build_index: false, // Initialize skip_build_index
     skip_filter_index: false, // Initialize skip_filter_index
     context_prune: true, // Initialize context_prune
-    context_prune_safe_zone_tokens: 32 * 1024, // Initialize context_prune_safe_zone_tokens
+    // 32 * 1024
+    context_prune_safe_zone_tokens: "", // Initialize context_prune_safe_zone_tokens
   });
 
   // Fetch current configuration
@@ -165,14 +167,15 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
         initialSettings.index_filter_model_max_input_length === undefined
       ) {
         initialSettings.index_filter_model_max_input_length =
-          Number(key.default) || 51200;
+          // Number(key.default) || 51200;
+          Number(key.default) || "";
       }
       if (
         key.key === "conversation_prune_safe_zone_tokens" &&
         initialSettings.conversation_prune_safe_zone_tokens === undefined
       ) {
         initialSettings.conversation_prune_safe_zone_tokens =
-          Number(key.default) || 51200;
+          Number(key.default) || "";
       }
       if (
         key.key === "auto_merge" &&
@@ -250,7 +253,8 @@ const BasicSettings: React.FC<BasicSettingsProps> = ({
         initialSettings.context_prune_safe_zone_tokens === undefined
       ) {
         initialSettings.context_prune_safe_zone_tokens =
-          Number(key.default) || 32 * 1024;
+          // Number(key.default) || 32 * 1024;
+          Number(key.default) || "";
       }
     });
 

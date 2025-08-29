@@ -1,0 +1,4 @@
+.llm-lib-select > .ant-select-selector {
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1)) !important;
+  border-color: #bbbbbb30 !important;
+}

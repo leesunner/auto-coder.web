@@ -33,6 +33,7 @@ class AutoCommandService extends EventEmitter {
 
   private eventFileId: string | null = null;
   private conversation_id: string | null = null;
+
   async executeCommand(command: string): Promise<{ event_file_id: string }> {
     try {
       const response = await fetch("/api/auto-command", {
@@ -81,7 +82,7 @@ class AutoCommandService extends EventEmitter {
    */
   async setCurrentSessionName(
     name: string,
-    panelId?: string = ""
+    panelId: string = ""
   ): Promise<boolean> {
     if (!name.trim()) {
       return false;
@@ -156,14 +157,16 @@ class AutoCommandService extends EventEmitter {
     this.conversation_id = _data.conversation_id as string;
   }
 
-  private startEventStream() {
+  public startEventStream(eventFileId?: string) {
     // Close existing connection if any
     this.closeEventStream();
 
-    if (!this.eventFileId) {
+    if (!(this.eventFileId || eventFileId)) {
       console.error("No event file ID available");
       return;
     }
+
+    if (eventFileId) this.eventFileId = eventFileId;
 
     this.eventSource = new EventSource(
       `/api/auto-command/events?event_file_id=${this.eventFileId}`

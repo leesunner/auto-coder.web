@@ -466,7 +466,7 @@ const InputArea: React.FC<InputAreaProps> = ({
             </span>
             <div className="flex items-center">
               {/* 功能区开关 */}
-              <Tooltip title={getMessage("settings")}>
+              <Tooltip placement="left" title={getMessage("settings")}>
                 <button
                   onClick={() => {
                     setSetting(!showSetList);
@@ -479,7 +479,7 @@ const InputArea: React.FC<InputAreaProps> = ({
                 </button>
               </Tooltip>
               {/* 文档按钮 */}
-              <Tooltip title={getMessage("openDocumentation")}>
+              <Tooltip placement="left" title={getMessage("openDocumentation")}>
                 <button
                   onClick={() =>
                     window.open(
@@ -508,6 +508,7 @@ const InputArea: React.FC<InputAreaProps> = ({
               </Tooltip>
               {/* 全屏切换按钮 */}
               <Tooltip
+                placement="left"
                 title={
                   isInputAreaMaximized
                     ? getMessage("exitFullscreen")
@@ -543,6 +544,7 @@ const InputArea: React.FC<InputAreaProps> = ({
               </Tooltip>
               {/* 构建索引按钮 */}
               <Tooltip
+                placement="left"
                 title={
                   indexBuilding
                     ? getMessage("buildingIndex")
@@ -572,17 +574,24 @@ const InputArea: React.FC<InputAreaProps> = ({
               </Tooltip>
               {/* 索引状态指示器 */}
               {indexStatus === "completed" && (
-                <Tooltip title={getMessage("indexBuiltSuccessfully")}>
+                <Tooltip
+                  placement="left"
+                  title={getMessage("indexBuiltSuccessfully")}
+                >
                   <span className="mr-1 text-green-500 text-xs">✓</span>
                 </Tooltip>
               )}
               {indexStatus === "error" && (
-                <Tooltip title={getMessage("indexBuildFailed")}>
+                <Tooltip
+                  placement="left"
+                  title={getMessage("indexBuildFailed")}
+                >
                   <span className="mr-1 text-red-500 text-xs">✗</span>
                 </Tooltip>
               )}
               {/* 声音开关按钮 */}
               <Tooltip
+                placement="left"
                 title={
                   soundEnabled
                     ? getMessage("disableSound")

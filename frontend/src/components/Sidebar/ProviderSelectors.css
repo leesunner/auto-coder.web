@@ -29,4 +29,4 @@
 /* 覆盖默认边框样式 */
 .provider-tabs .ant-tabs-nav::before {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-} 
+}

@@ -64,7 +64,10 @@ const SettingsPanel: React.FC = () => {
       });
   }, []);
 
-  const updateConfig = async (key: string, value: string | boolean) => {
+  const updateConfig = async (
+    key: string,
+    value: string | boolean | number
+  ) => {
     try {
       const response = await fetch("/api/conf", {
         method: "POST",
