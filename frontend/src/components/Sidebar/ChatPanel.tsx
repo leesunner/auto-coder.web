@@ -17,7 +17,8 @@ import {
 } from "@ant-design/icons";
 import { v4 as uuidv4 } from "uuid";
 import ChatListDropdown from "./ChatListDropdown";
-import html2canvas from "html2canvas";
+// import html2canvas from "html2canvas";
+import domtoimage from "dom-to-image";
 import "./ChatPanel.css";
 import InputArea from "./InputArea";
 import { getMessage } from "../../lang";
@@ -1364,72 +1365,80 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       AntdMessage.error(getMessage("messageAreaNotFound"));
       return;
     }
-    // 记录原始样式
-    // const originalHeight = container.style.height;
-    // const originalMaxHeight = container.style.maxHeight;
-    // const originalOverflow = container.style.overflow;
+
+    let targetElement: Element;
 
     try {
-      // 展开消息区域，确保完整内容渲染
-      // container.style.height = container.scrollHeight + "px";
-      // container.style.maxHeight = "none";
-      // container.style.overflow = "visible";
-
-      // const fragment = document.createDocumentFragment();
-
       // 克隆元素
       const clonedElement = container.cloneNode(true);
 
-      // 添加到目标位置
-      const targetElement = document.createElement("div");
-      targetElement.style.position = "absolute";
-      targetElement.style.top = "999999px";
-      targetElement.style.transform = "translateX(-999999px)";
-      // 展开消息区域，确保完整内容渲染
-      targetElement.style.height = "auto";
-      targetElement.style.width = "680px";
-      targetElement.style.overflow = "visible";
-      targetElement.style.display = "flex";
-      targetElement.style.flexDirection = "column";
-      targetElement.appendChild(clonedElement);
-      document.body.appendChild(targetElement);
-      targetElement.classList.add("exported-messages");
+      const createEle = (tag: string, children?: Node | Element) => {
+        // 添加到目标位置
+        const _targetElement = document.createElement(tag);
 
-      const style = document.createElement("style");
-      style.innerHTML = `
-        .exported-messages img { display: inline-block; }
-        .exported-messages span { display:inline-block;line-height: initial;}
-      `;
-      document.head.appendChild(style);
+        _targetElement.style.position = "absolute";
+        _targetElement.style.top = "-999999px";
+        _targetElement.style.transform = "translateX(-9999999px)";
+        // 展开消息区域，确保完整内容渲染
+        _targetElement.style.height = "auto";
+        _targetElement.style.width = "680px";
+        _targetElement.style.overflow = "visible";
+        _targetElement.style.display = "flex";
+        _targetElement.style.flexDirection = "column";
+        if (children) {
+          _targetElement.appendChild(children);
+        }
+        document.body.appendChild(_targetElement);
+        return _targetElement;
+      };
+
+      expandClonedElement(clonedElement);
+      targetElement = createEle("div", clonedElement);
+
+      function expandClonedElement(element: any) {
+        // 查找并展开所有滚动元素
+        const scrollableElements = element.querySelectorAll("*");
+
+        scrollableElements.forEach((el: any) => {
+          const computedStyle = window.getComputedStyle(el);
+          const isScrollable =
+            computedStyle.overflow.includes("scroll") ||
+            computedStyle.overflow.includes("auto") ||
+            computedStyle.overflowY.includes("scroll") ||
+            computedStyle.overflowY.includes("auto") ||
+            computedStyle.maxHeight !== "none";
+
+          if (isScrollable) {
+            // 只修改克隆元素的样式
+            el.style.overflow = "visible";
+            el.style.overflowY = "visible";
+            // el.style.height = "auto";
+            el.style.maxHeight = "none";
+            el.style.minHeight = el.scrollHeight + "px";
+          }
+        });
+      }
 
       // 等待浏览器渲染
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 150));
 
-      const canvas = await html2canvas(targetElement, {
-        backgroundColor: "#1a1a1a",
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
+      const dataUrl = await domtoimage.toPng(clonedElement, {
+        bgcolor: "#1a1a1a",
+        quality: 1, // 最高质量
       });
 
-      const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = dataUrl;
       link.download = `chat_${new Date()
         .toISOString()
         .replace(/[:.]/g, "-")}.png`;
       link.click();
-
-      document.head.removeChild(style);
+      if (!targetElement) return;
       document.body.removeChild(targetElement);
     } catch (error) {
       console.error("导出图片失败:", error);
       AntdMessage.error(getMessage("exportImageFailed"));
     } finally {
-      // 恢复原样式
-      // container.style.height = originalHeight;
-      // container.style.maxHeight = originalMaxHeight;
-      // container.style.overflow = originalOverflow;
     }
   };
 

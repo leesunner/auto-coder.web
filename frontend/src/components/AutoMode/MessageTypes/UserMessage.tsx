@@ -26,71 +26,74 @@ const UserMessage: React.FC<UserMessageProps> = ({ message }) => {
 
   return (
     <div className="message-font group relative">
-      {" "}
       {/* Add group and relative positioning */}
-      {/* Refresh Icon - Positioned top-right, appears on hover */}
-      <div className="flex items-center absolute top-1 right-1 p-1 rounded text-gray-400 transition-opacity">
-        <button
-          onClick={() => handleRefresh(true)}
-          className="mr-2 hover:text-gray-200"
-          title={getMessage("askAgain")}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 transform -rotate-45"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+
+      <div className="message-title flex items-center justify-between">
+        <div className="flex items-center">
+          <span className="message-title-icon">
+            <svg
+              className="w-4 h-4 text-indigo-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+          </span>
+          <span className="text-indigo-400 message-title-text">
+            {getMessage("user") || "User"}
+          </span>
+        </div>
+
+        {/* Refresh Icon - Positioned top-right, appears on hover */}
+        <div className="flex items-center p-1 rounded text-gray-400 transition-opacity">
+          <button
+            onClick={() => handleRefresh(true)}
+            className="mr-2 hover:text-gray-200"
+            title={getMessage("askAgain")}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-            />
-          </svg>
-        </button>
-        <button
-          className="hover:text-gray-200"
-          onClick={() => handleRefresh(false)}
-          title={getMessage("refreshFromHere")}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 transform -rotate-45"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+              />
+            </svg>
+          </button>
+          <button
+            className="hover:text-gray-200"
+            onClick={() => handleRefresh(false)}
+            title={getMessage("refreshFromHere")}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2M15 15H9"
-            />
-          </svg>
-        </button>
-      </div>
-      <div className="message-title">
-        <span className="message-title-icon">
-          <svg
-            className="w-4 h-4 text-indigo-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
               strokeWidth="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            ></path>
-          </svg>
-        </span>
-        <span className="text-indigo-400 message-title-text">
-          {getMessage("user") || "User"}
-        </span>
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2M15 15H9"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
       <div className="prose prose-invert prose-xs max-w-none pt-1 user-message-content">
         {" "}

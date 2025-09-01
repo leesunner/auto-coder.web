@@ -390,79 +390,83 @@ const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ message }) => {
 
   return (
     <div className="message-font">
-      <div className="message-title">
+      <div className="message-title flex items-center justify-between">
         {/* Toggle button for collapse/expand */}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="message-toggle-button"
-        >
-          {getToggleIcon()}
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="message-toggle-button"
+          >
+            {getToggleIcon()}
+          </button>
 
-        <span className="message-title-icon">
-          <svg
-            className="w-4 h-4 text-blue-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        </span>
-        <span className="text-blue-400 message-title-text">
-          {getMarkdownTitle()}
-        </span>
+          <span className="message-title-icon">
+            <svg
+              className="w-4 h-4 text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </span>
+          <span className="text-blue-400 message-title-text">
+            {getMarkdownTitle()}
+          </span>
+        </div>
 
-        {/* 添加复制和最大化按钮 */}
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(message.content);
-            // 可选：添加复制成功的提示
-          }}
-          className="ml-auto message-copy-button text-gray-400 hover:text-blue-400"
-          title={getCopyTitle()}
-        >
-          <svg
-            className="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+        <div className="flex items-center ">
+          {/* 添加复制和最大化按钮 */}
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(message.content);
+              // 可选：添加复制成功的提示
+            }}
+            className="message-copy-button text-gray-400 hover:text-blue-400"
+            title={getCopyTitle()}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-            />
-          </svg>
-        </button>
-        <button
-          onClick={handleMaximize}
-          className="ml-1 message-maximize-button text-gray-400 hover:text-blue-400"
-          title={getMaximizeTitle()}
-        >
-          <svg
-            className="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={handleMaximize}
+            className="ml-1 message-maximize-button text-gray-400 hover:text-blue-400"
+            title={getMaximizeTitle()}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"
-            />
-          </svg>
-        </button>
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {renderContent()}
