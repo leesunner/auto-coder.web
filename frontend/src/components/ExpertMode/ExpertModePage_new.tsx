@@ -434,7 +434,7 @@ const ExpertModePage: React.FC<ExpertModePageProps> = ({
                   </Dropdown>
                 </div>
 
-                {modeSwitch}
+                {modeSwitch || null}
               </div>
 
               {/* Dynamic Content Area */}

@@ -2,6 +2,7 @@
 from autocoder.common.conversations.get_conversation_manager import (
     get_conversation_manager,
 )
+from loguru import logger
 
 # 获取管理器实例（使用默认配置）
 manager = get_conversation_manager()
@@ -47,3 +48,11 @@ def delete_conversation(conversation_id: str):
 
 def update_conversation(conversation_id: str, name: str, description: str = None):
     manager.update_conversation(conversation_id, name, description)
+
+
+def get_messages_by_conversationId(conversation_id: str):
+    conversation_data = manager.get_conversation(conversation_id)
+    logger.info(f"Get messages by conversationId: {conversation_data}")
+    if conversation_data:
+        return conversation_data["messages"]
+    return []

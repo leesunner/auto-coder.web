@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const [requestId, setRequestId] = useState<string>("");
   const [isFileSearchOpen, setIsFileSearchOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
-  const [isExpertMode, setIsExpertMode] = useState<boolean>(false);
+  const [isExpertMode, setIsExpertMode] = useState<boolean>(true);
 
   const [isModeToggleVisible, setIsModeToggleVisible] = useState(true);
   const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
@@ -233,7 +233,7 @@ const App: React.FC = () => {
               selectedFiles={selectedFiles}
               setSelectedFiles={setSelectedFiles}
               onSwitchToAutoMode={() => setIsExpertMode(false)}
-              modeSwitch={modeSwitch()}
+              // modeSwitch={modeSwitch()}
             />
           )}
         </ChatProvider>

@@ -220,6 +220,7 @@ export class ChatListService extends EventEmitter {
         event_file_id: data.event_file_id,
         messages: convertedMessages,
         metadata: data.metadata,
+        conversation_id: data.conversation_id,
         panelId,
       });
       return {
@@ -241,9 +242,10 @@ export class ChatListService extends EventEmitter {
    */
   getChatTitle(messages: AutoModeMessage[]): string {
     if (messages.length > 0) {
+      const useList = ["USER_RESPONSE", "USER"];
       // 找到第一条用户消息
       const userMessage = messages.find(
-        (msg) => msg.isUser || msg.type === "USER_RESPONSE"
+        (msg) => msg.isUser || useList.includes(msg.type.toLocaleUpperCase())
       );
       if (userMessage && userMessage.content) {
         // 取前四个字符，如果不足四个字符则取全部

@@ -52,6 +52,7 @@ import {
 } from "../../services/event_bus_data";
 import { formatterMessageMetadata } from "@/utils/formatUtils";
 import { autoCommandService } from "@/services/autoCommandService";
+import { LLMResponseParser } from "@/utils/llm-parser";
 
 const saveChatListHandler = (() => {
   let curTime = Date.now();
@@ -1079,13 +1080,16 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     };
   }, [setupMessageListener, panelId]);
 
+  // 刷新页面后，恢复消息
   useEffect(() => {
     if (!chatListService) return;
+
     chatListService.on(
       "chatListLoaded",
-      ({ messages, event_file_id, panelId }) => {
+      async ({ messages, event_file_id, conversation_id }) => {
         // 没有事件id 事件，则返回
         if (!event_file_id) return;
+
         // 如果最后一条消息是completion类型，则返回
         if (
           messages &&
@@ -1093,11 +1097,38 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             "COMPLETION"
         )
           return;
+        // 获取会话里面的消息
+        // const rq = await fetch(
+        //   `/api/get-messages/by-conversationId/${conversation_id}`
+        // );
+
+        // const data = await rq.json();
+        // if (data.messages?.length) {
+        //   messages = data.messages.map(
+        //     ({ role, content, message_id, metadata, timestamp }) => {
+        //       const isUser = role === "user";
+        //       let parData = isUser ? null : LLMResponseParser.parse(content);
+        //       console.log(parData);
+        //       const data = {
+        //         id: message_id,
+        //         type: parData?.type,
+        //         content: isUser ? content : parData?.content,
+        //         contentType: parData?.contentType,
+        //         isUser,
+        //         isStreaming: false,
+        //         isThinking: parData?.isThinking,
+        //       };
+        //       return data;
+        //     }
+        //   );
+        // }
+
         // 设置当前正则进行的部分内容
         const userTypes = ["USER", "USER_RESPONSE"];
         const userList = messages.find((item: any) =>
-          userTypes.includes(item.type)
+          userTypes.includes(item.type.toUpperCase())
         ) as AutoModeMessage[];
+
         lastQuestion.current = userList[userList.length - 1]?.content || "";
         localRequestIdRef.current = event_file_id;
 

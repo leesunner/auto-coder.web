@@ -1,5 +1,6 @@
 from auto_coder_web.common_router.chat_conversations_manager import (
     create_and_set_conversation,
+    get_messages_by_conversationId,
     set_current_conversation,
 )
 
@@ -61,6 +62,22 @@ async def update_current_conversation_id(data: ConversationData):
     try:
         set_current_conversation(data.conversation_id)
         return {"status": "success", "message": "设置成功"}
+    except ValueError as e:
+        logger.error(f"Invalid data for conversation set: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error set conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/api/get-messages/by-conversationId/{id}")
+async def get_messages_by_conversation_id(id: str):
+    """
+    获取会话messages
+    """
+    try:
+        messages = get_messages_by_conversationId(id)
+        return {"status": "success", "messages": messages}
     except ValueError as e:
         logger.error(f"Invalid data for conversation set: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
